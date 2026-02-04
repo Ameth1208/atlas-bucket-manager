@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MinIO Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10B981; /* Green-500 */
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10B981;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800">
+
+    <!-- Navbar -->
+    <nav class="bg-slate-900 text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <!-- Simple Logo Icon -->
+                <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"></path>
+                    <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"></path>
+                </svg>
+                <span class="text-xl font-bold tracking-wide">MinIO <span class="text-red-400 font-light">Manager</span></span>
+            </div>
+            <button id="logoutBtn" class="flex items-center gap-2 text-slate-300 hover:text-white transition-colors duration-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Logout
+            </button>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        
+        <!-- Header & Create Action -->
+        <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Buckets</h1>
+                <p class="text-slate-500 mt-1">Manage your storage containers and access policies.</p>
+            </div>
+            
+            <form id="createBucketForm" class="flex gap-2 w-full md:w-auto shadow-sm">
+                <input type="text" id="newBucketName" placeholder="New bucket name..." required 
+                    class="w-full md:w-64 px-4 py-2 border border-slate-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                <button type="submit" 
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-r-lg transition-colors flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Create
+                </button>
+            </form>
+        </div>
+
+        <!-- Content Area -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold border-b border-slate-200">
+                            <th class="p-4">Name</th>
+                            <th class="p-4">Created At</th>
+                            <th class="p-4 text-center">Visibility</th>
+                            <th class="p-4 text-center">Access</th>
+                            <th class="p-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bucketList" class="divide-y divide-slate-100 text-sm">
+                        <tr><td colspan="5" class="p-8 text-center text-slate-400">Loading buckets...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        Notification
+    </div>
+
+    <script>
+        // --- API Helpers ---
+        const api = {
+            list: async () => {
+                const res = await fetch('/api/buckets');
+                if (res.status === 401) window.location.href = '/login';
+                return res.json();
+            },
+            create: async (name) => {
+                const res = await fetch('/api/buckets', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name })
+                });
+                return res.json();
+            },
+            updatePolicy: async (name, isPublic) => {
+                const res = await fetch(`/api/buckets/${name}/policy`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ public: isPublic })
+                });
+                return res.json();
+            },
+            delete: async (name) => {
+                const res = await fetch(`/api/buckets/${name}`, {
+                    method: 'DELETE'
+                });
+                return res.json();
+            },
+            logout: async () => {
+                await fetch('/api/logout', { method: 'POST' });
+                window.location.href = '/login';
+            }
+        };
+
+        // --- UI Logic ---
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-xl transform transition-all duration-300 z-50 ${isError ? 'bg-red-600 text-white' : 'bg-slate-800 text-white'}`;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function renderBuckets(buckets) {
+            const list = document.getElementById('bucketList');
+            list.innerHTML = '';
+            
+            if (buckets.length === 0) {
+                list.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No buckets found. Create one to get started.</td></tr>';
+                return;
+            }
+
+            buckets.forEach(bucket => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors group";
+                
+                const date = new Date(bucket.creationDate).toLocaleString();
+                
+                const visibilityBadge = bucket.isPublic 
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11.055a9.003 9.003 0 0117.89 0m-17.89 0a9.003 9.003 0 0017.89 0m-17.89 0c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm17.89 0c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        Public
+                       </span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        Private
+                       </span>`;
+
+                tr.innerHTML = "`
+                    <td class=\"p-4 font-medium text-slate-700\">${bucket.name}</td>
+                    <td class=\"p-4 text-slate-500\">${date}</td>
+                    <td class=\"p-4 text-center\">${visibilityBadge}</td>
+                    <td class=\"p-4 text-center\">
+                         <div class=\"relative inline-block w-12 mr-2 align-middle select-none\">
+                            <input type=\"checkbox\" id=\"toggle-${bucket.name}\" class=\"toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300 ease-in-out top-0 left-0\" ${bucket.isPublic ? 'checked' : ''}/>
+                            <label for=\"toggle-${bucket.name}\" class=\"toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300 ease-in-out\"></label>
+                        </div>
+                    </td>
+                    <td class=\"p-4 text-right\">
+                        <button onclick=\"handleDelete('${bucket.name}')\" class=\"text-slate-400 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50\" title=\"Delete Bucket\">
+                            <svg class=\"w-5 h-5\" fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16\"></path></svg>
+                        </button>
+                    </td>
+                `;
+                
+                list.appendChild(tr);
+
+                // Event Listener for Toggle
+                const toggle = tr.querySelector(`#toggle-${bucket.name}`);
+                toggle.addEventListener('change', async (e) => {
+                    const isChecked = e.target.checked;
+                    try {
+                        const res = await api.updatePolicy(bucket.name, isChecked);
+                        if (res.error) throw new Error(res.error);
+                        showToast(`Bucket is now ${isChecked ? 'Public' : 'Private'}`);
+                        loadData(); // Refresh to update badges
+                    } catch (err) {
+                        showToast(err.message || 'Error updating policy', true);
+                        e.target.checked = !isChecked; // Revert
+                    }
+                });
+            });
+        }
+
+        async function loadData() {
+            try {
+                const buckets = await api.list();
+                renderBuckets(buckets);
+            } catch (err) {
+                console.error(err);
+                showToast('Failed to load buckets', true);
+            }
+        }
+
+        window.handleDelete = async (name) => {
+            if(!confirm(`Are you sure you want to delete bucket "${name}"?\nThis action cannot be undone.`)) return;
+            
+            try {
+                const res = await api.delete(name);
+                if (res.error) throw new Error(res.error);
+                showToast(`Bucket "${name}" deleted`);
+                loadData();
+            } catch (err) {
+                // MinIO returns generic errors often, check if not empty
+                if(err.message.includes('not empty')) {
+                    showToast('Cannot delete: Bucket is not empty.', true);
+                } else {
+                    showToast(err.message || 'Failed to delete bucket', true);
+                }
+            }
+        }
+
+        // --- Init ---
+        document.getElementById('logoutBtn').addEventListener('click', api.logout);
+        
+        document.getElementById('createBucketForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('newBucketName');
+            const name = input.value.trim();
+            if(!name) return;
+            
+            try {
+                const res = await api.create(name);
+                if (res.error) throw new Error(res.error);
+                input.value = '';
+                showToast(`Bucket "${name}" created successfully`);
+                loadData();
+            } catch (err) {
+                showToast(err.message || 'Failed to create bucket', true);
+            }
+        });
+
+        loadData();
+    </script>
+</body>
+</html>
