@@ -46,7 +46,8 @@ export function renderBuckets(buckets) {
                     ${b.isPublic ? t.publicAccess : t.privateAccess}
                 </span>
                 <div class="relative inline-block w-9 h-5 align-middle select-none">
-                    <input type="checkbox" id="toggle-${b.name}" class="toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-2 border-slate-200 dark:border-dark-700 appearance-none cursor-pointer transition-all duration-300 top-0.5 left-0.5 shadow-sm" ${b.isPublic ? 'checked' : ''}/>
+                    <input type="checkbox" id="toggle-${b.name}" 
+                    class="toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-2 border-slate-200 dark:border-dark-700 appearance-none cursor-pointer transition-all duration-300 top-0.5 left-0.5 shadow-sm" ${b.isPublic ? 'checked' : ''}/>
                     <label for="toggle-${b.name}" class="toggle-label block overflow-hidden h-5 rounded-full bg-slate-100 dark:bg-dark-800 cursor-pointer transition-colors border border-slate-200 dark:border-dark-700"></label>
                 </div>
             </div>
