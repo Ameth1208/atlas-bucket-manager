@@ -1,8 +1,18 @@
 {
   "name": "minio-bucket-manager",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.0.1",
+  "description": "Lightweight and secure MinIO bucket management interface.",
+  "main": "dist/server.js",
+  "author": "Ameth Galarcio <https://amethgm.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ameth1208/minio-bucket-manager.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ameth1208/minio-bucket-manager/issues"
+  },
+  "homepage": "https://github.com/ameth1208/minio-bucket-manager#readme",
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
@@ -10,8 +20,6 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
   "type": "commonjs",
   "dependencies": {
     "cookie-parser": "^1.4.7",

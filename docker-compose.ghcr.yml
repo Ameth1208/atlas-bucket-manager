@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  minio-manager:
+    image: ghcr.io/ameth1208/minio-bucket-manager:latest
+    container_name: minio-manager
+    ports:
+      - "${PORT:-3000}:3000"
+    env_file:
+      - .env
+    restart: always
+    environment:
+      - NODE_ENV=production
