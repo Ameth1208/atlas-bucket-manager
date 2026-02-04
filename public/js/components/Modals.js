@@ -1,7 +1,6 @@
 import { store } from '../store.js';
 import { api } from '../api.js';
 import { showToast } from '../utils.js';
-import { t } from '../i18n.js';
 
 // --- Delete Modal ---
 export function openDeleteModal(name) {
@@ -38,28 +37,43 @@ export async function openPreview(bucket, file) {
         
         name.innerText = file;
         btn.href = url;
+        content.innerHTML = '<iconify-icon icon="line-md:loading-twotone-loop" width="48" class="text-white/50"></iconify-icon>'; // Loading state
         
+        document.getElementById('previewModal').classList.remove('hidden');
+
+        // Preload image to avoid layout shift
         if(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
-            content.innerHTML = `<img src="${url}" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">`;
+            const img = new Image();
+            img.onload = () => {
+                content.innerHTML = `<img src="${url}" class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl animate-fade-in">`;
+            };
+            img.src = url;
         } else if (['mp4', 'webm'].includes(ext)) {
-            content.innerHTML = `<video src="${url}" controls class="max-w-full max-h-full rounded-lg shadow-2xl"></video>`;
+            content.innerHTML = `<video src="${url}" controls autoplay class="max-w-full max-h-[75vh] rounded-lg shadow-2xl focus:outline-none"></video>`;
         } else if (ext === 'pdf') {
-            content.innerHTML = `<iframe src="${url}" class="w-full h-[70vh] rounded-lg border-0 shadow-2xl"></iframe>`;
+            content.innerHTML = `<iframe src="${url}" class="w-full h-[75vh] rounded-lg border-0 shadow-2xl bg-white"></iframe>`;
         } else {
             content.innerHTML = `
-                <div class="flex flex-col items-center gap-4 p-12 bg-white dark:bg-dark-800 rounded-3xl border border-slate-100 dark:border-dark-700 shadow-2xl">
-                    <iconify-icon icon="ph:file-dashed-duotone" width="80" class="text-slate-300"></iconify-icon>
-                    <p class="text-slate-500 font-medium">No preview available for this file type.</p>
+                <div class="flex flex-col items-center gap-6 p-12 bg-white/10 backdrop-blur-md rounded-3xl border border-white/10 shadow-2xl animate-fade-in text-center">
+                    <div class="p-4 bg-white/10 rounded-full">
+                        <iconify-icon icon="ph:file-dashed-duotone" width="64" class="text-white/70"></iconify-icon>
+                    </div>
+                    <div>
+                        <h3 class="text-white text-lg font-bold">No preview available</h3>
+                        <p class="text-white/50 text-sm mt-1">Please download the file to view it.</p>
+                    </div>
                 </div>`;
         }
         
-        document.getElementById('previewModal').classList.remove('hidden');
     } catch(e) { 
         showToast('Preview failed', 'error'); 
+        closePreview();
     }
 }
 
 export function closePreview() {
     document.getElementById('previewModal').classList.add('hidden');
-    document.getElementById('previewContent').innerHTML = '';
+    setTimeout(() => {
+        document.getElementById('previewContent').innerHTML = '';
+    }, 200);
 }
