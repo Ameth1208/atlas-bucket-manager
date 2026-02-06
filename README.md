@@ -2,7 +2,7 @@
 
 > A high-performance, unified Multi-Cloud UI for managing S3-compatible storage (MinIO, AWS S3, R2, Spaces).
 
-![Atlas Manager](https://via.placeholder.com/1200x600?text=Atlas+Bucket+Manager+v0.0.2)
+![Atlas Manager](public/atlas-portada.png)
 
 Atlas is a lightweight, secure, and modern web interface designed to bridge the gap between local development and cloud production. Manage visibility, explore files, and perform global searches across all your storage providers in one unified place.
 
@@ -84,6 +84,14 @@ docker-compose up -d
 ```
 
 Visit `http://localhost:3000`. 🎉
+
+---
+
+## ☕ Support
+
+If you find this project useful, consider buying me a coffee!
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/amethgmc)
 
 ---
 
