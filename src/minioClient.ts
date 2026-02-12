@@ -111,18 +111,35 @@ export class MinioManager {
   }
 
   async listObjects(providerId: string, bucketName: string, prefix: string = ''): Promise<any[]> {
+    console.log(`🔍 listObjects: provider=${providerId}, bucket=${bucketName}, prefix="${prefix}"`);
     const client = this.getClient(providerId);
     return new Promise((resolve, reject) => {
       const objects: any[] = [];
-      const stream = client.listObjectsV2(bucketName, prefix, false, ''); 
-      stream.on('data', (obj) => objects.push(obj));
-      stream.on('error', (err) => reject(err));
-      stream.on('end', () => resolve(objects));
+      const stream = client.listObjectsV2(bucketName, prefix, false, '/'); 
+      stream.on('data', (obj) => {
+        console.log(`   - Found item: ${obj.name || obj.prefix}`);
+        objects.push(obj);
+      });
+      stream.on('error', (err) => {
+        console.error(`   - listObjects error:`, err);
+        reject(err);
+      });
+      stream.on('end', () => {
+        console.log(`   - listObjects finished, found ${objects.length} items`);
+        resolve(objects);
+      });
     });
   }
 
   async uploadFile(providerId: string, bucketName: string, objectName: string, filePath: string) {
     await this.getClient(providerId).fPutObject(bucketName, objectName, filePath);
+    return true;
+  }
+
+  async createFolder(providerId: string, bucketName: string, folderPath: string) {
+    const client = this.getClient(providerId);
+    const name = folderPath.endsWith('/') ? folderPath : `${folderPath}/`;
+    await client.putObject(bucketName, name, Buffer.alloc(0));
     return true;
   }
 

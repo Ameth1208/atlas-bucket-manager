@@ -64,6 +64,20 @@ router.post('/buckets/:providerId/:name/upload', requireAuth, upload.array('file
     }
 });
 
+router.post('/buckets/:providerId/:name/folder', requireAuth, async (req: Request, res: Response) => {
+    try {
+        const { providerId, name } = getParams(req);
+        const { folderName, prefix } = req.body;
+        if (!folderName) throw new Error("Folder name is required");
+        
+        const fullPath = prefix ? `${prefix}${folderName}/` : `${folderName}/`;
+        await minioManager.createFolder(providerId, name, fullPath);
+        res.json({ success: true });
+    } catch (err: any) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 router.delete('/buckets/:providerId/:name/objects', requireAuth, async (req: Request, res: Response) => {
     try {
         const { providerId, name } = getParams(req);

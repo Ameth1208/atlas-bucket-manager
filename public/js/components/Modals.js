@@ -1,6 +1,6 @@
-import { store } from '../store.js';
-import { api } from '../api.js';
-import { showToast } from '../utils.js';
+import { store } from '/js/store.js';
+import { api } from '/js/api.js';
+import { showToast } from '/js/utils.js';
 
 // --- Delete Modal ---
 export function openDeleteModal(providerId, name) {

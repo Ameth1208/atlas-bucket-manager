@@ -1,9 +1,10 @@
-import { store } from '../store.js';
-import { api } from '../api.js';
-import { showToast } from '../utils.js';
-import { translations } from '../i18n.js';
-import { openExplorer } from './Explorer.js';
-import { openDeleteModal } from './Modals.js';
+import { store } from '/js/store.js';
+import { api } from '/js/api.js';
+import { showToast } from '/js/utils.js';
+import { translations } from '/js/i18n.js';
+import { openExplorer } from '/js/components/Explorer.js';
+import { openDeleteModal } from '/js/components/Modals.js';
+import { initTooltips } from '/js/components/Tooltip.js';
 
 export function renderBuckets(buckets) {
     const lang = localStorage.getItem('lang') || 'en';
@@ -42,14 +43,10 @@ export function renderBuckets(buckets) {
                     <span class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">${b.providerName}</span>
                 </div>
                 <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="console.log('Click Open:', '${b.providerId}', '${b.name}'); window.app.openExplorer('${b.providerId}', '${b.name}')" class="flex items-center gap-1 px-2 py-1 text-slate-400 hover:text-indigo-500 transition-colors" title="Open Explorer">
+                    <button onclick="window.app.openExplorer('${b.providerId}', '${b.name}')" class="p-2 text-slate-400 hover:text-indigo-500 transition-colors" data-tooltip="${t.explore}">
                         <iconify-icon icon="ph:folder-open-bold" width="20"></iconify-icon>
-                        <span class="text-[10px] font-bold uppercase">Open</span>
                     </button>
-                    <button onclick="window.open('/explorer/${b.providerId}/${b.name}', '_blank')" class="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Open in new window">
-                        <iconify-icon icon="ph:arrow-square-out-bold" width="20"></iconify-icon>
-                    </button>
-                    <button onclick="window.app.openDeleteModal('${b.providerId}', '${b.name}')" class="p-2 text-slate-400 hover:text-rose-500 transition-colors" title="Delete Bucket">
+                    <button onclick="window.app.openDeleteModal('${b.providerId}', '${b.name}')" class="p-2 text-slate-400 hover:text-rose-500 transition-colors" data-tooltip="${t.deleteTitle}">
                         <iconify-icon icon="ph:trash-simple-bold" width="20"></iconify-icon>
                     </button>
                 </div>
@@ -59,7 +56,7 @@ export function renderBuckets(buckets) {
                 <div class="flex items-center gap-3 mt-1">
                     <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest opacity-60">${new Date(b.creationDate).toLocaleDateString(lang)}</p>
                     <span id="stats-${b.providerId}-${b.name}" class="text-[10px] text-indigo-500 font-bold hidden"></span>
-                    <button onclick="window.app.refreshStats('${b.providerId}', '${b.name}')" class="text-[10px] text-slate-400 hover:text-rose-500 transition-colors" title="Calculate Stats">
+                    <button onclick="window.app.refreshStats('${b.providerId}', '${b.name}')" class="text-[10px] text-slate-400 hover:text-rose-500 transition-colors" data-tooltip="Stats">
                         <iconify-icon icon="ph:arrows-clockwise-bold"></iconify-icon>
                     </button>
                 </div>
@@ -92,4 +89,7 @@ export function renderBuckets(buckets) {
             });
         }
     });
+
+    initTooltips();
 }
+

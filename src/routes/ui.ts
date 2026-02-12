@@ -15,13 +15,8 @@ router.get("/manager", requireAuth, (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../public/manager.html"));
 });
 
-// Dedicated Explorer route (for separate window/tab)
-router.get(
-  "/explorer/:providerId/:bucket",
-  requireAuth,
-  (req: Request, res: Response) => {
-    res.sendFile(path.join(__dirname, "../../public/explorer.html"));
-  }
-);
+router.get(/^\/manager\/.*/, requireAuth, (req: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, "../../public/manager.html"));
+});
 
 export default router;
