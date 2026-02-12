@@ -1,12 +1,13 @@
-import { initTheme, toggleTheme, showToast } from './utils.js';
-import { initLanguage, setLanguage, renderLanguageSelector, t } from './i18n.js';
-import { api } from './api.js';
-import { store } from './store.js';
-import { renderBuckets } from './components/BucketList.js';
-import { openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload, toggleSelect, bulkDelete, openUrlModal, closeUrlModal, generateShareLink } from './components/Explorer.js';
-import { openDeleteModal, closeDeleteModal, openPreview, closePreview } from './components/Modals.js';
-import { initLoginForm } from './components/LoginForm.js';
-import { renderSupportButton } from './components/SupportButton.js';
+import { initTheme, toggleTheme, showToast } from '/js/utils.js';
+import { initLanguage, setLanguage, renderLanguageSelector, t } from '/js/i18n.js';
+import { api } from '/js/api.js';
+import { store } from '/js/store.js';
+import { renderBuckets } from '/js/components/BucketList.js';
+import { openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload, createFolder, closeFolderModal, submitFolder, toggleSelect, bulkDelete, openUrlModal, closeUrlModal, generateShareLink } from '/js/components/Explorer.js';
+import { openDeleteModal, closeDeleteModal, openPreview, closePreview } from '/js/components/Modals.js';
+import { initLoginForm } from '/js/components/LoginForm.js';
+import { renderSupportButton } from '/js/components/SupportButton.js';
+import { initTooltips } from '/js/components/Tooltip.js';
 
 // 1. Error Mapping
 function translateError(errorMsg) {
@@ -161,17 +162,25 @@ function initSearch() {
                                 <span class="text-[9px] text-slate-400 font-mono uppercase tracking-tighter">${item.providerId} / ${item.bucket}</span>
                             </div>
                         </div>
-                        <button class="p-2 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all search-new-win" title="Open in new window">
+                        <button class="p-2 text-slate-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all search-new-win" data-tooltip="Open in new window">
                             <iconify-icon icon="ph:arrow-square-out-bold" width="18"></iconify-icon>
                         </button>
                     `;
                     
                     const itemClick = el.querySelector('.search-clickable');
                     itemClick.onclick = () => {
+                        
                         results.classList.add('hidden'); 
                         input.value = ''; 
-                        const prefix = item.name.includes('/') ? item.name.substring(0, item.name.lastIndexOf('/') + 1) : '';
+                        
+                        // Calculate prefix: everything before the last slash
+                        const lastSlashIndex = item.name.lastIndexOf('/');
+                        const prefix = lastSlashIndex !== -1 ? item.name.substring(0, lastSlashIndex + 1) : '';
+                        
+                        
                         window.app.openExplorer(item.providerId, item.bucket, prefix);
+                        
+                        
                         window.app.openPreview(item.providerId, item.bucket, item.name);
                     };
     
@@ -184,6 +193,7 @@ function initSearch() {
     
                     results.appendChild(el);
                 });
+                initTooltips();
             }
         }, 300);
     });
@@ -191,10 +201,11 @@ function initSearch() {
 
 // 7. Expose & Init
 window.app = {
-    loadData, openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload,
+    loadData, openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload, createFolder, closeFolderModal, submitFolder,
     toggleSelect, bulkDelete, openUrlModal, closeUrlModal, generateShareLink,
     openDeleteModal, closeDeleteModal, confirmDelete, openPreview, closePreview,
-    setLanguage, toggleTheme, refreshStats, translateError, setFilter, api, showToast
+    setLanguage, toggleTheme, refreshStats, translateError, setFilter, api, showToast,
+    initTooltips
 };
 
 function handleRouting() {
@@ -204,7 +215,7 @@ function handleRouting() {
         const providerId = parts[2];
         const bucket = parts[3];
         const prefix = parts.slice(5).join('/');
-        window.app.openExplorer(providerId, bucket, prefix, false, true);
+        window.app.openExplorer(providerId, bucket, prefix);
     } else if (path === '/manager') {
         const listView = document.getElementById('bucketListView');
         const explorerView = document.getElementById('explorerView');
@@ -217,37 +228,36 @@ function handleRouting() {
 
 window.addEventListener('popstate', handleRouting);
 
-console.log('app.js script loaded');
+
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Content Loaded - App initialization started');
+    
     
     try {
         initTheme();
-        console.log('Theme initialized');
+        
         initLanguage();
-        console.log('Language initialized');
+        
         renderLanguageSelector('langSelectorContainer');
-        console.log('Language selector rendered');
+        
         renderSupportButton();
-        console.log('Support button rendered');
+        
+        initTooltips();
+        
     } catch (err) {
         console.error('Error during global init:', err);
     }
     
     const loginForm = document.getElementById('loginForm');
     const isLogin = !!loginForm;
-    const isExplorer = window.location.pathname.startsWith('/explorer');
     
-    console.log('Page context:', { isLogin, isExplorer, path: window.location.pathname });
+    
     
     if (isLogin) {
-        console.log('Initializing Login Form...');
+        
         initLoginForm();
-    } else if (isExplorer) {
-        console.log('Standing by for Explorer init (handled in explorer.html)');
     } else {
-        console.log('Initializing Manager...');
+        
         initSearch();
         loadData();
         handleRouting(); // Check initial route

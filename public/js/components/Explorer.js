@@ -1,60 +1,49 @@
-import { store } from '../store.js';
-import { api } from '../api.js';
-import { openPreview } from './Modals.js';
-import { showToast } from '../utils.js';
+import { store } from '/js/store.js';
+import { api } from '/js/api.js';
+import { openPreview } from '/js/components/Modals.js';
+import { showToast } from '/js/utils.js';
+import { initTooltips } from '/js/components/Tooltip.js';
 
 let selectedObjects = new Set();
 let shareTarget = null;
 
-export async function openExplorer(providerId, name, prefix = '', isStandalone = false) {
+export async function openExplorer(providerId, name, prefix = '') {
     try {
-        console.log(`🚀 openExplorer called for ${providerId}/${name}, prefix: "${prefix}", standalone: ${isStandalone}`);
         
-        store.currentProviderId = providerId;
-        store.currentBucket = name;
-        store.currentPrefix = prefix;
-        store.isExplorerStandalone = isStandalone;
         
-        // Hide search results if any
-        const searchResults = document.getElementById('searchResults');
-        if (searchResults) {
-            searchResults.classList.add('hidden');
+        if (!providerId || !name) {
+            console.error('Invalid parameters:', { providerId, name });
+            showToast('Invalid bucket selection', 'error');
+            return;
         }
+
+        store.currentProviderId = providerId.trim();
+        store.currentBucket = name.trim();
+        store.currentPrefix = prefix;
+        
+        // UI Clean up
+        const searchResults = document.getElementById('searchResults');
+        if (searchResults) searchResults.classList.add('hidden');
         const searchInput = document.getElementById('globalSearchInput');
         if (searchInput) searchInput.value = '';
 
-        // Update UI
         const titleEl = document.getElementById('explorerTitle');
         if (titleEl) titleEl.innerText = name;
         
-        // Switch Views if in Manager
+        // Switch Views
         const listView = document.getElementById('bucketListView');
         const explorerView = document.getElementById('explorerView');
         
-        if (!isStandalone) {
-            if (listView && explorerView) {
-                console.log('UI: Hiding list, showing explorer');
-                listView.classList.add('hidden');
-                explorerView.classList.remove('hidden');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            } else {
-                console.error('UI: Explorer view elements not found!');
-                showToast('UI Error: View elements missing', 'error');
-            }
+        if (listView && explorerView) {
+            listView.classList.add('hidden');
+            explorerView.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        const modalEl = document.getElementById('explorerModal');
-        if (modalEl) {
-            modalEl.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-        }
-
-        // Update URL if needed
-        if (!isStandalone) {
-            const newPath = `/manager/${providerId}/${name}/files/${prefix}`;
-            if (window.location.pathname !== newPath && !window.location.pathname.startsWith('/explorer')) {
-                window.history.pushState({ providerId, name, prefix, type: 'explorer' }, '', newPath);
-            }
+        // Update URL for SPA
+        const newPath = `/manager/${providerId}/${name}/files/${prefix}`;
+        if (window.location.pathname !== newPath) {
+            window.history.pushState({ providerId, name, prefix, type: 'explorer' }, '', newPath);
         }
 
         await renderExplorerContent();
@@ -65,49 +54,26 @@ export async function openExplorer(providerId, name, prefix = '', isStandalone =
 }
 
 export function closeExplorer() {
-    const modalEl = document.getElementById('explorerModal');
-    if (modalEl) {
-        modalEl.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    }
-
-    // Switch Views if in Manager
     const listView = document.getElementById('bucketListView');
     const explorerView = document.getElementById('explorerView');
     
     if (listView && explorerView) {
-        if (!store.isExplorerStandalone) {
-            // Check if we are currently in an explorer path
-            const isExplorerPath = window.location.pathname.includes('/files/');
-            if (isExplorerPath) {
-                window.history.back();
-            } else {
-                listView.classList.remove('hidden');
-                explorerView.classList.add('hidden');
-                if (window.location.pathname !== '/manager') {
-                    window.history.pushState({ type: 'list' }, '', '/manager');
-                }
-            }
+        listView.classList.remove('hidden');
+        explorerView.classList.add('hidden');
+        if (window.location.pathname !== '/manager') {
+            window.history.pushState({ type: 'list' }, '', '/manager');
         }
     }
 }
 
 export async function navigateExplorer(prefix) {
     store.currentPrefix = prefix;
-    
-    // Update URL
-    if (store.isExplorerStandalone) {
-        // We don't change the path in standalone explorer yet to avoid reloading, 
-        // but we could use query params or hash if needed. 
-        // For now let's just keep it simple.
-    } else {
-        const newPath = `/manager/${store.currentProviderId}/${store.currentBucket}/files/${prefix}`;
-        window.history.pushState({ 
-            providerId: store.currentProviderId, 
-            name: store.currentBucket, 
-            prefix 
-        }, '', newPath);
-    }
+    const newPath = `/manager/${store.currentProviderId}/${store.currentBucket}/files/${prefix}`;
+    window.history.pushState({ 
+        providerId: store.currentProviderId, 
+        name: store.currentBucket, 
+        prefix 
+    }, '', newPath);
 
     await renderExplorerContent();
 }
@@ -156,13 +122,13 @@ async function renderExplorerContent() {
         const fileCountEl = document.getElementById('fileCount');
         if (fileCountEl) fileCountEl.innerText = `${items.length} items`;
         
-        console.log(`UI: Found ${items.length} items in bucket`);
+        
 
         if(store.currentPrefix !== '') {
             const parentParts = store.currentPrefix.split('/').filter(Boolean);
             parentParts.pop();
             const parentPath = parentParts.length > 0 ? parentParts.join('/') + '/' : '';
-            console.log(`UI: Adding back button to prefix: "${parentPath}"`);
+            
             
             const back = document.createElement('div');
             back.className = "flex items-center gap-4 p-2.5 hover:bg-slate-100 dark:hover:bg-dark-800 rounded-xl cursor-pointer text-slate-500 mb-1 transition-all group";
@@ -177,7 +143,7 @@ async function renderExplorerContent() {
         }
 
         if(!items || items.length === 0) { 
-            console.log('UI: Folder is empty');
+            
             list.innerHTML = '<div class="text-center py-20 flex flex-col items-center gap-4 text-slate-400 opacity-60"><iconify-icon icon="ph:folder-dashed-duotone" width="48"></iconify-icon><span class="text-sm font-medium tracking-tight">Empty folder</span></div>'; 
             return; 
         }
@@ -185,7 +151,7 @@ async function renderExplorerContent() {
         const folders = items.filter(i => i.prefix);
         const files = items.filter(i => !i.prefix);
         
-        console.log(`UI: Rendering ${folders.length} folders and ${files.length} files`);
+        
 
         folders.forEach(f => {
             const el = document.createElement('div');
@@ -222,19 +188,21 @@ async function renderExplorerContent() {
                     </div>
                 </div>
                 <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="window.app.openPreview('${store.currentProviderId}', '${store.currentBucket}', '${f.name}')" class="aspect-square w-9 flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all">
+                    <button onclick="window.app.openPreview('${store.currentProviderId}', '${store.currentBucket}', '${f.name}')" class="aspect-square w-9 flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all" data-tooltip="Preview">
                         <iconify-icon icon="ph:eye-bold" width="18"></iconify-icon>
                     </button>
-                    <button onclick="window.app.openUrlModal('${f.name}')" class="aspect-square w-9 flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all">
+                    <button onclick="window.app.openUrlModal('${f.name}')" class="aspect-square w-9 flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all" data-tooltip="Share">
                         <iconify-icon icon="ph:share-network-bold" width="18"></iconify-icon>
                     </button>
-                    <button onclick="window.app.downloadFile('${store.currentProviderId}', '${store.currentBucket}', '${f.name}')" class="aspect-square w-9 flex items-center justify-center text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all">
+                    <button onclick="window.app.downloadFile('${store.currentProviderId}', '${store.currentBucket}', '${f.name}')" class="aspect-square w-9 flex items-center justify-center text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all" data-tooltip="Download">
                         <iconify-icon icon="ph:download-simple-bold" width="18"></iconify-icon>
                     </button>
                 </div>
             `;
             list.appendChild(el);
         });
+
+        initTooltips();
 
     } catch (err) { 
         console.error('Explorer error:', err);
@@ -320,6 +288,38 @@ export async function handleUpload(files) {
         }
     } catch (err) {
         showToast('Upload failed', 'error');
+    }
+}
+
+export async function createFolder() {
+    document.getElementById('folderModal').classList.remove('hidden');
+    const input = document.getElementById('newFolderName');
+    if (input) {
+        input.value = '';
+        input.focus();
+    }
+}
+
+export function closeFolderModal() {
+    document.getElementById('folderModal').classList.add('hidden');
+}
+
+export async function submitFolder() {
+    const input = document.getElementById('newFolderName');
+    const name = input.value.trim();
+    if (!name) return;
+    
+    showToast('Creating folder...', 'info');
+    try {
+        const res = await api.createFolder(store.currentProviderId, store.currentBucket, name, store.currentPrefix);
+        if (res.error) showToast(res.error, 'error');
+        else {
+            showToast('Folder created', 'success');
+            closeFolderModal();
+            await renderExplorerContent();
+        }
+    } catch (err) {
+        showToast('Failed to create folder', 'error');
     }
 }
 

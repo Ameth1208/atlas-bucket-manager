@@ -2,7 +2,7 @@ import { api } from '../api.js';
 import { t } from '../i18n.js';
 
 export function initLoginForm() {
-    console.log('initLoginForm called');
+    
     const form = document.getElementById('loginForm');
     if (!form) {
         console.warn('loginForm not found');
@@ -11,7 +11,7 @@ export function initLoginForm() {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log('Login form submitted');
+        
         
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
@@ -23,7 +23,7 @@ export function initLoginForm() {
         const username = usernameInput.value.trim();
         const password = passwordInput.value;
 
-        console.log('Attempting login for:', username);
+        
 
         // Reset UI
         errorContainer.classList.add('hidden');
@@ -32,10 +32,10 @@ export function initLoginForm() {
 
         try {
             const res = await api.login(username, password);
-            console.log('Login response:', res);
+            
 
             if (res.success) {
-                console.log('Login success, redirecting...');
+                
                 window.location.href = '/manager';
             } else {
                 throw new Error(res.error || 'Invalid credentials');

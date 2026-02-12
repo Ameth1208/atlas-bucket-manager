@@ -40,6 +40,13 @@ export const api = {
         }));
     },
 
+    createFolder: async (providerId, bucket, folderName, prefix = '') => 
+        handleResponse(await fetch(`/api/buckets/${providerId}/${bucket}/folder`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ folderName, prefix })
+        })),
+
     deleteObjects: async (providerId, bucket, objects) => 
         handleResponse(await fetch(`/api/buckets/${providerId}/${bucket}/objects`, {
             method: 'DELETE',
