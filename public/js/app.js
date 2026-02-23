@@ -24,6 +24,9 @@ async function loadData(spinner = true) {
     const empty = document.getElementById('emptyState');
     if (!list) return;
 
+    // Load providers FIRST to ensure UI is ready
+    await loadProviders();
+
     if(spinner) { 
         loader.classList.remove('hidden'); 
         list.classList.add('hidden'); 
@@ -32,17 +35,19 @@ async function loadData(spinner = true) {
 
     try { 
         const res = await api.list(); 
+        
         if (res && res.error) {
             showToast(translateError(res.error), 'error');
             loader.classList.add('hidden');
             empty.classList.remove('hidden');
             return;
         }
+
         store.buckets = Array.isArray(res) ? res : [];
         renderBuckets(store.buckets); 
         renderFilters(store.buckets);
-        loadProviders();
     } catch (e) { 
+        console.error("Data load failed:", e);
         showToast("Connection failed", 'error');
         loader.classList.add('hidden');
         empty.classList.remove('hidden');
@@ -53,15 +58,21 @@ async function loadData(spinner = true) {
 function renderFilters(buckets) {
     const container = document.getElementById('filterContainer');
     if(!container) return;
-    const providers = Array.from(new Set(buckets.map(b => b.providerId)));
+    
+    // Use providers from store if available, otherwise from buckets
+    const providers = (store.providers && store.providers.length > 0) 
+        ? store.providers 
+        : Array.from(new Set(buckets.map(b => b.providerId))).map(id => ({ id, name: id }));
+
     if(providers.length <= 1) {
         container.innerHTML = '';
         return;
     }
+
     let html = `<button onclick="window.app.setFilter('all')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all ${store.currentFilter === 'all' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-100 dark:bg-dark-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-dark-700'}">All Accounts</button>`;
-    providers.forEach(pId => {
-        const pObj = buckets.find(b => b.providerId === pId);
-        html += `<button onclick="window.app.setFilter('${pId}')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all ${store.currentFilter === pId ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-100 dark:bg-dark-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-dark-700'}">${pObj ? pObj.providerName : pId}</button>`;
+    
+    providers.forEach(p => {
+        html += `<button onclick="window.app.setFilter('${p.id}')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all ${store.currentFilter === p.id ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-100 dark:bg-dark-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-dark-700'}">${p.name}</button>`;
     });
     container.innerHTML = html;
 }
@@ -78,27 +89,75 @@ async function loadProviders() {
     if(!select) return;
     try {
         const providers = await api.listProviders();
-        if(providers && providers.length > 1) {
+        store.providers = Array.isArray(providers) ? providers : [];
+        
+        console.log("Providers for UI:", store.providers);
+
+        if(store.providers.length > 1) {
             select.classList.remove('hidden');
-            select.innerHTML = providers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-        } else if (providers && providers[0]) {
-            select.innerHTML = `<option value="${providers[0].id}">${providers[0].name}</option>`;
+            select.innerHTML = store.providers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+        } else if (store.providers.length === 1) {
+            const p = store.providers[0];
+            select.innerHTML = `<option value="${p.id}" selected>${p.name}</option>`;
+            select.value = p.id; // Force value
+            select.classList.add('hidden');
+        } else {
+            select.innerHTML = '<option value="">No Providers</option>';
             select.classList.add('hidden');
         }
-    } catch (err) {}
+    } catch (err) {
+        console.error("Failed to load providers:", err);
+    }
 }
 
 async function createBucket(e) {
     e.preventDefault();
+    console.log("Submit event triggered on createBucketForm");
+
     const input = document.getElementById('newBucketName');
     const providerSelect = document.getElementById('createProviderId');
     const name = input.value.trim();
-    const providerId = providerSelect.value;
-    if(!name || !providerId) return;
-    showToast(t('create') + "...", 'info');
-    const res = await api.create(providerId, name);
-    if (res && res.error) showToast(translateError(res.error), 'error');
-    else { input.value = ''; showToast(t('toastCreated'), 'success'); loadData(); }
+    
+    // Get providerId from select
+    let providerId = providerSelect ? providerSelect.value : null;
+    
+    console.log("Form values -> Name:", name, "ProviderId (from select):", providerId);
+
+    if(!name) {
+        showToast("Please enter a bucket name", "error");
+        return;
+    }
+
+    if(!providerId) {
+        console.warn("ProviderId missing from select, checking store...");
+        if (store.providers && store.providers.length > 0) {
+            providerId = store.providers[0].id;
+            console.log("Using first provider from store:", providerId);
+        }
+    }
+
+    if(!providerId) {
+        showToast("No provider available", 'error');
+        return;
+    }
+
+    try {
+        console.log(`Final attempt: Creating bucket "${name}" on "${providerId}"`);
+        showToast(t('create') + "...", 'info');
+        const res = await api.create(providerId, name);
+        console.log("API Create response:", res);
+
+        if (res && res.error) {
+            showToast(translateError(res.error), 'error');
+        } else { 
+            input.value = ''; 
+            showToast(t('toastCreated'), 'success'); 
+            await loadData(false); 
+        }
+    } catch (err) {
+        console.error("Create bucket unexpected error:", err);
+        showToast("Failed to create bucket", 'error');
+    }
 }
 
 // 5. Deletion & Stats

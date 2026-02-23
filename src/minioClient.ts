@@ -8,17 +8,25 @@ export class MinioManager {
   constructor() {
     console.log(`🔌 Initializing Multi-Cloud Manager...`);
     config.providers.forEach(p => {
-        console.log(`   - Adding Provider: ${p.name} (${p.id})`);
-        const client = new Minio.Client({
-            endPoint: p.endPoint,
-            port: p.port,
-            useSSL: p.useSSL,
-            accessKey: p.accessKey,
-            secretKey: p.secretKey,
-            region: p.region
-        });
-        this.clients.set(p.id, client);
-        this.providerConfigs.set(p.id, p);
+        try {
+            if (!p.accessKey || !p.secretKey) {
+                console.warn(`   - Skipping Provider: ${p.name} (${p.id}) - Missing Credentials`);
+                return;
+            }
+            const client = new Minio.Client({
+                endPoint: p.endPoint,
+                port: p.port,
+                useSSL: p.useSSL,
+                accessKey: p.accessKey,
+                secretKey: p.secretKey,
+                region: p.region
+            });
+            this.clients.set(p.id, client);
+            this.providerConfigs.set(p.id, p);
+            console.log(`   - Added Provider: ${p.name} (${p.id}) ✅`);
+        } catch (err: any) {
+            console.error(`   - Failed to initialize Provider: ${p.name} (${p.id}):`, err.message);
+        }
     });
   }
 
@@ -84,8 +92,19 @@ export class MinioManager {
   async createBucket(providerId: string, bucketName: string) {
     const client = this.getClient(providerId);
     const conf = this.providerConfigs.get(providerId);
-    await client.makeBucket(bucketName, conf.region);
-    return true;
+    
+    console.log(`[MinioManager] Attempting to create bucket "${bucketName}" on provider "${providerId}"...`);
+    
+    try {
+        // En MinIO, a veces la región causa problemas si no coincide exactamente
+        // Intentamos crear con la región configurada
+        await client.makeBucket(bucketName, conf.region || '');
+        console.log(`[MinioManager] Bucket "${bucketName}" created successfully.`);
+        return true;
+    } catch (err: any) {
+        console.error(`[MinioManager] Failed to create bucket "${bucketName}":`, err.message);
+        throw err;
+    }
   }
 
   async setBucketVisibility(providerId: string, bucketName: string, makePublic: boolean) {
@@ -173,6 +192,13 @@ export class MinioManager {
 
   async getObjectStream(providerId: string, bucketName: string, objectName: string) {
     return await this.getClient(providerId).getObject(bucketName, objectName);
+  }
+
+  getActiveProviders() {
+    return Array.from(this.providerConfigs.values()).map(p => ({
+        id: p.id,
+        name: p.name
+    }));
   }
 }
 
