@@ -22,6 +22,13 @@ export const api = {
 
     list: async () => handleResponse(await fetch('/api/buckets')),
     
+    create: async (providerId, name) => 
+        handleResponse(await fetch('/api/buckets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ providerId, name })
+        })),
+
     listObjects: async (providerId, name, prefix = '') => 
         handleResponse(await fetch(`/api/buckets/${providerId}/${name}/objects?prefix=${encodeURIComponent(prefix)}`)),
     

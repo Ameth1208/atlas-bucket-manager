@@ -12,7 +12,10 @@ const getParams = (req: Request) => ({
 });
 
 router.get('/providers', requireAuth, (req, res) => {
-    res.json(config.providers.map(p => ({ id: p.id, name: p.name })));
+    // Usamos directamente lo que el Manager inicializó con éxito
+    const providers = minioManager.getActiveProviders();
+    console.log(`[GET /api/providers] Active providers in Manager:`, JSON.stringify(providers));
+    res.json(providers);
 });
 
 router.get('/buckets', requireAuth, async (req: Request, res: Response) => {
@@ -27,10 +30,17 @@ router.get('/buckets', requireAuth, async (req: Request, res: Response) => {
 router.post('/buckets', requireAuth, async (req: Request, res: Response) => {
     try {
         const { providerId, name } = req.body;
-        if (!providerId || !name) throw new Error("Provider and name required");
+        console.log(`[POST /api/buckets] Request Body:`, JSON.stringify(req.body));
+        
+        if (!providerId || !name) {
+            console.error(`[POST /api/buckets] Missing required fields: providerId="${providerId}", name="${name}"`);
+            throw new Error("Provider and name required");
+        }
+        
         await minioManager.createBucket(providerId, name);
         res.json({ success: true });
     } catch (err: any) {
+        console.error(`[POST /api/buckets] Error:`, err.message);
         res.status(400).json({ error: err.message });
     }
 });
