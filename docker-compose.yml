@@ -9,7 +9,6 @@ services:
       - PORT=3000
       - ADMIN_USER=${ADMIN_USER:-admin}
       - ADMIN_PASS=${ADMIN_PASS:-admin}
-      - JWT_SECRET=${JWT_SECRET:-secret_jwt_key}
       # Local Provider
       - MINIO_ENDPOINT=minio-server
       - MINIO_PORT=9000

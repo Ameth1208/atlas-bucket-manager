@@ -24,6 +24,7 @@ Atlas is a lightweight, secure, and modern web interface designed to bridge the 
 ## 🔌 Supported Providers
 
 ### Available Now (v0.0.3) ✅
+
 - **MinIO** (Amazon S3 compatible)
 - **AWS S3** (Amazon Web Services)
 - **Cloudflare R2**
@@ -32,6 +33,7 @@ Atlas is a lightweight, secure, and modern web interface designed to bridge the 
 - **Any S3-Compatible API**
 
 ### Coming Soon (Roadmap) 🚀
+
 - **Google Cloud Storage (GCS)**
 - **Azure Blob Storage**
 - **Backblaze B2**
@@ -63,7 +65,6 @@ services:
 # App Credentials
 ADMIN_USER=admin
 ADMIN_PASS=password
-JWT_SECRET=random_secret_here
 
 # Provider 1: MinIO
 MINIO_ENDPOINT=minio.example.com
