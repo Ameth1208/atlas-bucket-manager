@@ -115,10 +115,19 @@ if (!fs.existsSync("uploads/")) {
   fs.mkdirSync("uploads/");
 }
 
+// Determine static files directory based on environment
+const isDevelopment = process.env.NODE_ENV !== 'production';
+const staticDir = isDevelopment 
+  ? path.join(__dirname, "../public")           // Dev: serve from public/
+  : path.join(__dirname, "../dist-frontend");   // Prod: serve from dist-frontend/
+
+console.log(`📁 Serving static files from: ${staticDir}`);
+console.log(`🌍 Environment: ${isDevelopment ? 'DEVELOPMENT' : 'PRODUCTION'}`);
+
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, "../public")));
+app.use(express.static(staticDir));
 
 // Routes
 app.use("/api", authRoutes);
@@ -132,4 +141,5 @@ app.use(errorHandler);
 // Start Server
 app.listen(appConfig.port, () => {
   console.log(`🚀 Server running at http://localhost:${appConfig.port}`);
+  console.log(`   Open: http://localhost:${appConfig.port}/login`);
 });

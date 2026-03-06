@@ -92,6 +92,7 @@ async function renderExplorerContent() {
         return;
     }
 
+    // Render breadcrumbs
     const parts = prefix.split('/').filter(p => p);
     let path = '';
     bread.innerHTML = '';
@@ -121,86 +122,9 @@ async function renderExplorerContent() {
         list.innerHTML = '';
         const fileCountEl = document.getElementById('fileCount');
         if (fileCountEl) fileCountEl.innerText = `${items.length} items`;
-        
-        
 
-        if(store.currentPrefix !== '') {
-            const parentParts = store.currentPrefix.split('/').filter(Boolean);
-            parentParts.pop();
-            const parentPath = parentParts.length > 0 ? parentParts.join('/') + '/' : '';
-            
-            
-            const back = document.createElement('div');
-            back.className = "flex items-center gap-4 p-2.5 hover:bg-slate-100 dark:hover:bg-dark-800 rounded-xl cursor-pointer text-slate-500 mb-1 transition-all group";
-            back.innerHTML = `
-                <div class="aspect-square w-10 flex items-center justify-center bg-slate-200/50 dark:bg-dark-700/50 rounded-xl group-hover:bg-rose-500 group-hover:text-white transition-all">
-                    <iconify-icon icon="ph:arrow-u-up-left-bold" width="20"></iconify-icon>
-                </div> 
-                <span class="text-sm font-bold font-mono">..</span>
-            `;
-            back.onclick = () => navigateExplorer(parentPath);
-            list.appendChild(back);
-        }
-
-        if(!items || items.length === 0) { 
-            
-            list.innerHTML = '<div class="text-center py-20 flex flex-col items-center gap-4 text-slate-400 opacity-60"><iconify-icon icon="ph:folder-dashed-duotone" width="48"></iconify-icon><span class="text-sm font-medium tracking-tight">Empty folder</span></div>'; 
-            return; 
-        }
-
-        const folders = items.filter(i => i.prefix);
-        const files = items.filter(i => !i.prefix);
-        
-        
-
-        folders.forEach(f => {
-            const el = document.createElement('div');
-            el.className = "flex items-center justify-between p-2.5 hover:bg-slate-100 dark:hover:bg-dark-800 rounded-xl cursor-pointer group transition-all mb-1";
-            el.onclick = () => navigateExplorer(f.prefix);
-            el.innerHTML = `
-                <div class="flex items-center gap-4">
-                    <div class="aspect-square w-10 flex items-center justify-center bg-amber-500/10 text-amber-500 rounded-xl">
-                        <iconify-icon icon="ph:folder-duotone" width="22"></iconify-icon>
-                    </div>
-                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200 font-mono tracking-tight">${f.prefix.split('/').filter(Boolean).pop()}</span>
-                </div>
-                <iconify-icon icon="ph:caret-right-bold" class="text-slate-300 group-hover:text-slate-500 transition-colors" width="16"></iconify-icon>
-            `;
-            list.appendChild(el);
-        });
-
-        files.forEach(f => {
-            const size = (f.size / 1024).toFixed(1) + ' KB';
-            const name = f.name.replace(store.currentPrefix, '');
-            const icon = getFileIcon(name);
-            const styles = getIconStyles(name);
-            const el = document.createElement('div');
-            el.className = "flex items-center justify-between p-2.5 hover:bg-slate-100 dark:hover:bg-dark-800 rounded-xl group transition-all mb-1";
-            el.innerHTML = `
-                <div class="flex items-center gap-4 overflow-hidden">
-                    <input type="checkbox" onchange="window.app.toggleSelect('${f.name}', event)" class="w-4 h-4 rounded border-slate-300 text-rose-500 focus:ring-rose-500">
-                    <div class="aspect-square w-10 flex items-center justify-center ${styles} rounded-xl transition-all group-hover:scale-105">
-                        <iconify-icon icon="${icon}" width="22"></iconify-icon>
-                    </div>
-                    <div class="flex flex-col min-w-0 flex-grow cursor-pointer" onclick="window.app.openPreview('${store.currentProviderId}', '${store.currentBucket}', '${f.name}')">
-                        <span class="text-sm font-semibold text-slate-700 dark:text-slate-200 truncate font-mono tracking-tight hover:text-rose-500 transition-colors">${name}</span>
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">${size}</span>
-                    </div>
-                </div>
-                <div class="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="window.app.openPreview('${store.currentProviderId}', '${store.currentBucket}', '${f.name}')" class="aspect-square w-9 flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all" data-tooltip="Preview">
-                        <iconify-icon icon="ph:eye-bold" width="18"></iconify-icon>
-                    </button>
-                    <button onclick="window.app.openUrlModal('${f.name}')" class="aspect-square w-9 flex items-center justify-center text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 rounded-lg transition-all" data-tooltip="Share">
-                        <iconify-icon icon="ph:share-network-bold" width="18"></iconify-icon>
-                    </button>
-                    <button onclick="window.app.downloadFile('${store.currentProviderId}', '${store.currentBucket}', '${f.name}')" class="aspect-square w-9 flex items-center justify-center text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all" data-tooltip="Download">
-                        <iconify-icon icon="ph:download-simple-bold" width="18"></iconify-icon>
-                    </button>
-                </div>
-            `;
-            list.appendChild(el);
-        });
+        // Render using Lit <file-list> component with PAGINATION
+        await renderExplorerWithLit(items, list);
 
         initTooltips();
 
@@ -210,29 +134,91 @@ async function renderExplorerContent() {
     }
 }
 
+/**
+ * Render explorer using Lit <file-list> component with PAGINATION (100 items/page)
+ * 
+ * REQUIRES: <file-list> component to be registered (from /js/main.ts)
+ */
+async function renderExplorerWithLit(items, container) {
+    const prefix = store.currentPrefix;
+
+    // Add "Back" button if not at root
+    if (prefix !== '') {
+        const parentParts = prefix.split('/').filter(Boolean);
+        parentParts.pop();
+        const parentPath = parentParts.length > 0 ? parentParts.join('/') + '/' : '';
+        
+        const back = document.createElement('div');
+        back.className = "flex items-center gap-4 p-2.5 hover:bg-slate-100 dark:hover:bg-dark-800 rounded-xl cursor-pointer text-slate-500 mb-1 transition-all group";
+        back.innerHTML = `
+            <div class="aspect-square w-10 flex items-center justify-center bg-slate-200/50 dark:bg-dark-700/50 rounded-xl group-hover:bg-rose-500 group-hover:text-white transition-all">
+                <iconify-icon icon="ph:arrow-u-up-left-bold" width="20"></iconify-icon>
+            </div> 
+            <span class="text-sm font-bold font-mono">..</span>
+        `;
+        back.onclick = () => navigateExplorer(parentPath);
+        container.appendChild(back);
+    }
+
+    // Empty state
+    if (!items || items.length === 0) {
+        container.innerHTML = '<div class="text-center py-20 flex flex-col items-center gap-4 text-slate-400 opacity-60"><iconify-icon icon="ph:folder-dashed-duotone" width="48"></iconify-icon><span class="text-sm font-medium tracking-tight">Empty folder</span></div>';
+        return;
+    }
+
+    // Transform items to match FileList component format
+    const fileObjects = items.map(item => ({
+        name: item.prefix || item.name,
+        size: item.size || 0,
+        lastModified: item.lastModified || new Date().toISOString(),
+        isFolder: !!item.prefix,
+        etag: item.etag
+    }));
+
+    // Create and configure <file-list> component
+    const fileListComponent = document.createElement('file-list');
+    fileListComponent.items = fileObjects;
+    fileListComponent.pageSize = 100; // 100 items per page
+
+    // Event listeners
+    fileListComponent.addEventListener('navigate', (e) => {
+        navigateExplorer(e.detail.path);
+    });
+
+    fileListComponent.addEventListener('preview', (e) => {
+        window.app.openPreview(store.currentProviderId, store.currentBucket, e.detail.name);
+    });
+
+    fileListComponent.addEventListener('share', (e) => {
+        window.app.openUrlModal(e.detail.name);
+    });
+
+    fileListComponent.addEventListener('download', (e) => {
+        window.app.downloadFile(store.currentProviderId, store.currentBucket, e.detail.name);
+    });
+
+    fileListComponent.addEventListener('delete', (e) => {
+        // Handle single file delete
+        if (confirm(`Delete ${e.detail.name}?`)) {
+            api.deleteObjects(store.currentProviderId, store.currentBucket, [e.detail.name])
+                .then(() => {
+                    showToast('Item deleted', 'success');
+                    renderExplorerContent();
+                })
+                .catch(err => showToast('Delete failed', 'error'));
+        }
+    });
+
+    fileListComponent.addEventListener('selection-change', (e) => {
+        // Update selected objects for bulk delete
+        selectedObjects = new Set(e.detail.selected);
+        updateBulkDeleteUI();
+    });
+
+    container.appendChild(fileListComponent);
+}
+
 // --- Helper Functions ---
-function getFileIcon(name) {
-    const ext = name.split('.').pop().toLowerCase();
-    if(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return 'ph:image-duotone';
-    if(['mp4', 'webm', 'mov', 'mkv'].includes(ext)) return 'ph:video-duotone';
-    if(['mp3', 'wav', 'ogg', 'flac', 'm4a'].includes(ext)) return 'ph:music-notes-duotone';
-    if(ext === 'pdf') return 'ph:file-pdf-duotone';
-    if(ext === 'zip' || ext === 'rar' || ext === '7z') return 'ph:archive-duotone';
-    if(['js', 'ts', 'html', 'css', 'json', 'py', 'go', 'rs'].includes(ext)) return 'ph:file-code-duotone';
-    return 'ph:file-duotone';
-}
-
-function getIconStyles(name) {
-    const ext = name.split('.').pop().toLowerCase();
-    if(['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) return 'bg-rose-500/10 text-rose-500';
-    if(['mp4', 'webm', 'mov', 'mkv'].includes(ext)) return 'bg-indigo-500/10 text-indigo-500';
-    if(['mp3', 'wav', 'ogg', 'flac', 'm4a'].includes(ext)) return 'bg-cyan-500/10 text-cyan-400';
-    if(ext === 'pdf') return 'bg-orange-500/10 text-orange-500';
-    if(ext === 'zip' || ext === 'rar' || ext === '7z') return 'bg-amber-500/10 text-amber-500';
-    if(['js', 'ts', 'html', 'css', 'json', 'py', 'go', 'rs'].includes(ext)) return 'bg-emerald-500/10 text-emerald-500';
-    return 'bg-slate-500/10 text-slate-500';
-}
-
 function updateBulkDeleteUI() {
     const btn = document.getElementById('bulkDeleteBtn');
     if (btn) {
