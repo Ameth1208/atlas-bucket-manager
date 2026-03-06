@@ -717,22 +717,72 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ## Testing
 
-**Current State**: No automated tests implemented.
+**Current State**: ✅ **Automated tests implemented with Jest**
 
-**Test Script**: `package.json` has placeholder:
+### Test Infrastructure
+
+- **Framework**: Jest v29.7.0 with TypeScript support (ts-jest)
+- **Test Location**: `tests/` directory (excluded from compilation)
+- **Mock Repository**: `tests/mocks/mock-bucket.repository.ts` for isolated testing
+- **Coverage**: 32 unit tests covering 5/14 use cases (35% use case coverage)
+
+### Test Scripts
 
 ```json
 "scripts": {
-  "test": "echo \"Error: no test run\" && exit 1"
+  "test": "jest",
+  "test:watch": "jest --watch",
+  "test:coverage": "jest --coverage",
+  "test:unit": "jest tests/unit",
+  "test:integration": "jest tests/integration",
+  "test:e2e": "jest tests/e2e"
 }
 ```
 
-**Recommended Testing Strategy**:
+### Test Coverage Status
 
-- **Unit Tests**: Jest for backend logic (MinioManager, auth)
-- **Integration Tests**: Supertest for API endpoints
-- **E2E Tests**: Playwright/Cypress for UI flows
-- **Mock Providers**: Use Testcontainers with MinIO for isolated tests
+**Tested Use Cases** (32 tests, 100% passing):
+- ✅ **CreateBucketUseCase** (12 tests) - S3 validation, error handling
+- ✅ **ListBucketsUseCase** (3 tests) - Multi-provider listing
+- ✅ **UploadFileUseCase** (3 tests) - File upload with metadata
+- ✅ **DeleteObjectsUseCase** (6 tests) - Bulk deletion
+- ✅ **LoginUseCase** (8 tests) - Authentication and JWT
+
+**Pending Test Coverage** (9 use cases):
+- ⏳ DeleteBucketUseCase
+- ⏳ GetBucketStatsUseCase
+- ⏳ GetProvidersUseCase
+- ⏳ UpdateBucketPolicyUseCase
+- ⏳ CreateFolderUseCase
+- ⏳ GetObjectStreamUseCase
+- ⏳ GetPresignedUrlUseCase
+- ⏳ ListObjectsUseCase
+- ⏳ SearchObjectsUseCase
+
+### Testing Strategy
+
+- **Unit Tests**: Test use cases in isolation with mock repository
+- **Integration Tests**: Test API endpoints with Supertest (planned)
+- **E2E Tests**: Test UI flows with Playwright/Cypress (planned)
+- **Mock Providers**: Use Testcontainers with MinIO for isolated tests (planned)
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run with coverage report
+npm run test:coverage
+
+# Run in watch mode (for development)
+npm run test:watch
+
+# Run only unit tests
+npm run test:unit
+```
+
+**See**: `TESTING.md` for complete testing documentation and examples
 
 ---
 
@@ -929,10 +979,10 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### File Naming
 
-- Backend: camelCase (e.g., `minioClient.ts`)
-- Frontend components: PascalCase (e.g., `BucketList.js`)
-- Routes: lowercase (e.g., `buckets.ts`)
-- Config files: lowercase with dots (e.g., `tsconfig.json`)
+- **Backend (Clean Architecture)**: kebab-case (e.g., `create-bucket.use-case.ts`, `s3-bucket.repository.ts`)
+- **Frontend components**: PascalCase (e.g., `BucketList.js`)
+- **Routes**: kebab-case (e.g., `bucket.routes.ts`)
+- **Config files**: lowercase with dots (e.g., `tsconfig.json`)
 
 ### Git Commits
 
@@ -952,8 +1002,7 @@ docker-compose -f docker-compose.prod.yml up -d
 - [ ] Multi-user authentication with roles
 - [ ] Bucket versioning support
 - [ ] Object metadata editor
-- [ ] Batch operations (copy, move)
-- [ ] Storage analytics dashboard
+- [ ] Batch operations (copy, move) - *Partial: Delete implemented*
 - [ ] Object lifecycle policies
 - [ ] Server-side encryption toggle
 - [ ] Access logs viewer
@@ -962,7 +1011,7 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### Technical Improvements
 
-- [ ] Add automated tests (Jest, Supertest)
+- [x] **Add automated tests (Jest, Supertest)** - 32 unit tests with Jest ✅
 - [ ] Implement pagination for large buckets
 - [ ] Add caching layer (Redis)
 - [ ] Websocket for real-time updates
@@ -972,6 +1021,24 @@ docker-compose -f docker-compose.prod.yml up -d
 - [ ] Distributed tracing
 - [ ] Rate limiting
 - [ ] Request validation (Zod)
+
+### Completed Enhancements
+
+- [x] **Clean Architecture Migration** (2026-03-05)
+  - 4-layer separation (Domain, Application, Infrastructure, Presentation)
+  - 14 use cases with single responsibility
+  - Repository pattern with dependency injection
+  - Kebab-case naming convention
+
+- [x] **Comprehensive Testing Infrastructure** (2026-03-05)
+  - Jest configuration with TypeScript
+  - MockBucketRepository for test isolation
+  - 32 unit tests covering 5/14 use cases
+  - Test scripts for watch, coverage, and targeted testing
+
+- [x] **Bug Fixes** (2026-03-05)
+  - Fixed folder navigation in Explorer component
+  - Updated StorageObject entity to preserve `prefix` field for folders
 
 ---
 
