@@ -170,6 +170,7 @@ minio-bucket-manager/
 #### Use Cases (`src/application/use-cases/`)
 
 **Bucket Use Cases:**
+
 - `create-bucket.use-case.ts` - Creates bucket with S3 naming validation
 - `delete-bucket.use-case.ts` - Deletes bucket
 - `list-buckets.use-case.ts` - Lists all buckets across providers
@@ -178,6 +179,7 @@ minio-bucket-manager/
 - `get-providers.use-case.ts` - Returns active providers
 
 **Object Use Cases:**
+
 - `upload-file.use-case.ts` - Uploads file to bucket
 - `delete-objects.use-case.ts` - Deletes multiple objects
 - `list-objects.use-case.ts` - Lists objects with prefix support
@@ -187,6 +189,7 @@ minio-bucket-manager/
 - `get-object-stream.use-case.ts` - Streams file for preview
 
 **Auth Use Cases:**
+
 - `login.use-case.ts` - Validates credentials and generates JWT
 
 #### DTOs (`src/application/dtos/`)
@@ -742,6 +745,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ### Test Coverage Status
 
 **Tested Use Cases** (32 tests, 100% passing):
+
 - ✅ **CreateBucketUseCase** (12 tests) - S3 validation, error handling
 - ✅ **ListBucketsUseCase** (3 tests) - Multi-provider listing
 - ✅ **UploadFileUseCase** (3 tests) - File upload with metadata
@@ -749,6 +753,7 @@ docker-compose -f docker-compose.prod.yml up -d
 - ✅ **LoginUseCase** (8 tests) - Authentication and JWT
 
 **Pending Test Coverage** (9 use cases):
+
 - ⏳ DeleteBucketUseCase
 - ⏳ GetBucketStatsUseCase
 - ⏳ GetProvidersUseCase
@@ -1002,7 +1007,7 @@ npm run test:unit
 - [ ] Multi-user authentication with roles
 - [ ] Bucket versioning support
 - [ ] Object metadata editor
-- [ ] Batch operations (copy, move) - *Partial: Delete implemented*
+- [ ] Batch operations (copy, move) - _Partial: Delete implemented_
 - [ ] Object lifecycle policies
 - [ ] Server-side encryption toggle
 - [ ] Access logs viewer

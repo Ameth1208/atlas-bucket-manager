@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    
+    /* Strict Type-Checking */
+    "strict": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    
+    /* Module Resolution */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./public/js/*"],
+      "@components/*": ["./public/js/components/*"]
+    },
+    
+    /* Experimental Features - Use legacy decorators for Lit */
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false
+  },
+  "include": ["public/**/*.ts", "public/**/*.tsx"],
+  "exclude": ["node_modules", "dist", "dist-frontend"]
+}
