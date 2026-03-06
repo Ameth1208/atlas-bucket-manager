@@ -14,8 +14,8 @@ export interface FileObject {
 export class FileList extends LitElement {
   @property({ type: Array }) items: FileObject[] = [];
   @property({ type: Number }) pageSize = 100;
-  @state() private currentPage = 1;
-  @state() private selectedFiles = new Set<string>();
+  @state() currentPage = 1;
+  @state() selectedFiles = new Set<string>();
 
   static styles = css`
     :host {
