@@ -4,30 +4,26 @@
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "preserve",
+    "outDir": "public/js-compiled",
+    "rootDir": "public/js",
+    "declaration": false,
+    "sourceMap": true,
     
     /* Strict Type-Checking */
     "strict": false,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    
-    /* Module Resolution */
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./public/js/*"],
-      "@components/*": ["./public/js/components/*"]
-    },
     
     /* Experimental Features - Use legacy decorators for Lit */
     "experimentalDecorators": true,
-    "useDefineForClassFields": false
+    "useDefineForClassFields": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["public/**/*.ts", "public/**/*.tsx"],
-  "exclude": ["node_modules", "dist", "dist-frontend"]
+  "include": ["public/js/**/*.ts"],
+  "exclude": ["node_modules", "dist", "dist-frontend", "public/js/**/*.d.ts"]
 }
