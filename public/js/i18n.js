@@ -155,3 +155,6 @@ export function t(key) {
     const lang = localStorage.getItem('lang') || 'en';
     return (translations[lang] && translations[lang][key]) || (translations['en'] && translations['en'][key]) || key;
 }
+
+// Exponer traducciones globalmente para componentes Lit
+window.translations = translations;
