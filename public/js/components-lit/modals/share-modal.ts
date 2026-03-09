@@ -31,6 +31,13 @@ export class ShareModal extends LitElement {
     this.generatedUrl = url;
   }
 
+  // Extract just the filename from the full path
+  private getDisplayName(): string {
+    if (!this.fileName) return '';
+    const parts = this.fileName.split('/');
+    return parts[parts.length - 1];
+  }
+
   render() {
     if (!this.open) return html``;
     return html`
@@ -41,7 +48,7 @@ export class ShareModal extends LitElement {
           </div>
           
           <h3 class="${TW.shareModal.title}">Share File</h3>
-          <p class="${TW.shareModal.description}">Generate a temporary download link for ${this.fileName}</p>
+          <p class="${TW.shareModal.description}">Generate a temporary download link for ${this.getDisplayName()}</p>
           
           <div class="${TW.shareModal.expiryWrapper}">
             <label class="${TW.shareModal.expiryLabel}">EXPIRATION TIME</label>
