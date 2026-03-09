@@ -43,21 +43,27 @@ export function renderBuckets(buckets) {
         
         // Listen to custom events
         card.addEventListener('explore', (e) => {
-            window.app.openExplorer(e.detail.providerId, e.detail.name);
+            // bucket-card sends { bucket: {...} }
+            const bucket = e.detail.bucket;
+            window.app.openExplorer(bucket.providerId, bucket.name);
         });
         
         card.addEventListener('delete', (e) => {
-            window.app.openDeleteModal(e.detail.providerId, e.detail.name);
+            // bucket-card sends { bucket: {...} }
+            const bucket = e.detail.bucket;
+            window.app.openDeleteModal(bucket.providerId, bucket.name);
         });
         
         card.addEventListener('refresh-stats', async (e) => {
-            await window.app.refreshStats(e.detail.providerId, e.detail.name);
+            // bucket-card sends { bucket: {...} }
+            const bucket = e.detail.bucket;
+            await window.app.refreshStats(bucket.providerId, bucket.name);
         });
         
         card.addEventListener('policy-change', async (e) => {
-            const { providerId, name, isPublic } = e.detail;
+            const { bucket, isPublic } = e.detail;
             try {
-                await api.updatePolicy(providerId, name, isPublic);
+                await api.updatePolicy(bucket.providerId, bucket.name, isPublic);
                 showToast(translations[lang].toastUpdated);
                 window.app.loadData(false);
             } catch (err) {

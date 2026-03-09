@@ -88,8 +88,6 @@ async function loadProviders() {
     try {
         const providers = await api.listProviders();
         store.providers = Array.isArray(providers) ? providers : [];
-        
-        console.log("Providers for UI:", store.providers);
 
         if(store.providers.length > 1) {
             select.classList.remove('hidden');

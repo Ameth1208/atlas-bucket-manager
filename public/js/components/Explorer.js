@@ -68,6 +68,8 @@ export function closeExplorer() {
 
 export async function navigateExplorer(prefix) {
     store.currentPrefix = prefix;
+    console.log(prefix);
+    
     const newPath = `/manager/${store.currentProviderId}/${store.currentBucket}/files/${prefix}`;
     window.history.pushState({ 
         providerId: store.currentProviderId, 
@@ -80,6 +82,7 @@ export async function navigateExplorer(prefix) {
 
 async function renderExplorerContent() {
     console.log(`📂 Rendering Explorer: ${store.currentProviderId}/${store.currentBucket}, prefix: "${store.currentPrefix}"`);
+    console.log(store);
     const prefix = store.currentPrefix;
     selectedObjects.clear();
     updateBulkDeleteUI();
@@ -109,7 +112,9 @@ async function renderExplorerContent() {
     list.innerHTML = '<div class="text-center py-16 flex justify-center text-slate-400"><iconify-icon icon="line-md:loading-twotone-loop" width="40"></iconify-icon></div>';
     
     try {
-        const items = await api.listObjects(store.currentProviderId, store.currentBucket, store.currentPrefix);
+        
+        const items = await api.listObjects(store.rcurrentProviderId, store.currentBucket, store.currentPrefix);
+        
         
         if (items && items.error) {
             throw new Error(items.error);
@@ -182,25 +187,34 @@ async function renderExplorerWithLit(items, container) {
 
     // Event listeners
     fileListComponent.addEventListener('navigate', (e) => {
-        navigateExplorer(e.detail.path);
+        // file-list sends { folder: item }, extract the name
+        const folderName = e.detail.folder?.name || e.detail.folder?.prefix;
+        navigateExplorer(folderName);
     });
 
     fileListComponent.addEventListener('preview', (e) => {
-        window.app.openPreview(store.currentProviderId, store.currentBucket, e.detail.name);
+        // file-list sends { file: item }, extract the name
+        const fileName = e.detail.file?.name;
+        window.app.openPreview(store.currentProviderId, store.currentBucket, fileName);
     });
 
     fileListComponent.addEventListener('share', (e) => {
-        window.app.openUrlModal(e.detail.name);
+        // file-list sends { file: item }, extract the name
+        const fileName = e.detail.file?.name;
+        window.app.openUrlModal(fileName);
     });
 
     fileListComponent.addEventListener('download', (e) => {
-        window.app.downloadFile(store.currentProviderId, store.currentBucket, e.detail.name);
+        // file-list sends { file: item }, extract the name
+        const fileName = e.detail.file?.name;
+        window.app.downloadFile(store.currentProviderId, store.currentBucket, fileName);
     });
 
     fileListComponent.addEventListener('delete', (e) => {
-        // Handle single file delete
-        if (confirm(`Delete ${e.detail.name}?`)) {
-            api.deleteObjects(store.currentProviderId, store.currentBucket, [e.detail.name])
+        // file-list sends { file: item }, extract the name
+        const fileName = e.detail.file?.name;
+        if (confirm(`Delete ${fileName}?`)) {
+            api.deleteObjects(store.currentProviderId, store.currentBucket, [fileName])
                 .then(() => {
                     showToast('Item deleted', 'success');
                     renderExplorerContent();
