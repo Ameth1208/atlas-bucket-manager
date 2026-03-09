@@ -31,9 +31,10 @@ export const bucketCardStyles = {
   toggleContainer: "relative inline-flex items-center cursor-pointer",
   toggleInput: "absolute opacity-0 pointer-events-none",
   toggleSwitch:
-    "w-9 h-5 bg-slate-300 dark:bg-slate-600 rounded-full relative transition-all duration-300 ease-in-out",
-  toggleSwitchChecked: "bg-rose-500 dark:bg-rose-500 shadow-md shadow-rose-500/30",
+    "w-9 h-5 rounded-full relative transition-all duration-300 ease-in-out",
+  toggleSwitchUnchecked: "bg-slate-300 dark:bg-slate-600",
+  toggleSwitchChecked: "bg-rose-600 dark:bg-rose-600",
   toggleKnob:
-    "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 ease-in-out shadow-sm",
+    "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 ease-in-out",
   toggleKnobChecked: "translate-x-4",
 };

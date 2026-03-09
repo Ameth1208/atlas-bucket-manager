@@ -39,7 +39,7 @@ export class ToggleSwitch extends LitElement {
         <span
           class="${TW.bucketCard.toggleSwitch} ${this.checked
             ? TW.bucketCard.toggleSwitchChecked
-            : ''}"
+            : TW.bucketCard.toggleSwitchUnchecked}"
         >
           <span
             class="${TW.bucketCard.toggleKnob} ${this.checked
