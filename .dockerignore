@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Build artifacts
+dist
+dist-frontend
+*.map
+
+# Development
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+
+# Tests
+tests
+coverage
+*.test.js
+*.test.ts
+
+# Documentation
+README.md
+AGENTS.md
+TESTING.md
+*.md
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# IDE
+.vscode
+.idea
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (temporal)
+uploads/*
