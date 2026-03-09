@@ -8,3 +8,4 @@ coverage/*
 *.map
 dist-frontend/*
 public/js/main.js
+public/css/*.css
