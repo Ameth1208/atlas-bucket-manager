@@ -4,7 +4,7 @@
 
 **Atlas Bucket Manager** (minio-bucket-manager) is a multi-cloud storage management web application that provides a unified, modern UI for managing S3-compatible storage providers. It serves as a bridge between local development (MinIO) and cloud production environments (AWS S3, Cloudflare R2, DigitalOcean Spaces, etc.).
 
-**Version**: 0.0.5  
+**Version**: 0.0.6  
 **Repository**: https://github.com/ameth1208/atlas-bucket-manager  
 **Author**: Ameth Galarcio (https://amethgm.com)  
 **License**: MIT
