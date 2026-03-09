@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install production dependencies only with clean cache
-RUN npm ci --only=production --ignore-scripts && \
+RUN npm i --only=production --ignore-scripts && \
     npm cache clean --force
 
 # ============================================
@@ -23,7 +23,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including devDependencies)
-RUN npm ci --ignore-scripts
+RUN npm i --ignore-scripts
 
 # Copy source code
 COPY . .
@@ -70,7 +70,7 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/login || exit 1
+    CMD curl -f http://localhost:3000/login || exit 1
 
 # Set environment to production
 ENV NODE_ENV=production
