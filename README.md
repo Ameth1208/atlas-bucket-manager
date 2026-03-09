@@ -1,29 +1,33 @@
 # 🪣 Atlas Bucket Manager
 
-> A high-performance, unified Multi-Cloud UI for managing S3-compatible storage (MinIO, AWS S3, R2, Spaces).
+> A high-performance, unified Multi-Cloud UI for managing S3-compatible storage (MinIO, AWS S3, R2, Spaces). Built with **Lit Web Components** and **Tailwind CSS** for blazing-fast performance and modern user experience.
 
 ![Atlas Manager](public/atlas-portada.png)
 
 Atlas is a lightweight, secure, and modern web interface designed to bridge the gap between local development and cloud production. Manage visibility, explore files, and perform global searches across all your storage providers in one unified place.
+
+**Tech Stack**: Lit v3.2.1 (Web Components) • Express.js • TypeScript • Tailwind CSS (~15KB) • WCAG 2.1 AA Accessibility
 
 ---
 
 ## ✨ Multi-Cloud Features
 
 - **🌐 Unified Dashboard**: View buckets from MinIO and AWS S3 in a single view with provider-specific badges.
-- **🔍 Global Search**: Search for any file across **all buckets and all providers** at the same time.
+- **🔍 Global Search**: Search for any file across **all buckets and all providers** at the same time (includes mobile fullscreen mode).
 - **🛡️ Secure Preview Tunnel**: Preview private images, videos, audio (with integrated player), and PDFs through an internal proxy. No need to expose ports or deal with CORS.
-- **📤 Bulk Operations**: Support for multi-file upload and bulk deletion.
-- **🔗 Smart Share Links**: Generate temporary download links with custom expiration (1m to 7 days).
+- **📤 Bulk Operations**: Support for multi-file upload and bulk deletion with checkbox selection.
+- **🔗 Smart Share Links**: Generate temporary download links with custom expiration (1min to 7 days).
 - **📊 Storage Stats**: Instant calculation of total size and object count per bucket.
-- **🌍 Multi-language**: 🇺🇸 EN, 🇪🇸 ES, 🇧🇷 PT, 🇫🇷 FR, 🇯🇵 JP, 🇨🇳 ZH.
-- **🌗 Modern UI**: Fully persistent Dark/Light mode and mobile-responsive design.
+- **🌍 Multi-language**: 🇺🇸 EN, 🇪🇸 ES, 🇧🇷 PT, 🇫🇷 FR, 🇯🇵 JP, 🇨🇳 ZH (persistent preference).
+- **🌗 Modern UI**: Fully persistent Dark/Light mode, mobile-responsive design, and WCAG 2.1 AA accessibility.
+- **⚡ Lightweight**: Only ~15KB minified CSS (99.5% smaller than CDN), 11 reusable Lit web components.
+- **♿ Accessible**: 25+ ARIA labels, keyboard navigation, screen reader support.
 
 ---
 
 ## 🔌 Supported Providers
 
-### Available Now (v0.0.3) ✅
+### Available Now (v0.0.5) ✅
 
 - **MinIO** (Amazon S3 compatible)
 - **AWS S3** (Amazon Web Services)
@@ -100,7 +104,8 @@ If you find this project useful, consider buying me a coffee!
 
 1.  **Clone:** `git clone https://github.com/ameth1208/atlas-bucket-manager.git`
 2.  **Install:** `npm install`
-3.  **Build & Run:** `npm run build && npm start`
+3.  **Build CSS:** `npm run build:css` (production) or `npm run build:css:watch` (development)
+4.  **Build & Run:** `npm run build && npm start` (or `npm run dev` for hot reload)
 
 ---
 
