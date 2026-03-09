@@ -264,7 +264,49 @@ async function renderExplorerWithLit(items, container) {
         updateBulkDeleteUI();
     });
 
+    // Render pagination in footer
+    renderPaginationInFooter(fileListComponent);
+
     container.appendChild(fileListComponent);
+}
+
+// Render pagination controls in the explorer footer
+function renderPaginationInFooter(fileListComponent) {
+    const footer = document.getElementById('explorerFooter');
+    if (!footer) return;
+
+    // Clear footer first
+    footer.innerHTML = '';
+
+    const totalItems = fileListComponent.items.length;
+    const pageSize = fileListComponent.pageSize;
+
+    if (totalItems > pageSize) {
+        // Create pagination component
+        const pagination = document.createElement('pagination-controls');
+        pagination.total = totalItems;
+        pagination.page = fileListComponent.currentPage || 1;
+        pagination.pageSize = pageSize;
+
+        // Listen for page changes
+        pagination.addEventListener('page-change', (e) => {
+            fileListComponent.currentPage = e.detail.page;
+            // Scroll to top of file list
+            const fileListContainer = document.getElementById('fileList');
+            if (fileListContainer) {
+                fileListContainer.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+
+        footer.appendChild(pagination);
+    } else {
+        // Show item count only if no pagination
+        footer.innerHTML = `
+            <div class="p-3 flex justify-between items-center">
+                <span class="text-xs text-slate-400">${totalItems} ${totalItems === 1 ? 'item' : 'items'}</span>
+            </div>
+        `;
+    }
 }
 
 // --- Helper Functions ---
