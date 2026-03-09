@@ -1,11 +1,17 @@
 /**
- * Vite Entry Point for Lit Components
+ * Entry Point for Lit Components
  */
 
-// Import Lit components
+// Bucket
 import './components-lit/bucket/bucket-card.ts';
+
+// Explorer
 import './components-lit/explorer/file-list.ts';
+import './components-lit/explorer/explorer-header.ts';
+
+// Shared
 import './components-lit/shared/pagination-controls.ts';
+import './components-lit/shared/toggle-switch.ts';
 
 // Modals
 import './components-lit/modals/preview-modal.ts';
