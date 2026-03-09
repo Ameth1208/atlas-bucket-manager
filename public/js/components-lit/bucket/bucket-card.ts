@@ -85,25 +85,10 @@ export class BucketCard extends LitElement {
           >
             ${this.bucket.isPublic ? "Public" : "Private"}
           </span>
-          <label class="${TW.bucketCard.toggleContainer}">
-            <input
-              type="checkbox"
-              class="${TW.bucketCard.toggleInput}"
-              .checked=${this.bucket.isPublic}
-              @change=${this._handleToggle}
-            />
-            <span
-              class="${TW.bucketCard.toggleSwitch} ${this.bucket.isPublic
-                ? TW.bucketCard.toggleSwitchChecked
-                : ""}"
-            >
-              <span
-                class="${TW.bucketCard.toggleKnob} ${this.bucket.isPublic
-                  ? TW.bucketCard.toggleKnobChecked
-                  : ""}"
-              ></span>
-            </span>
-          </label>
+          <toggle-switch
+            .checked=${this.bucket.isPublic}
+            @toggle-change=${this._handleToggle}
+          ></toggle-switch>
         </div>
       </div>
     `;
@@ -143,13 +128,13 @@ export class BucketCard extends LitElement {
     );
   }
 
-  private _handleToggle(e: Event) {
-    const input = e.target as HTMLInputElement;
+  private _handleToggle(e: CustomEvent) {
+    const isPublic = e.detail.checked;
     this.dispatchEvent(
       new CustomEvent("policy-change", {
         detail: {
           bucket: this.bucket,
-          isPublic: input.checked,
+          isPublic: isPublic,
         },
         bubbles: true,
         composed: true,
