@@ -8,6 +8,8 @@ export interface Bucket {
   providerName: string;
   creationDate: string;
   isPublic: boolean;
+  count?: number;
+  size?: number;
 }
 
 @customElement("bucket-card")
@@ -70,7 +72,7 @@ export class BucketCard extends LitElement {
             <button
               class="${TW.bucketCard.statsBtn}"
               @click=${this._handleRefreshStats}
-              title="Refresh Stats"
+              title="Load Stats"
             >
               <iconify-icon icon="ph:arrows-clockwise-bold"></iconify-icon>
             </button>
