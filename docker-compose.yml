@@ -1,11 +1,15 @@
 services:
   app:
-    build: .
-    image: atlas-bucket-manager:local
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: atlas-bucket-manager:latest
     container_name: atlas-manager
     ports:
       - "3000:3000"
     environment:
+      - NODE_ENV=production
       - PORT=3000
       - ADMIN_USER=${ADMIN_USER:-admin}
       - ADMIN_PASS=${ADMIN_PASS:-admin}
@@ -23,26 +27,40 @@ services:
       - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT:-s3.amazonaws.com}
       - AWS_S3_PORT=${AWS_S3_PORT:-443}
       - AWS_S3_USE_SSL=${AWS_S3_USE_SSL:-true}
-    depends_on:
-      - minio-server
+    # depends_on:
+    #   - minio-server
     networks:
       - atlas-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
-  minio-server:
-    image: minio/minio
-    container_name: minio-server
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-    volumes:
-      - atlas_data:/data
-    networks:
-      - atlas-net
+  # minio-server:
+  #   image: minio/minio
+  #   container_name: minio-server
+  #   command: server /data --console-address ":9001"
+  #   ports:
+  #     - "9000:9000"
+  #     - "9001:9001"
+  #   environment:
+  #     - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+  #     - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
+  #   volumes:
+  #     - atlas_data:/data
+  #   networks:
+  #     - atlas-net
 
 volumes:
   atlas_data:
