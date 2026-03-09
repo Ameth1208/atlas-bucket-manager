@@ -379,6 +379,56 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('logoutBtn')?.addEventListener('click', api.logout);
     document.getElementById('createBucketForm')?.addEventListener('submit', createBucket);
     
+    // Mobile search modal handlers
+    const mobileSearchBtn = document.getElementById('mobileSearchBtn');
+    const mobileSearchModal = document.getElementById('mobileSearchModal');
+    const closeMobileSearch = document.getElementById('closeMobileSearch');
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    
+    if (mobileSearchBtn && mobileSearchModal) {
+        mobileSearchBtn.addEventListener('click', () => {
+            mobileSearchModal.classList.remove('hidden');
+            setTimeout(() => mobileSearchInput?.focus(), 100);
+        });
+    }
+    
+    if (closeMobileSearch && mobileSearchModal) {
+        closeMobileSearch.addEventListener('click', () => {
+            mobileSearchModal.classList.add('hidden');
+            mobileSearchInput.value = '';
+            document.getElementById('mobileSearchResults').innerHTML = '';
+        });
+    }
+    
+    if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('input', async (e) => {
+            const query = e.target.value.trim();
+            const resultsContainer = document.getElementById('mobileSearchResults');
+            
+            if (query.length < 2) {
+                resultsContainer.innerHTML = '';
+                return;
+            }
+            
+            const res = await api.search(query);
+            if (!res || res.error || res.length === 0) {
+                resultsContainer.innerHTML = '<div class="text-slate-400 text-sm text-center py-8">No results found</div>';
+                return;
+            }
+            
+            resultsContainer.innerHTML = res.map(r => `
+                <button class="w-full text-left p-3 hover:bg-slate-100 dark:hover:bg-dark-800 rounded-lg transition-colors flex items-center gap-3" 
+                        onclick="window.location.hash='explorer/${r.providerId}/${r.bucket}'; document.getElementById('mobileSearchModal').classList.add('hidden');">
+                    <iconify-icon icon="ph:file-bold" class="text-slate-400" width="18"></iconify-icon>
+                    <div class="flex-1 min-w-0">
+                        <div class="font-mono text-sm truncate">${r.object}</div>
+                        <div class="text-xs text-slate-400">${r.bucket} • ${r.providerId}</div>
+                    </div>
+                </button>
+            `).join('');
+        });
+    }
+    
     window.addEventListener('languageChanged', () => {
         if(store.buckets && store.buckets.length > 0) renderBuckets(store.buckets);
     });
