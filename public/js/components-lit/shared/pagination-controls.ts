@@ -1,5 +1,6 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import { TW } from '../styles/tailwind-classes';
 
 @customElement('pagination-controls')
 export class PaginationControls extends LitElement {
@@ -7,104 +8,10 @@ export class PaginationControls extends LitElement {
   @property({ type: Number }) page = 1;
   @property({ type: Number }) pageSize = 100;
 
-  static styles = css`
-    :host {
-      display: block;
-      padding: 1rem 0;
-    }
-
-    .container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    .info {
-      font-size: 0.75rem;
-      color: var(--text-muted, #64748b);
-      font-weight: 500;
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .btn {
-      padding: 0.5rem 0.75rem;
-      background: var(--bg-secondary, #f1f5f9);
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: var(--text-primary, #1e293b);
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
-    }
-
-    .btn:hover:not(:disabled) {
-      background: var(--color-rose-500, #f43f5e);
-      color: white;
-    }
-
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .page-numbers {
-      display: flex;
-      gap: 0.25rem;
-    }
-
-    .page-btn {
-      min-width: 2rem;
-      height: 2rem;
-      padding: 0.25rem 0.5rem;
-      background: none;
-      border: none;
-      border-radius: 0.375rem;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: var(--text-muted, #64748b);
-    }
-
-    .page-btn:hover:not(.active) {
-      background: var(--bg-secondary, #f1f5f9);
-    }
-
-    .page-btn.active {
-      background: var(--color-rose-500, #f43f5e);
-      color: white;
-    }
-
-    .ellipsis {
-      padding: 0.25rem 0.5rem;
-      color: var(--text-muted, #64748b);
-    }
-
-    @media (max-width: 640px) {
-      .container {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .info {
-        text-align: center;
-      }
-
-      .controls {
-        justify-content: center;
-      }
-    }
-  `;
+  // Desactivar Shadow DOM para usar Tailwind directamente
+  createRenderRoot(): HTMLElement | DocumentFragment {
+    return this as unknown as HTMLElement;
+  }
 
   get totalPages(): number {
     return Math.ceil(this.total / this.pageSize);
@@ -128,18 +35,18 @@ export class PaginationControls extends LitElement {
 
   render() {
     if (this.total === 0) {
-      return html`<div class="container"><span class="info">No items</span></div>`;
+      return html`<div class="${TW.pagination.container}"><span class="${TW.pagination.info}">No items</span></div>`;
     }
 
     return html`
-      <div class="container">
-        <span class="info">
+      <div class="${TW.pagination.container}">
+        <span class="${TW.pagination.info}">
           Showing ${this.start} - ${this.end} of ${this.total} items
         </span>
 
-        <div class="controls">
+        <div class="${TW.pagination.controls}">
           <button 
-            class="btn"
+            class="${TW.pagination.button} ${!this.hasPrev ? TW.pagination.buttonDisabled : TW.pagination.buttonInactive} flex items-center gap-1"
             ?disabled=${!this.hasPrev}
             @click=${this._handlePrevious}>
             <iconify-icon icon="ph:caret-left-bold" width="16"></iconify-icon>
@@ -149,7 +56,7 @@ export class PaginationControls extends LitElement {
           ${this._renderPageNumbers()}
 
           <button 
-            class="btn"
+            class="${TW.pagination.button} ${!this.hasNext ? TW.pagination.buttonDisabled : TW.pagination.buttonInactive} flex items-center gap-1"
             ?disabled=${!this.hasNext}
             @click=${this._handleNext}>
             Next
@@ -164,14 +71,14 @@ export class PaginationControls extends LitElement {
     const pages = this._getPageRange();
     
     return html`
-      <div class="page-numbers">
+      <div class="flex gap-1">
         ${pages.map(page => {
           if (page === '...') {
-            return html`<span class="ellipsis">...</span>`;
+            return html`<span class="px-2 py-1 text-slate-400">...</span>`;
           }
           return html`
             <button
-              class="page-btn ${page === this.page ? 'active' : ''}"
+              class="${TW.pagination.button} ${page === this.page ? TW.pagination.buttonActive : TW.pagination.buttonInactive} min-w-[2rem] h-8"
               @click=${() => this._handlePageClick(page as number)}>
               ${page}
             </button>
