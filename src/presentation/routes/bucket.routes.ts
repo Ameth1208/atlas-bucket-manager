@@ -6,6 +6,7 @@ export const createBucketRoutes = (bucketController: BucketController, authMiddl
 
   router.get('/providers', authMiddleware, bucketController.getProviders);
   router.get('/buckets', authMiddleware, bucketController.listBuckets);
+  router.get('/buckets/:providerId/:name/stats', authMiddleware, bucketController.getStats);
   router.post('/buckets', authMiddleware, bucketController.createBucket);
   router.put('/buckets/:providerId/:name/policy', authMiddleware, bucketController.updatePolicy);
   router.delete('/buckets/:providerId/:name', authMiddleware, bucketController.deleteBucket);

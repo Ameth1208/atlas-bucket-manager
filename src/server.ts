@@ -82,7 +82,8 @@ const bucketController = new BucketController(
   listBucketsUseCase,
   createBucketUseCase,
   deleteBucketUseCase,
-  updateBucketPolicyUseCase
+  updateBucketPolicyUseCase,
+  getBucketStatsUseCase
 );
 const objectController = new ObjectController(
   listObjectsUseCase,

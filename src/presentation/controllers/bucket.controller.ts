@@ -4,6 +4,7 @@ import { ListBucketsUseCase } from '../../application/use-cases/bucket/list-buck
 import { CreateBucketUseCase } from '../../application/use-cases/bucket/create-bucket.use-case';
 import { DeleteBucketUseCase } from '../../application/use-cases/bucket/delete-bucket.use-case';
 import { UpdateBucketPolicyUseCase } from '../../application/use-cases/bucket/update-bucket-policy.use-case';
+import { GetBucketStatsUseCase } from '../../application/use-cases/bucket/get-bucket-stats.use-case';
 
 export class BucketController {
   constructor(
@@ -11,7 +12,8 @@ export class BucketController {
     private listBucketsUseCase: ListBucketsUseCase,
     private createBucketUseCase: CreateBucketUseCase,
     private deleteBucketUseCase: DeleteBucketUseCase,
-    private updateBucketPolicyUseCase: UpdateBucketPolicyUseCase
+    private updateBucketPolicyUseCase: UpdateBucketPolicyUseCase,
+    private getBucketStatsUseCase: GetBucketStatsUseCase
   ) {}
 
   getProviders = (req: Request, res: Response) => {
@@ -45,5 +47,13 @@ export class BucketController {
     
     await this.deleteBucketUseCase.execute(providerId, name);
     res.json({ success: true });
+  };
+
+  getStats = async (req: Request, res: Response) => {
+    const providerId = req.params.providerId as string;
+    const name = req.params.name as string;
+    
+    const stats = await this.getBucketStatsUseCase.execute(providerId, name);
+    res.json(stats);
   };
 }
