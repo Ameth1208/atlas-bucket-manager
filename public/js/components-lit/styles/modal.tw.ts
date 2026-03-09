@@ -86,25 +86,47 @@ export const modalStyles = {
     backdrop:
       "fixed inset-0 z-60 bg-black/90 backdrop-blur flex items-center justify-center p-4",
     content:
-      "relative max-w-4xl w-full max-h-[90vh] flex flex-col",
+      "relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center",
     header:
-      "flex items-center justify-between mb-4 pb-4 border-b border-slate-700",
+      "w-full flex justify-end mb-4 gap-4",
     fileName:
-      "text-lg font-bold text-white truncate font-mono",
+      "text-white/70 text-sm mt-4 font-mono",
     actions: "flex gap-2",
     btnAction:
       "p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors",
     body: "flex-1 flex items-center justify-center overflow-auto",
     image:
-      "max-w-full max-h-[70vh] object-contain rounded-lg",
+      "max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl animate-in",
     video:
-      "max-w-full max-h-[70vh] rounded-lg",
+      "max-w-full max-h-[75vh] rounded-lg shadow-2xl",
+    audio:
+      "w-full h-12",
+    pdf:
+      "w-full h-[75vh] rounded-lg border-0 shadow-2xl bg-white",
+    previewContainer:
+      "rounded-xl overflow-hidden flex items-center justify-center w-full h-full",
+    placeholder:
+      "flex flex-col items-center gap-6 p-12 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl animate-in",
+    iconContainer:
+      "p-6 rounded-full",
+    iconContainerAudio:
+      "p-6 rounded-full bg-cyan-500/20 text-cyan-300",
+    iconContainerAndroid:
+      "p-6 rounded-full bg-green-500/20 text-green-400",
+    iconContainerDefault:
+      "p-6 rounded-full bg-slate-500/20 text-slate-300",
+    placeholderText:
+      "text-white/50 text-sm font-medium",
+    placeholderTitle:
+      "text-white text-xl font-bold",
     footer:
       "flex items-center justify-between mt-4 pt-4 border-t border-slate-700",
     fileInfo: "text-sm text-slate-400",
     btnDownload:
-      "px-4 py-2 rounded-lg font-bold text-sm transition-all cursor-pointer border-0 bg-rose-600 text-white hover:bg-rose-700 flex items-center gap-2",
+      "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all cursor-pointer border-0 bg-white/10 text-white hover:text-indigo-400",
     btnClose:
-      "px-4 py-2 rounded-lg font-bold text-sm transition-all cursor-pointer border-0 bg-white/10 text-white hover:bg-white/20 flex items-center gap-2",
+      "flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-sm transition-all cursor-pointer border-0 bg-white/10 text-white hover:text-rose-500",
+    loading:
+      "text-white/50",
   },
 };

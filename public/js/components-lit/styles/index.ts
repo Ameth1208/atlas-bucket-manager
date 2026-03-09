@@ -16,6 +16,8 @@ import { modalStyles } from './modal.tw';
 import { loginStyles } from './login.tw';
 import { bucketCardStyles } from './bucket.tw';
 import { fileListStyles } from './file-list.tw';
+import { explorerStyles } from './explorer.tw';
+import { paginationStyles } from './pagination.tw';
 
 // Combine all styles into a single TW object
 export const TW = {
@@ -25,6 +27,8 @@ export const TW = {
   login: loginStyles,
   bucketCard: bucketCardStyles,
   fileList: fileListStyles,
+  explorer: explorerStyles,
+  pagination: paginationStyles,
 };
 
 // Alias for backward compatibility
@@ -37,3 +41,5 @@ export { modalStyles } from './modal.tw';
 export { loginStyles } from './login.tw';
 export { bucketCardStyles } from './bucket.tw';
 export { fileListStyles } from './file-list.tw';
+export { explorerStyles } from './explorer.tw';
+export { paginationStyles } from './pagination.tw';

@@ -15,6 +15,12 @@ export const baseStyles = {
   },
 
   // ============================================
+  // FORM CONTROLS (select, textarea, etc)
+  // ============================================
+  formControl:
+    "w-full px-3 py-2.5 bg-slate-100 dark:bg-dark-800 border-none rounded-lg text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-rose-500/20 outline-none transition-all font-medium",
+
+  // ============================================
   // LABELS
   // ============================================
   label: {
