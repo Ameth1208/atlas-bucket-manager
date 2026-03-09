@@ -65,15 +65,16 @@ RUN mkdir -p /app/uploads && \
 # Switch to non-root user
 USER atlasapp
 
-# Expose port
+# Set environment to production and default port
+ENV NODE_ENV=production \
+    PORT=3000
+
+# Expose port (use default 3000, override with -p in docker run)
 EXPOSE 3000
 
-# Health check
+# Health check (uses PORT env var)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/login || exit 1
-
-# Set environment to production
-ENV NODE_ENV=production
+    CMD curl -f http://localhost:${PORT:-3000}/login || exit 1
 
 # Start command
 CMD ["node", "dist/server.js"]
