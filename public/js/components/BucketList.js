@@ -57,7 +57,16 @@ export function renderBuckets(buckets) {
         card.addEventListener('refresh-stats', async (e) => {
             // bucket-card sends { bucket: {...} }
             const bucket = e.detail.bucket;
-            await window.app.refreshStats(bucket.providerId, bucket.name);
+            const stats = await window.app.refreshStats(bucket.providerId, bucket.name);
+            
+            // Update stats display in the card
+            if (stats) {
+                const statsEl = document.getElementById(`stats-${bucket.providerId}-${bucket.name}`);
+                if (statsEl) {
+                    const sizeMB = (stats.totalSize / (1024 * 1024)).toFixed(2);
+                    statsEl.textContent = `${sizeMB} MB · ${stats.objectCount} objects`;
+                }
+            }
         });
         
         card.addEventListener('policy-change', async (e) => {

@@ -19,10 +19,10 @@ export const bucketCardStyles = {
     "font-bold text-slate-900 dark:text-white font-mono text-sm tracking-tight whitespace-nowrap overflow-hidden text-ellipsis",
   metadata: "flex items-center gap-3 mt-1",
   date: "text-[0.625rem] text-slate-400 dark:text-slate-500 uppercase font-black tracking-wider opacity-60",
-  stats: "text-[0.625rem] text-indigo-500 font-bold hidden",
+  stats: "text-[0.625rem] text-rose-500 dark:text-rose-400 font-bold",
   statsVisible: "block",
   statsBtn:
-    "text-[0.625rem] text-slate-400 dark:text-slate-500 bg-transparent border-0 cursor-pointer transition-colors duration-200 hover:text-rose-500",
+    "text-[0.625rem] text-slate-400 dark:text-slate-500 bg-transparent border-0 cursor-pointer transition-colors duration-200 hover:text-rose-500 hover:scale-110",
   footer: "flex items-center justify-between pt-5 border-t border-slate-100 dark:border-dark-800",
   statusPublic:
     "text-[0.625rem] font-black uppercase tracking-tight px-2 py-1 rounded bg-slate-50 dark:bg-dark-800 text-green-500",
@@ -31,9 +31,9 @@ export const bucketCardStyles = {
   toggleContainer: "relative inline-flex items-center cursor-pointer",
   toggleInput: "absolute opacity-0 pointer-events-none",
   toggleSwitch:
-    "w-9 h-5 bg-slate-300 dark:bg-slate-600 rounded-full relative transition-colors duration-200",
-  toggleSwitchChecked: "bg-rose-500",
+    "w-9 h-5 bg-slate-300 dark:bg-slate-600 rounded-full relative transition-all duration-300 ease-in-out",
+  toggleSwitchChecked: "bg-rose-500 dark:bg-rose-500 shadow-md shadow-rose-500/30",
   toggleKnob:
-    "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200",
+    "absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all duration-300 ease-in-out shadow-sm",
   toggleKnobChecked: "translate-x-4",
 };
