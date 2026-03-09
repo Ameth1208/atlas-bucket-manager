@@ -1,6 +1,5 @@
 import { store } from '/js/store.js';
 import { api } from '/js/api.js';
-import { openPreview } from '/js/components/Modals.js';
 import { showToast } from '/js/utils.js';
 import { initTooltips } from '/js/components/Tooltip.js';
 
@@ -82,39 +81,27 @@ export async function navigateExplorer(prefix) {
 
 async function renderExplorerContent() {
     console.log(`📂 Rendering Explorer: ${store.currentProviderId}/${store.currentBucket}, prefix: "${store.currentPrefix}"`);
-    console.log(store);
     const prefix = store.currentPrefix;
     selectedObjects.clear();
     updateBulkDeleteUI();
     
     const list = document.getElementById('fileList');
-    const bread = document.getElementById('breadcrumbs');
+    const headerContainer = document.getElementById('explorerHeaderContainer');
     
-    if (!list || !bread) {
-        console.error('Explorer elements not found');
+    if (!list) {
+        console.error('Explorer fileList element not found');
         return;
     }
 
-    // Render breadcrumbs
-    const parts = prefix.split('/').filter(p => p);
-    let path = '';
-    bread.innerHTML = '';
-
-    parts.forEach(p => {
-        path += p + '/';
-        const currentPath = path;
-        const span = document.createElement('span');
-        span.innerHTML = ` <span class="text-slate-300 dark:text-slate-600">/</span> <span class="cursor-pointer hover:text-rose-500 transition-colors">${p}</span>`;
-        span.querySelector('.cursor-pointer').onclick = () => navigateExplorer(currentPath);
-        bread.appendChild(span);
-    });
+    // Update header with Lit component (includes toolbar)
+    if (headerContainer) {
+        updateExplorerHeader(headerContainer, store.currentBucket, prefix);
+    }
 
     list.innerHTML = '<div class="text-center py-16 flex justify-center text-slate-400"><iconify-icon icon="line-md:loading-twotone-loop" width="40"></iconify-icon></div>';
     
     try {
-        
-        const items = await api.listObjects(store.rcurrentProviderId, store.currentBucket, store.currentPrefix);
-        
+        const items = await api.listObjects(store.currentProviderId, store.currentBucket, store.currentPrefix);
         
         if (items && items.error) {
             throw new Error(items.error);
@@ -137,6 +124,54 @@ async function renderExplorerContent() {
         console.error('Explorer error:', err);
         list.innerHTML = `<div class="text-center py-12 text-rose-500 text-sm font-medium">Error: ${err.message}</div>`; 
     }
+}
+
+// Update Explorer Header using Lit component (includes toolbar as slot)
+function updateExplorerHeader(container, bucketName, prefix) {
+    container.innerHTML = '';
+    
+    const header = document.createElement('explorer-header');
+    header.bucketName = bucketName;
+    
+    // Build breadcrumbs
+    const parts = prefix.split('/').filter(p => p);
+    let path = '';
+    const breadcrumbs = [];
+    
+    parts.forEach(p => {
+        path += p + '/';
+        breadcrumbs.push({ name: p, path });
+    });
+    
+    header.breadcrumbs = breadcrumbs;
+    
+    // Event listeners for header
+    header.addEventListener('back', () => {
+        closeExplorer();
+    });
+    
+    header.addEventListener('navigate', (e) => {
+        navigateExplorer(e.detail.path);
+    });
+    
+    // Set toolbar props directly on header
+    header.showBulkDelete = selectedObjects.size > 0;
+    header.selectedCount = selectedObjects.size;
+    
+    // Event listeners for toolbar actions (now in header)
+    header.addEventListener('create-folder', () => {
+        window.app.createFolder();
+    });
+    
+    header.addEventListener('upload', (e) => {
+        window.app.handleUpload(e.detail.files);
+    });
+    
+    header.addEventListener('bulk-delete', () => {
+        window.app.bulkDelete();
+    });
+    
+    container.appendChild(header);
 }
 
 /**
@@ -234,13 +269,13 @@ async function renderExplorerWithLit(items, container) {
 
 // --- Helper Functions ---
 function updateBulkDeleteUI() {
-    const btn = document.getElementById('bulkDeleteBtn');
-    if (btn) {
-        if (selectedObjects.size > 0) {
-            btn.classList.remove('hidden');
-            btn.innerText = `Delete (${selectedObjects.size})`;
-        } else {
-            btn.classList.add('hidden');
+    // Update header component directly (toolbar is now inside header)
+    const headerContainer = document.getElementById('explorerHeaderContainer');
+    if (headerContainer) {
+        const header = headerContainer.querySelector('explorer-header');
+        if (header) {
+            header.showBulkDelete = selectedObjects.size > 0;
+            header.selectedCount = selectedObjects.size;
         }
     }
 }
