@@ -87,7 +87,7 @@ export class FileList extends LitElement {
         </div>
 
         <div class="${TW.fileList.fileInfo}">
-          <div class="${TW.fileList.fileName}">${item.name}</div>
+          <div class="${TW.fileList.fileName}">${this._getDisplayName(item)}</div>
           <div class="${TW.fileList.fileMeta}">
             ${!item.isFolder ? html`
               <span>${this._formatSize(item.size)}</span>
@@ -158,6 +158,21 @@ export class FileList extends LitElement {
     if (['zip', 'rar', 'tar', 'gz'].includes(ext)) return 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-500';
     
     return '';
+  }
+
+  private _getDisplayName(item: FileObject): string {
+    // Extract the last segment of the path for both files and folders
+    // Examples:
+    //   "images/" -> "images"
+    //   "folder1/folder2/" -> "folder2"
+    //   "images/photo.jpg" -> "photo.jpg"
+    //   "docs/reports/2024.pdf" -> "2024.pdf"
+    
+    const cleanName = item.name.replace(/\/+$/, ''); // Remove trailing slashes
+    const segments = cleanName.split('/');
+    const lastSegment = segments[segments.length - 1];
+    
+    return lastSegment || cleanName;
   }
 
   private _formatSize(bytes: number): string {
