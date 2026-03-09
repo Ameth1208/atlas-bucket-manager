@@ -63,8 +63,8 @@ export function renderBuckets(buckets) {
             if (stats) {
                 const statsEl = document.getElementById(`stats-${bucket.providerId}-${bucket.name}`);
                 if (statsEl) {
-                    const sizeMB = (stats.totalSize / (1024 * 1024)).toFixed(2);
-                    statsEl.textContent = `${sizeMB} MB · ${stats.objectCount} objects`;
+                    const sizeMB = (stats.size / (1024 * 1024)).toFixed(2);
+                    statsEl.textContent = `${sizeMB} MB · ${stats.count} objects`;
                 }
             }
         });

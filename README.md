@@ -27,7 +27,7 @@ Atlas is a lightweight, secure, and modern web interface designed to bridge the 
 
 ## 🔌 Supported Providers
 
-### Available Now (v0.0.7) ✅
+### Available Now (v0.0.8) ✅
 
 - **MinIO** (Amazon S3 compatible)
 - **AWS S3** (Amazon Web Services)
