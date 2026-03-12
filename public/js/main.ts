@@ -19,6 +19,13 @@ import './components-lit/modals/delete-modal.ts';
 import './components-lit/modals/folder-modal.ts';
 import './components-lit/modals/share-modal.ts';
 
+// Viewers
+import './components-lit/viewers/image-viewer.ts';
+import './components-lit/viewers/video-viewer.ts';
+import './components-lit/viewers/audio-viewer.ts';
+import './components-lit/viewers/pdf-viewer.ts';
+import './components-lit/viewers/file-placeholder.ts';
+
 // Forms
 import './components-lit/forms/login-form.ts';
 
