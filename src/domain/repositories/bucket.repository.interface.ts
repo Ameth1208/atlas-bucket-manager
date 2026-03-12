@@ -15,6 +15,7 @@ export interface IBucketRepository {
 
   // Object operations
   listObjects(providerId: string, bucketName: string, prefix?: string): Promise<StorageObject[]>;
+  listAllObjectsRecursive(providerId: string, bucketName: string, prefix?: string): Promise<StorageObject[]>;
   uploadFile(providerId: string, bucketName: string, objectName: string, filePath: string): Promise<void>;
   deleteObjects(providerId: string, bucketName: string, objectNames: string[]): Promise<void>;
   createFolder(providerId: string, bucketName: string, folderPath: string): Promise<void>;
