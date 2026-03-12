@@ -4,6 +4,14 @@ import path from "path";
 import fs from "fs";
 import { createServer } from "http";
 
+// Ensure upload and temp directories exist (before any infrastructure)
+if (!fs.existsSync("uploads/")) {
+  fs.mkdirSync("uploads/", { recursive: true });
+}
+if (!fs.existsSync("temp/")) {
+  fs.mkdirSync("temp/", { recursive: true });
+}
+
 // Configuration
 import { appConfig } from "./infrastructure/config/app.config";
 
@@ -163,14 +171,6 @@ copyManager.on('job-completed', (job) => {
     socketManager.emitCopyCancelled(job);
   }
 });
-
-// Ensure upload and temp directories exist
-if (!fs.existsSync("uploads/")) {
-  fs.mkdirSync("uploads/");
-}
-if (!fs.existsSync("temp/")) {
-  fs.mkdirSync("temp/");
-}
 
 // Determine static files directory based on environment
 const isDevelopment = process.env.NODE_ENV !== 'production';

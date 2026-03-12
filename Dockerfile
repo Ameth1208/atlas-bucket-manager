@@ -58,9 +58,9 @@ COPY --from=builder --chown=atlasapp:nodejs /app/public ./public
 # Copy package.json for metadata
 COPY --from=builder --chown=atlasapp:nodejs /app/package*.json ./
 
-# Create uploads directory with correct permissions
-RUN mkdir -p /app/uploads && \
-    chown -R atlasapp:nodejs /app/uploads
+# Create uploads and temp directories with correct permissions
+RUN mkdir -p /app/uploads /app/temp && \
+    chown -R atlasapp:nodejs /app/uploads /app/temp
 
 # Switch to non-root user
 USER atlasapp
