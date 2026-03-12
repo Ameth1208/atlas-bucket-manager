@@ -31,7 +31,7 @@ export class CopyBucketModal extends LitElement {
 
   @state() targetProviderId = '';
   @state() targetBucketName = '';
-  @state() targetBucketMode: 'existing' | 'new' = 'existing';
+  @state() targetBucketSearch = '';
   @state() skipExisting = true;
   @state() overwrite = false;
   @state() availableBuckets: Bucket[] = [];
@@ -58,31 +58,34 @@ export class CopyBucketModal extends LitElement {
       b.providerId === this.targetProviderId && 
       b.name !== this.sourceBucket?.name
     );
-    
-    // If there are existing buckets, default to existing mode
-    if (this.availableBuckets.length > 0) {
-      this.targetBucketMode = 'existing';
-      this.targetBucketName = this.availableBuckets[0].name;
-    } else {
-      this.targetBucketMode = 'new';
-      this.targetBucketName = '';
-    }
   }
 
   private handleProviderChange(e: Event) {
     this.targetProviderId = (e.target as HTMLSelectElement).value;
+    this.targetBucketName = '';
+    this.targetBucketSearch = '';
     this.updateAvailableBuckets();
   }
 
-  private handleBucketModeChange(e: Event) {
-    const value = (e.target as HTMLSelectElement).value;
-    if (value === '__new__') {
-      this.targetBucketMode = 'new';
-      this.targetBucketName = '';
-    } else {
-      this.targetBucketMode = 'existing';
-      this.targetBucketName = value;
-    }
+  private handleBucketSearch(e: Event) {
+    this.targetBucketSearch = (e.target as HTMLInputElement).value.toLowerCase();
+    this.targetBucketName = this.targetBucketSearch;
+  }
+
+  private selectBucket(bucketName: string) {
+    this.targetBucketName = bucketName;
+    this.targetBucketSearch = bucketName;
+  }
+
+  private get filteredBuckets() {
+    if (!this.targetBucketSearch) return this.availableBuckets.slice(0, 5);
+    return this.availableBuckets
+      .filter(b => b.name.toLowerCase().includes(this.targetBucketSearch))
+      .slice(0, 5);
+  }
+
+  private bucketExists() {
+    return this.availableBuckets.some(b => b.name.toLowerCase() === this.targetBucketSearch.toLowerCase());
   }
 
   private handleClose() {
@@ -132,7 +135,7 @@ export class CopyBucketModal extends LitElement {
 
   private resetForm() {
     this.targetBucketName = '';
-    this.targetBucketMode = 'existing';
+    this.targetBucketSearch = '';
     this.skipExisting = true;
     this.overwrite = false;
     this.availableBuckets = [];
@@ -214,35 +217,47 @@ export class CopyBucketModal extends LitElement {
 
             <div class="${TW.copyModal.formGroup}">
               <label class="${TW.copyModal.label}">${this.t('targetBucketLabel')}</label>
-              ${this.availableBuckets.length > 0 ? html`
-                <select 
-                  class="${TW.copyModal.select}"
-                  @change="${this.handleBucketModeChange}">
-                  ${this.availableBuckets.map(bucket => html`
-                    <option value="${bucket.name}" ?selected="${this.targetBucketName === bucket.name}">
-                      ${bucket.name}
-                    </option>
-                  `)}
-                  <option value="__new__" ?selected="${this.targetBucketMode === 'new'}">
-                    ${this.t('createNewBucket')}
-                  </option>
-                </select>
-              ` : ''}
               
-              ${this.targetBucketMode === 'new' || this.availableBuckets.length === 0 ? html`
-                <input 
-                  type="text"
-                  class="${TW.copyModal.input} ${this.availableBuckets.length > 0 ? 'mt-2' : ''}"
-                  placeholder="${this.t('bucketNamePlaceholder')}"
-                  .value="${this.targetBucketName}"
-                  @input="${(e: Event) => this.targetBucketName = (e.target as HTMLInputElement).value}"
-                  @keypress="${(e: KeyboardEvent) => {
-                    if (e.key === 'Enter') this.handleCopy();
-                  }}">
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  ${this.availableBuckets.length === 0 ? this.t('noExistingBuckets') : ''}${this.t('bucketNameRules')}
+              <!-- Input for search or create new bucket -->
+              <input 
+                type="text"
+                class="${TW.copyModal.input}"
+                placeholder="${this.t('bucketSearchPlaceholder')}"
+                .value="${this.targetBucketName}"
+                @input="${(e: Event) => this.targetBucketName = (e.target as HTMLInputElement).value}"
+                @keypress="${(e: KeyboardEvent) => {
+                  if (e.key === 'Enter') this.handleCopy();
+                }}">
+              
+              <!-- Show message if bucket will be created -->
+              ${this.targetBucketName && !this.availableBuckets.some(b => b.name === this.targetBucketName) ? html`
+                <p class="text-xs text-amber-600 dark:text-amber-500 mt-1 flex items-center gap-1">
+                  <iconify-icon icon="ph:warning-circle-bold" width="14"></iconify-icon>
+                  ${this.t('willCreateNew')}
                 </p>
               ` : ''}
+
+              <!-- List of existing buckets -->
+              ${this.availableBuckets.length > 0 && this.targetBucketName ? html`
+                <div class="mt-2 space-y-1">
+                  ${this.availableBuckets
+                    .filter(b => b.name.toLowerCase().includes(this.targetBucketName.toLowerCase()))
+                    .slice(0, 5)
+                    .map(bucket => html`
+                      <button
+                        type="button"
+                        class="w-full text-left px-3 py-2 rounded-lg bg-slate-100 dark:bg-dark-800 hover:bg-slate-200 dark:hover:bg-dark-700 text-sm text-slate-700 dark:text-slate-300 flex items-center gap-2"
+                        @click="${() => this.targetBucketName = bucket.name}">
+                        <iconify-icon icon="ph:package-duotone" width="16" class="text-slate-400"></iconify-icon>
+                        ${bucket.name}
+                      </button>
+                    `)}
+                </div>
+              ` : ''}
+              
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">
+                ${this.t('bucketNameRules')}
+              </p>
             </div>
           </div>
 
