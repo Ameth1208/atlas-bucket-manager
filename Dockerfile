@@ -8,9 +8,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install production dependencies only with clean cache
-RUN npm i --only=production --ignore-scripts && \
-    npm cache clean --force
+# Install production dependencies only and prune
+RUN npm ci --omit=dev --ignore-scripts
 
 # ============================================
 # Stage 2: Builder (Full dependencies + Build)
@@ -22,8 +21,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install all dependencies (including devDependencies)
-RUN npm i --ignore-scripts
+# Install all dependencies (including devDependencies for build)
+RUN npm ci --ignore-scripts
 
 # Copy source code
 COPY . .
@@ -32,20 +31,17 @@ COPY . .
 RUN npm run build
 
 # ============================================
-# Stage 3: Runtime (Production image)
+# Stage 3: Runtime (Production image - OPTIMIZED)
 # ============================================
 FROM node:22-alpine AS production
 
-# Install curl for health checks
-RUN apk add --no-cache curl
+WORKDIR /app
 
 # Create non-root user with specific UID/GID
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S atlasapp -u 1001 -G nodejs
 
-WORKDIR /app
-
-# Copy production dependencies from deps stage
+# Copy only production node_modules (pruned)
 COPY --from=deps --chown=atlasapp:nodejs /app/node_modules ./node_modules
 
 # Copy compiled backend from builder
@@ -62,17 +58,11 @@ COPY --from=builder --chown=atlasapp:nodejs /app/package*.json ./
 RUN mkdir -p /app/uploads /app/temp && \
     chown -R atlasapp:nodejs /app/uploads /app/temp
 
-# Switch to non-root user
-USER atlasapp
-
-# Set environment to production (NO default port - user must specify)
+# Set environment to production
 ENV NODE_ENV=production
 
-# No EXPOSE - port is completely dynamic and user-defined
-
-# Health check disabled by default (requires PORT to be set)
-# Enable by rebuilding with: --build-arg ENABLE_HEALTHCHECK=true
-# Or override in docker-compose/docker run
+# Switch to non-root user
+USER atlasapp
 
 # Start command
 CMD ["node", "dist/server.js"]
