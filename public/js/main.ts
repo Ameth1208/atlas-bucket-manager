@@ -18,6 +18,10 @@ import './components-lit/modals/preview-modal.ts';
 import './components-lit/modals/delete-modal.ts';
 import './components-lit/modals/folder-modal.ts';
 import './components-lit/modals/share-modal.ts';
+import './components-lit/modals/copy-bucket-modal.ts';
+
+// Panels
+import './components-lit/panels/copy-progress-panel.ts';
 
 // Viewers
 import './components-lit/viewers/image-viewer.ts';

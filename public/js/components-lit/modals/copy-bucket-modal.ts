@@ -1,0 +1,240 @@
+import { LitElement, html } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { TW } from '../styles/tailwind-classes';
+
+export interface Provider {
+  id: string;
+  name: string;
+}
+
+export interface SourceBucket {
+  name: string;
+  providerId: string;
+  providerName: string;
+  count?: number;
+  size?: number;
+}
+
+@customElement('copy-bucket-modal')
+export class CopyBucketModal extends LitElement {
+  @property({ type: Boolean }) open = false;
+  @property({ type: Object }) sourceBucket?: SourceBucket;
+  @property({ type: Array }) providers: Provider[] = [];
+
+  @state() targetProviderId = '';
+  @state() targetBucketName = '';
+  @state() skipExisting = true;
+  @state() overwrite = false;
+
+  // Disable Shadow DOM to use Tailwind directly
+  createRenderRoot(): HTMLElement | DocumentFragment {
+    return this as unknown as HTMLElement;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    // Set default target provider (different from source)
+    if (this.providers.length > 0 && this.sourceBucket) {
+      const differentProvider = this.providers.find(p => p.id !== this.sourceBucket?.providerId);
+      if (differentProvider) {
+        this.targetProviderId = differentProvider.id;
+      }
+    }
+  }
+
+  private handleClose() {
+    this.open = false;
+    this.resetForm();
+    this.dispatchEvent(new CustomEvent('close'));
+  }
+
+  private handleCopy() {
+    if (!this.targetProviderId || !this.targetBucketName.trim()) {
+      this.dispatchEvent(new CustomEvent('toast', { 
+        detail: { message: 'Please fill all required fields', type: 'error' },
+        bubbles: true,
+        composed: true
+      }));
+      return;
+    }
+
+    // Validate bucket name (S3 rules)
+    const bucketNameRegex = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
+    if (!bucketNameRegex.test(this.targetBucketName)) {
+      this.dispatchEvent(new CustomEvent('toast', { 
+        detail: { message: 'Invalid bucket name. Use lowercase letters, numbers, and hyphens only', type: 'error' },
+        bubbles: true,
+        composed: true
+      }));
+      return;
+    }
+
+    this.dispatchEvent(new CustomEvent('start-copy', {
+      detail: {
+        sourceProviderId: this.sourceBucket?.providerId,
+        sourceBucket: this.sourceBucket?.name,
+        targetProviderId: this.targetProviderId,
+        targetBucket: this.targetBucketName,
+        options: {
+          skipExisting: this.skipExisting,
+          overwrite: this.overwrite
+        }
+      },
+      bubbles: true,
+      composed: true
+    }));
+
+    this.handleClose();
+  }
+
+  private resetForm() {
+    this.targetBucketName = '';
+    this.skipExisting = true;
+    this.overwrite = false;
+  }
+
+  private formatSize(bytes?: number): string {
+    if (!bytes) return 'N/A';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let unitIndex = 0;
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    return `${size.toFixed(2)} ${units[unitIndex]}`;
+  }
+
+  render() {
+    if (!this.open || !this.sourceBucket) return html``;
+
+    return html`
+      <div class="${TW.copyModal.backdrop}" @click="${this.handleClose}">
+        <div class="${TW.copyModal.content}" @click="${(e: Event) => e.stopPropagation()}">
+          <!-- Header -->
+          <div class="${TW.copyModal.iconContainer}">
+            <iconify-icon icon="ph:copy-bold" width="24"></iconify-icon>
+          </div>
+          
+          <h3 class="${TW.copyModal.title}">Copy Bucket</h3>
+          <p class="${TW.copyModal.description}">
+            Create a complete backup of your bucket to another provider
+          </p>
+
+          <!-- Source Bucket Info -->
+          <div class="${TW.copyModal.sourceSection}">
+            <div class="${TW.copyModal.sectionLabel}">Source</div>
+            <div class="${TW.copyModal.sourceBucket}">
+              <div class="${TW.copyModal.bucketIcon}">
+                <iconify-icon icon="ph:package-duotone" width="24"></iconify-icon>
+              </div>
+              <div class="${TW.copyModal.bucketInfo}">
+                <div class="${TW.copyModal.bucketName}">${this.sourceBucket.name}</div>
+                <div class="${TW.copyModal.bucketMeta}">
+                  ${this.sourceBucket.providerName}
+                  ${this.sourceBucket.count !== undefined ? ` • ${this.sourceBucket.count} files` : ''}
+                  ${this.sourceBucket.size !== undefined ? ` • ${this.formatSize(this.sourceBucket.size)}` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow Divider -->
+          <div class="${TW.copyModal.arrowDivider}">
+            <iconify-icon icon="ph:arrow-down-bold" width="24" class="${TW.copyModal.arrowIcon}"></iconify-icon>
+          </div>
+
+          <!-- Target Configuration -->
+          <div class="${TW.copyModal.targetSection}">
+            <div class="${TW.copyModal.sectionLabel}">Target</div>
+            
+            <div class="${TW.copyModal.formGroup}">
+              <label class="${TW.copyModal.label}">Target Provider</label>
+              <select 
+                class="${TW.copyModal.select}"
+                .value="${this.targetProviderId}"
+                @change="${(e: Event) => this.targetProviderId = (e.target as HTMLSelectElement).value}">
+                <option value="" disabled>Select a provider</option>
+                ${this.providers.map(provider => html`
+                  <option value="${provider.id}" ?selected="${provider.id === this.targetProviderId}">
+                    ${provider.name}
+                  </option>
+                `)}
+              </select>
+            </div>
+
+            <div class="${TW.copyModal.formGroup}">
+              <label class="${TW.copyModal.label}">Target Bucket Name</label>
+              <input 
+                type="text"
+                class="${TW.copyModal.input}"
+                placeholder="my-backup-bucket"
+                .value="${this.targetBucketName}"
+                @input="${(e: Event) => this.targetBucketName = (e.target as HTMLInputElement).value}"
+                @keypress="${(e: KeyboardEvent) => {
+                  if (e.key === 'Enter') this.handleCopy();
+                }}">
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Lowercase letters, numbers, and hyphens only
+              </p>
+            </div>
+          </div>
+
+          <!-- Copy Options -->
+          <div class="${TW.copyModal.optionsSection}">
+            <div class="${TW.copyModal.sectionLabel}">Options</div>
+            
+            <div class="${TW.copyModal.optionItem}">
+              <div>
+                <div class="${TW.copyModal.optionLabel}">Skip existing files</div>
+                <div class="${TW.copyModal.optionDescription}">
+                  Don't copy files that already exist in target
+                </div>
+              </div>
+              <input 
+                type="checkbox"
+                class="${TW.copyModal.checkbox}"
+                ?checked="${this.skipExisting}"
+                @change="${(e: Event) => this.skipExisting = (e.target as HTMLInputElement).checked}">
+            </div>
+
+            <div class="${TW.copyModal.optionItem}">
+              <div>
+                <div class="${TW.copyModal.optionLabel}">Overwrite existing</div>
+                <div class="${TW.copyModal.optionDescription}">
+                  Replace files in target if they exist
+                </div>
+              </div>
+              <input 
+                type="checkbox"
+                class="${TW.copyModal.checkbox}"
+                ?checked="${this.overwrite}"
+                @change="${(e: Event) => this.overwrite = (e.target as HTMLInputElement).checked}"
+                ?disabled="${!this.skipExisting}">
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="${TW.copyModal.actions}">
+            <button class="${TW.copyModal.btnCancel}" @click="${this.handleClose}">
+              Cancel
+            </button>
+            <button 
+              class="${TW.copyModal.btnCopy}"
+              @click="${this.handleCopy}"
+              ?disabled="${!this.targetProviderId || !this.targetBucketName.trim()}">
+              <iconify-icon icon="ph:copy-bold" width="18"></iconify-icon>
+              Start Copy
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+declare global {
+  interface HTMLElementTagNameMap {
+    'copy-bucket-modal': CopyBucketModal;
+  }
+}

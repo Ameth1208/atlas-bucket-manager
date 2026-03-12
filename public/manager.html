@@ -193,6 +193,10 @@
     <delete-modal id="deleteModalComponent" role="dialog" aria-modal="true"></delete-modal>
     <folder-modal id="folderModalComponent" role="dialog" aria-modal="true"></folder-modal>
     <share-modal id="shareModalComponent" role="dialog" aria-modal="true"></share-modal>
+    <copy-bucket-modal id="copyModalComponent" role="dialog" aria-modal="true"></copy-bucket-modal>
+
+    <!-- Copy Progress Panel -->
+    <copy-progress-panel id="copyProgressPanel"></copy-progress-panel>
 
     <!-- Toast -->
     <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] transform transition-all duration-500 translate-y-20 opacity-0" role="alert" aria-live="assertive">
@@ -210,6 +214,9 @@
 
     <!-- PDF.js Script -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <!-- Socket.io Client -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
 
     <!-- Lit Web Components (REQUIRED) -->
     <script type="module" src="/js/main.js"></script>

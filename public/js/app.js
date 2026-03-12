@@ -7,6 +7,9 @@ import { openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUplo
 import { renderSupportButton } from '/js/components/SupportButton.js';
 import { initTooltips } from '/js/components/Tooltip.js';
 
+// Socket.io WebSocket connection
+let socket = null;
+
 // 1. Error Mapping
 function translateError(errorMsg) {
     if (!errorMsg) return t('errGeneral');
@@ -79,6 +82,118 @@ function setFilter(filterId) {
     store.currentFilter = filterId;
     renderBuckets(store.buckets);
     renderFilters(store.buckets);
+}
+
+// 3.5. Copy Bucket Functions
+function initializeWebSocket() {
+    if (typeof io === 'undefined') {
+        console.error('Socket.io not loaded');
+        return;
+    }
+
+    socket = io({
+        transports: ['websocket', 'polling']
+    });
+
+    socket.on('connect', () => {
+        console.log('✅ WebSocket connected');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('🔌 WebSocket disconnected');
+    });
+
+    socket.on('copy:progress', (job) => {
+        const progressPanel = document.getElementById('copyProgressPanel');
+        if (progressPanel) {
+            progressPanel.updateJob(job.id, job);
+        }
+    });
+
+    socket.on('copy:completed', (job) => {
+        const progressPanel = document.getElementById('copyProgressPanel');
+        if (progressPanel) {
+            progressPanel.updateJob(job.id, job);
+            showToast(`Copy completed: ${job.sourceBucket} → ${job.targetBucket}`, 'success');
+        }
+    });
+
+    socket.on('copy:failed', (job) => {
+        const progressPanel = document.getElementById('copyProgressPanel');
+        if (progressPanel) {
+            progressPanel.updateJob(job.id, job);
+            showToast(`Copy failed: ${job.sourceBucket}`, 'error');
+        }
+    });
+
+    socket.on('copy:cancelled', (job) => {
+        const progressPanel = document.getElementById('copyProgressPanel');
+        if (progressPanel) {
+            progressPanel.updateJob(job.id, job);
+            showToast(`Copy cancelled: ${job.sourceBucket}`, 'warning');
+        }
+    });
+}
+
+function openCopyModal(bucket) {
+    const modal = document.getElementById('copyModalComponent');
+    if (!modal) return;
+
+    modal.sourceBucket = {
+        name: bucket.name,
+        providerId: bucket.providerId,
+        providerName: bucket.providerName,
+        count: bucket.count,
+        size: bucket.size
+    };
+    modal.providers = store.providers || [];
+    modal.open = true;
+}
+
+async function startCopyJob(detail) {
+    try {
+        const result = await api.startCopy(
+            detail.sourceProviderId,
+            detail.sourceBucket,
+            detail.targetProviderId,
+            detail.targetBucket,
+            detail.options
+        );
+
+        if (result.error) {
+            showToast(translateError(result.error), 'error');
+            return;
+        }
+
+        // Add job to progress panel
+        const progressPanel = document.getElementById('copyProgressPanel');
+        if (progressPanel && result.job) {
+            progressPanel.addJob(result.job);
+            showToast('Copy started successfully', 'success');
+
+            // Subscribe to job updates via WebSocket
+            if (socket && socket.connected) {
+                socket.emit('copy:subscribe', result.job.id);
+            }
+        }
+    } catch (err) {
+        console.error('Error starting copy:', err);
+        showToast('Failed to start copy', 'error');
+    }
+}
+
+async function cancelCopyJob(jobId) {
+    try {
+        const result = await api.cancelCopy(jobId);
+        if (result.error) {
+            showToast(translateError(result.error), 'error');
+        } else {
+            showToast('Copy job cancelled', 'warning');
+        }
+    } catch (err) {
+        console.error('Error cancelling copy:', err);
+        showToast('Failed to cancel copy', 'error');
+    }
 }
 
 // 4. Providers & Creation
@@ -339,7 +454,7 @@ window.app = {
     toggleSelect, bulkDelete, openUrlModal, closeUrlModal, generateShareLink,
     openDeleteModal, closeDeleteModal, confirmDelete, openPreview, closePreview,
     setLanguage, toggleTheme, refreshStats, translateError, setFilter, api, showToast,
-    initTooltips, handleLogin
+    initTooltips, handleLogin, openCopyModal, startCopyJob, cancelCopyJob
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -349,6 +464,17 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('shareModalComponent')?.addEventListener('generate', (e) => generateShareLink(e.detail));
     document.getElementById('shareModalComponent')?.addEventListener('toast', (e) => showToast(e.detail));
     document.getElementById('folderModalComponent')?.addEventListener('confirm', (e) => submitFolder(e.detail));
+    
+    // Copy Bucket event listeners
+    document.getElementById('copyModalComponent')?.addEventListener('start-copy', (e) => startCopyJob(e.detail));
+    document.getElementById('copyProgressPanel')?.addEventListener('cancel-job', (e) => cancelCopyJob(e.detail.jobId));
+    
+    // Event delegation for bucket card copy button
+    document.addEventListener('copy', (e) => {
+        if (e.detail && e.detail.bucket) {
+            openCopyModal(e.detail.bucket);
+        }
+    });
 
     try {
         initTheme();
@@ -373,6 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initSearch();
         loadData();
         handleRouting();
+        initializeWebSocket();
     }
     
     document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
