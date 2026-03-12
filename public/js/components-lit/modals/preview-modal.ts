@@ -13,13 +13,16 @@ export class PreviewModal extends LitElement {
   @property({ type: Boolean }) open = false;
   @property({ type: Object }) file: FilePreview | null = null;
   @state() loading = false;
-  @state() previewContent = '';
   @state() downloadUrl = '';
 
   // Disable Shadow DOM to use Tailwind directly
   createRenderRoot(): HTMLElement | DocumentFragment {
     return this as unknown as HTMLElement;
   }
+
+  // ============================================
+  // FILE TYPE DETECTION
+  // ============================================
 
   private getFileExtension(): string {
     if (!this.file) return '';
@@ -31,7 +34,39 @@ export class PreviewModal extends LitElement {
     return `/api/view/${this.file.providerId}/${this.file.bucket}?file=${encodeURIComponent(this.file.file)}`;
   }
 
-  private renderPreviewContent() {
+  private getFileName(): string {
+    if (!this.file) return '';
+    return this.file.file.split('/').pop() || this.file.file;
+  }
+
+  private isImage(): boolean {
+    const ext = this.getFileExtension();
+    return ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico'].includes(ext);
+  }
+
+  private isVideo(): boolean {
+    const ext = this.getFileExtension();
+    return ['mp4', 'webm', 'mov', 'mkv', 'avi'].includes(ext);
+  }
+
+  private isAudio(): boolean {
+    const ext = this.getFileExtension();
+    return ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'].includes(ext);
+  }
+
+  private isPDF(): boolean {
+    return this.getFileExtension() === 'pdf';
+  }
+
+  private isAPK(): boolean {
+    return this.getFileExtension() === 'apk';
+  }
+
+  // ============================================
+  // VIEWER RENDERING
+  // ============================================
+
+  private renderViewer() {
     if (this.loading) {
       return html`
         <div class="${TW.previewModal.placeholder}">
@@ -42,60 +77,54 @@ export class PreviewModal extends LitElement {
 
     const ext = this.getFileExtension();
     const url = this.getPreviewUrl();
+    const filename = this.getFileName();
 
-    // Images
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(ext)) {
-      return html`<img src="${url}" class="${TW.previewModal.image}" @load="${() => this.loading = false}" />`;
+    // Image Viewer
+    if (this.isImage()) {
+      return html`<image-viewer src="${url}" filename="${filename}"></image-viewer>`;
     }
 
-    // Videos
-    if (['mp4', 'webm', 'mov', 'mkv'].includes(ext)) {
-      return html`<video src="${url}" controls autoplay class="${TW.previewModal.video}"></video>`;
+    // Video Viewer
+    if (this.isVideo()) {
+      return html`<video-viewer src="${url}" type="${ext}"></video-viewer>`;
     }
 
-    // Audio
-    if (['mp3', 'wav', 'ogg', 'flac', 'm4a'].includes(ext)) {
+    // Audio Viewer
+    if (this.isAudio()) {
+      return html`<audio-viewer src="${url}" type="${ext}" filename="${filename}"></audio-viewer>`;
+    }
+
+    // PDF Viewer
+    if (this.isPDF()) {
+      return html`<pdf-viewer src="${url}" filename="${filename}"></pdf-viewer>`;
+    }
+
+    // APK Placeholder
+    if (this.isAPK()) {
       return html`
-        <div class="${TW.previewModal.placeholder}">
-          <div class="${TW.previewModal.iconContainerAudio}">
-            <iconify-icon icon="ph:music-notes-fill" width="64"></iconify-icon>
-          </div>
-          <audio src="${url}" controls autoplay class="${TW.previewModal.audio}"></audio>
-          <p class="${TW.previewModal.placeholderText}">Playing audio file</p>
-        </div>
+        <file-placeholder 
+          icon="ph:android-logo-fill" 
+          title="Android Package (APK)" 
+          message="Preview not available for binaries."
+          iconColor="android"
+        ></file-placeholder>
       `;
     }
 
-    // PDF
-    if (ext === 'pdf') {
-      return html`<iframe src="${url}" class="${TW.previewModal.pdf}"></iframe>`;
-    }
-
-    // APK
-    if (ext === 'apk') {
-      return html`
-        <div class="${TW.previewModal.placeholder}">
-          <div class="${TW.previewModal.iconContainerAndroid}">
-            <iconify-icon icon="ph:android-logo-fill" width="64"></iconify-icon>
-          </div>
-          <div class="text-center">
-            <h3 class="${TW.previewModal.placeholderTitle}">Android Package (APK)</h3>
-            <p class="${TW.previewModal.placeholderText} mt-2">Preview not available for binaries.</p>
-          </div>
-        </div>
-      `;
-    }
-
-    // Default (no preview)
+    // Default Placeholder
     return html`
-      <div class="${TW.previewModal.placeholder}">
-        <div class="${TW.previewModal.iconContainerDefault}">
-          <iconify-icon icon="ph:file-dashed-duotone" width="64"></iconify-icon>
-        </div>
-        <p class="${TW.previewModal.placeholderText}">No preview available</p>
-      </div>
+      <file-placeholder 
+        icon="ph:file-dashed-duotone" 
+        title="No Preview Available" 
+        message="This file type cannot be previewed."
+        iconColor="default"
+      ></file-placeholder>
     `;
   }
+
+  // ============================================
+  // EVENT HANDLERS
+  // ============================================
 
   private handleClose() {
     this.open = false;
@@ -108,9 +137,21 @@ export class PreviewModal extends LitElement {
     }
   }
 
+  private handleBackdropClick(e: Event) {
+    // Only close if clicking the backdrop itself, not children
+    if (e.target === e.currentTarget) {
+      this.handleClose();
+    }
+  }
+
+  // ============================================
+  // LIFECYCLE
+  // ============================================
+
   updated(changedProperties: Map<string, any>) {
     if (changedProperties.has('file') && this.file) {
       this.loading = true;
+      
       // Fetch download URL when file changes
       fetch(`/api/buckets/${this.file.providerId}/${this.file.bucket}/objects/${encodeURIComponent(this.file.file)}/url`)
         .then(res => res.json())
@@ -124,24 +165,39 @@ export class PreviewModal extends LitElement {
     }
   }
 
+  // ============================================
+  // RENDER
+  // ============================================
+
   render() {
     if (!this.open) return html``;
 
     return html`
-      <div class="${TW.previewModal.backdrop}" @click="${this.handleClose}">
+      <div class="${TW.previewModal.backdrop}" @click="${this.handleBackdropClick}">
         <div class="${TW.previewModal.content}" @click="${(e: Event) => e.stopPropagation()}">
+          <!-- Header with Actions -->
           <div class="${TW.previewModal.header}">
-            <button class="${TW.previewModal.btnDownload}" @click="${this.handleDownload}">
-              <iconify-icon icon="ph:download-bold"></iconify-icon>
-              Download
-            </button>
-            <button class="${TW.previewModal.btnClose}" @click="${this.handleClose}">
-              <iconify-icon icon="ph:x-bold" width="20"></iconify-icon>
-            </button>
+            <!-- Spacer for layout (toolbar goes here for images) -->
+            <div></div>
+            
+            <!-- Action Buttons -->
+            <div class="${TW.previewModal.headerActions}">
+              <button class="${TW.previewModal.btnDownload}" @click="${this.handleDownload}">
+                <iconify-icon icon="ph:download-bold"></iconify-icon>
+                Download
+              </button>
+              <button class="${TW.previewModal.btnClose}" @click="${this.handleClose}">
+                <iconify-icon icon="ph:x-bold" width="20"></iconify-icon>
+              </button>
+            </div>
           </div>
+
+          <!-- Viewer Container -->
           <div class="${TW.previewModal.previewContainer}">
-            ${this.renderPreviewContent()}
+            ${this.renderViewer()}
           </div>
+
+          <!-- Filename -->
           ${this.file ? html`<p class="${TW.previewModal.fileName}">${this.file.file}</p>` : ''}
         </div>
       </div>
