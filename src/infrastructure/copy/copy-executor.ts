@@ -95,40 +95,19 @@ export class CopyExecutor extends EventEmitter {
   }
 
   private async listAllObjects(): Promise<Array<{ name: string; size: number; isFolder: boolean }>> {
-    const allObjects: Array<{ name: string; size: number; isFolder: boolean }> = [];
-    
-    // List objects with recursive approach
-    await this.listObjectsRecursive('', allObjects);
-    
-    return allObjects;
-  }
-
-  private async listObjectsRecursive(prefix: string, allObjects: Array<{ name: string; size: number; isFolder: boolean }>): Promise<void> {
-    const result = await this.sourceRepo.listObjects(
+    // Use the recursive method that lists all objects in one call
+    const result = await this.sourceRepo.listAllObjectsRecursive(
       this.job.sourceProviderId,
       this.job.sourceBucket,
-      prefix
+      ''
     );
 
-    for (const obj of result) {
-      // Add folder marker for directories
-      if (obj.isFolder) {
-        allObjects.push({
-          name: obj.name,
-          size: 0,
-          isFolder: true
-        });
-        
-        // Recursively list subfolder
-        await this.listObjectsRecursive(obj.name, allObjects);
-      } else {
-        allObjects.push({
-          name: obj.name,
-          size: obj.size,
-          isFolder: false
-        });
-      }
-    }
+    // Transform to the format expected by the copy executor
+    return result.map(obj => ({
+      name: obj.name,
+      size: obj.size,
+      isFolder: obj.isFolder
+    }));
   }
 
   private calculateTotalSize(objects: Array<{ size: number }>): number {
