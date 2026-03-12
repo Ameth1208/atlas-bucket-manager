@@ -76,5 +76,31 @@ export const api = {
     logout: async () => { 
         await fetch('/api/logout', { method: 'POST' }); 
         window.location.href = '/login'; 
-    }
+    },
+
+    // Copy operations
+    startCopy: async (sourceProviderId, sourceBucket, targetProviderId, targetBucket, options = {}) =>
+        handleResponse(await fetch('/api/copy/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sourceProviderId,
+                sourceBucket,
+                targetProviderId,
+                targetBucket,
+                options
+            })
+        })),
+
+    getCopyStatus: async (jobId) =>
+        handleResponse(await fetch(`/api/copy/${jobId}/status`)),
+
+    cancelCopy: async (jobId) =>
+        handleResponse(await fetch(`/api/copy/${jobId}/cancel`, { method: 'POST' })),
+
+    listCopyJobs: async () =>
+        handleResponse(await fetch('/api/copy/jobs')),
+
+    deleteCopyJob: async (jobId) =>
+        handleResponse(await fetch(`/api/copy/${jobId}`, { method: 'DELETE' }))
 };

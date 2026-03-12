@@ -37,6 +37,16 @@ export class BucketCard extends LitElement {
           <div class="${TW.bucketCard.actions}">
             <button
               class="${TW.bucketCard.actionBtn}"
+              @click=${this._handleCopy}
+              title="Copy Bucket"
+            >
+              <iconify-icon
+                icon="ph:copy-bold"
+                width="20"
+              ></iconify-icon>
+            </button>
+            <button
+              class="${TW.bucketCard.actionBtn}"
               @click=${this._handleExplore}
               title="Explore"
             >
@@ -98,6 +108,16 @@ export class BucketCard extends LitElement {
 
   private _formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString(this.lang);
+  }
+
+  private _handleCopy() {
+    this.dispatchEvent(
+      new CustomEvent("copy", {
+        detail: { bucket: this.bucket },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 
   private _handleExplore() {
