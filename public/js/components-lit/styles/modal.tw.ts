@@ -67,7 +67,8 @@ export const modalStyles = {
     title: "text-lg font-bold mb-2 text-slate-900 dark:text-white",
     description: "text-sm text-slate-500 dark:text-slate-400 mb-4",
     expiryWrapper: "mb-4",
-    expiryLabel: "block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2",
+    expiryLabel:
+      "block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2",
     urlWrapper: "mb-6",
     urlLabel: "block text-xs font-bold text-slate-500 dark:text-slate-400 mb-2",
     urlInput:
@@ -84,41 +85,48 @@ export const modalStyles = {
   // ============================================
   previewModal: {
     backdrop:
-      "fixed inset-0 z-60 bg-black/90 backdrop-blur flex items-center justify-center p-4",
+      "fixed inset-0 z-[9999] bg-black/90 backdrop-blur flex items-center justify-center p-4",
     content:
-      "relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center",
-    header:
-      "w-full flex justify-end mb-4 gap-4",
-    fileName:
-      "text-white/70 text-sm mt-4 font-mono",
+      "relative max-w-4xl w-full flex flex-col items-center",
+    header: "w-full flex justify-between items-center mb-4 gap-4",
+    headerActions: "flex gap-2",
+    fileName: "text-white/70 text-sm mt-4 font-mono",
+
+    // Image controls toolbar
+    imageToolbar:
+      "flex items-center gap-2 bg-white/10 backdrop-blur-xl rounded-lg px-3 py-2 border border-white/20",
+    btnControl:
+      "w-8 h-8 aspect-square p-2 flex item-center justify-center rounded-lg bg-white/10 hover:bg-white/20 text-white transition-all cursor-pointer border-0 active:scale-95",
+    zoomLevel:
+      "px-3 py-1 text-white/70 text-sm font-mono min-w-[3.5rem] text-center",
+
+    // Image container
+    imageContainer:
+      "relative overflow-hidden cursor-move flex items-center justify-center w-full h-full select-none",
+    image: "max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl",
+
+    // Other media
     actions: "flex gap-2",
     btnAction:
       "p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors",
     body: "flex-1 flex items-center justify-center overflow-auto",
-    image:
-      "max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl animate-in",
-    video:
-      "max-w-full max-h-[75vh] rounded-lg shadow-2xl",
-    audio:
-      "w-full h-12",
-    pdf:
-      "w-full h-[75vh] rounded-lg border-0 shadow-2xl bg-white",
+    video: "max-w-full max-h-[75vh] rounded-lg shadow-2xl",
+    audio: "w-full h-12",
+    pdf: "w-full h-[75vh] rounded-lg border-0 shadow-2xl bg-white",
     previewContainer:
-      "rounded-xl overflow-hidden flex items-center justify-center w-full h-full",
+      "rounded-xl flex items-center justify-center w-full",
     placeholder:
       "flex flex-col items-center gap-6 p-12 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/10 shadow-2xl animate-in",
-    iconContainer:
-      "p-6 rounded-full",
-    iconContainerAudio:
-      "p-6 rounded-full bg-cyan-500/20 text-cyan-300",
-    iconContainerAndroid:
-      "p-6 rounded-full bg-green-500/20 text-green-400",
-    iconContainerDefault:
-      "p-6 rounded-full bg-slate-500/20 text-slate-300",
-    placeholderText:
-      "text-white/50 text-sm font-medium",
-    placeholderTitle:
-      "text-white text-xl font-bold",
+
+    // Icons
+    iconContainer: "p-6 rounded-full",
+    iconContainerAudio: "p-6 rounded-full bg-cyan-500/20 text-cyan-300",
+    iconContainerAndroid: "p-6 rounded-full bg-green-500/20 text-green-400",
+    iconContainerDefault: "p-6 rounded-full bg-slate-500/20 text-slate-300",
+    placeholderText: "text-white/50 text-sm font-medium",
+    placeholderTitle: "text-white text-xl font-bold",
+
+    // Actions
     footer:
       "flex items-center justify-between mt-4 pt-4 border-t border-slate-700",
     fileInfo: "text-sm text-slate-400",
@@ -126,7 +134,6 @@ export const modalStyles = {
       "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all cursor-pointer border-0 bg-white/10 text-white hover:text-indigo-400",
     btnClose:
       "flex items-center gap-2 px-3 py-2 rounded-lg font-bold text-sm transition-all cursor-pointer border-0 bg-white/10 text-white hover:text-rose-500",
-    loading:
-      "text-white/50",
+    loading: "text-white/50",
   },
 };
