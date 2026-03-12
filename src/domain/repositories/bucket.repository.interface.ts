@@ -23,4 +23,8 @@ export interface IBucketRepository {
   // URL and streaming
   getPresignedUrl(providerId: string, bucketName: string, objectName: string, expiry?: number): Promise<string>;
   getObjectStream(providerId: string, bucketName: string, objectName: string): Promise<any>;
+  
+  // Copy operations
+  objectExists(providerId: string, bucketName: string, objectName: string): Promise<boolean>;
+  uploadStream(providerId: string, bucketName: string, objectName: string, stream: any, size: number): Promise<void>;
 }

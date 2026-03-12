@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import path from "path";
 import fs from "fs";
+import { createServer } from "http";
 
 // Configuration
 import { appConfig } from "./infrastructure/config/app.config";
@@ -29,10 +30,23 @@ import { GetObjectStreamUseCase } from "./application/use-cases/object/get-objec
 // Use Cases - Auth
 import { LoginUseCase } from "./application/use-cases/auth/login.use-case";
 
+// Use Cases - Copy
+import { StartCopyUseCase } from "./application/use-cases/copy/start-copy.use-case";
+import { GetCopyStatusUseCase } from "./application/use-cases/copy/get-copy-status.use-case";
+import { CancelCopyUseCase } from "./application/use-cases/copy/cancel-copy.use-case";
+import { ListCopyJobsUseCase } from "./application/use-cases/copy/list-copy-jobs.use-case";
+import { DeleteCopyJobUseCase } from "./application/use-cases/copy/delete-copy-job.use-case";
+
+// Copy Infrastructure
+import { CopyJobStore } from "./infrastructure/copy/copy-job-store";
+import { CopyManager } from "./infrastructure/copy/copy-manager";
+import { SocketManager } from "./infrastructure/websocket/socket-manager";
+
 // Controllers
 import { AuthController } from "./presentation/controllers/auth.controller";
 import { BucketController } from "./presentation/controllers/bucket.controller";
 import { ObjectController } from "./presentation/controllers/object.controller";
+import { CopyController } from "./presentation/controllers/copy.controller";
 
 // Middleware
 import { createAuthMiddleware } from "./presentation/middleware/auth.middleware";
@@ -42,6 +56,7 @@ import { errorHandler } from "./presentation/middleware/error-handler.middleware
 import { createAuthRoutes } from "./presentation/routes/auth.routes";
 import { createBucketRoutes } from "./presentation/routes/bucket.routes";
 import { createObjectRoutes } from "./presentation/routes/object.routes";
+import { createCopyRoutes } from "./presentation/routes/copy.routes";
 import { createUiRoutes } from "./presentation/routes/ui.routes";
 
 // ============================================
@@ -75,6 +90,17 @@ const loginUseCase = new LoginUseCase(
   appConfig.jwtSecret as string
 );
 
+// 4b. Initialize Copy Infrastructure
+const copyJobStore = new CopyJobStore();
+const copyManager = new CopyManager(copyJobStore, bucketRepository);
+
+// 4c. Initialize Use Cases - Copy
+const startCopyUseCase = new StartCopyUseCase(copyManager);
+const getCopyStatusUseCase = new GetCopyStatusUseCase(copyManager);
+const cancelCopyUseCase = new CancelCopyUseCase(copyManager);
+const listCopyJobsUseCase = new ListCopyJobsUseCase(copyManager);
+const deleteCopyJobUseCase = new DeleteCopyJobUseCase(copyManager);
+
 // 5. Initialize Controllers
 const authController = new AuthController(loginUseCase);
 const bucketController = new BucketController(
@@ -95,6 +121,13 @@ const objectController = new ObjectController(
   getObjectStreamUseCase,
   getBucketStatsUseCase
 );
+const copyController = new CopyController(
+  startCopyUseCase,
+  getCopyStatusUseCase,
+  cancelCopyUseCase,
+  listCopyJobsUseCase,
+  deleteCopyJobUseCase
+);
 
 // 6. Initialize Middleware
 const authMiddleware = createAuthMiddleware(appConfig.jwtSecret as string);
@@ -103,6 +136,7 @@ const authMiddleware = createAuthMiddleware(appConfig.jwtSecret as string);
 const authRoutes = createAuthRoutes(authController);
 const bucketRoutes = createBucketRoutes(bucketController, authMiddleware);
 const objectRoutes = createObjectRoutes(objectController, authMiddleware);
+const copyRoutes = createCopyRoutes(copyController, authMiddleware);
 const uiRoutes = createUiRoutes(authMiddleware);
 
 // ============================================
@@ -110,10 +144,30 @@ const uiRoutes = createUiRoutes(authMiddleware);
 // ============================================
 
 const app = express();
+const httpServer = createServer(app);
 
-// Ensure upload directory exists
+// Initialize Socket.io
+const socketManager = new SocketManager(httpServer);
+
+// Connect CopyManager events to Socket.io
+copyManager.on('job-progress', (job) => {
+  socketManager.emitCopyProgress(job);
+});
+
+copyManager.on('job-completed', (job) => {
+  if (job.status === 'completed') {
+    socketManager.emitCopyCompleted(job);
+  } else if (job.status === 'failed') {
+    socketManager.emitCopyFailed(job);
+  }
+});
+
+// Ensure upload and temp directories exist
 if (!fs.existsSync("uploads/")) {
   fs.mkdirSync("uploads/");
+}
+if (!fs.existsSync("temp/")) {
+  fs.mkdirSync("temp/");
 }
 
 // Determine static files directory based on environment
@@ -134,13 +188,15 @@ app.use(express.static(staticDir));
 app.use("/api", authRoutes);
 app.use("/api", bucketRoutes);
 app.use("/api", objectRoutes);
+app.use("/api/copy", copyRoutes);
 app.use("/", uiRoutes);
 
 // Error Handler (must be last)
 app.use(errorHandler);
 
-// Start Server
-app.listen(appConfig.port, () => {
+// Start Server with Socket.io
+httpServer.listen(appConfig.port, () => {
   console.log(`🚀 Server running at http://localhost:${appConfig.port}`);
   console.log(`   Open: http://localhost:${appConfig.port}/login`);
+  console.log(`🔌 WebSocket server enabled`);
 });
