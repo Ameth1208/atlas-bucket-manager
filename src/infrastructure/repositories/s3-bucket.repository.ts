@@ -129,7 +129,7 @@ export class S3BucketRepository implements IBucketRepository {
     const client = this.getClient(providerId);
     return new Promise((resolve, reject) => {
       const objects: any[] = [];
-      const stream = client.listObjectsV2(bucketName, prefix, false, '/');
+      const stream = client.listObjectsV2(bucketName, prefix, true, '/');
       stream.on('data', (obj) => {
         // If it's a folder (prefix), preserve both name and prefix for compatibility
         if (obj.prefix) {
