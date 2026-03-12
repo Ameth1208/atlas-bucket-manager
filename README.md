@@ -18,6 +18,19 @@ Atlas is a lightweight, secure, and modern web interface designed to bridge the 
 - **📤 Bulk Operations**: Support for multi-file upload and bulk deletion with checkbox selection.
 - **🔗 Smart Share Links**: Generate temporary download links with custom expiration (1min to 7 days).
 - **📊 Storage Stats**: Instant calculation of total size and object count per bucket.
+- **🪣 Copy Bucket Engine**: Complete bucket backup between providers with real-time progress tracking via WebSocket. Features include:
+  - Stream-based copying (memory efficient)
+  - Progress tracking: files copied, bytes transferred, speed (MB/s), and ETA
+  - Automatic folder creation and recursive copying
+  - Skip existing / Overwrite options
+  - Cancel running jobs
+  - Auto-refresh bucket list after completion
+- **🗑️ Safe Deletion**: Delete buckets with automatic content cleanup. Requires typing the bucket name to confirm, preventing accidental deletions.
+- **🌍 Internationalization (i18n)**: Full support for 6 languages (EN, ES, PT, FR, JA, ZH) with persistent preference. Translation files are externalized for easy maintenance (`public/js/i18n/`).
+- **🎨 Modern UI Components**:
+  - Copy Bucket Modal: Search/filter existing buckets or create new ones
+  - Copy Progress Panel: Floating real-time progress with WebSocket updates
+  - Delete Confirmation Modal: Type bucket name to confirm
 - **🌍 Multi-language**: 🇺🇸 EN, 🇪🇸 ES, 🇧🇷 PT, 🇫🇷 FR, 🇯🇵 JP, 🇨🇳 ZH (persistent preference).
 - **🌗 Modern UI**: Fully persistent Dark/Light mode, mobile-responsive design, and WCAG 2.1 AA accessibility.
 - **⚡ Lightweight**: Only ~15KB minified CSS (99.5% smaller than CDN), 11 reusable Lit web components.
@@ -27,7 +40,7 @@ Atlas is a lightweight, secure, and modern web interface designed to bridge the 
 
 ## 🔌 Supported Providers
 
-### Available Now (v0.0.8) ✅
+### Available Now (v0.0.9) ✅
 
 - **MinIO** (Amazon S3 compatible)
 - **AWS S3** (Amazon Web Services)

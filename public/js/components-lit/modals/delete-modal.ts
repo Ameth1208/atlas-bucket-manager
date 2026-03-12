@@ -29,16 +29,29 @@ export class DeleteModal extends LitElement {
   }
 
   private handleConfirm() {
-    // For buckets, require typing "DELETE"
-    if (this.target?.type === "bucket" && this.confirmText !== "DELETE") {
-      this.dispatchEvent(
-        new CustomEvent("toast", {
-          detail: { message: this.t("deleteErrorConfirm"), type: "error" },
-          bubbles: true,
-          composed: true,
-        }),
-      );
-      return;
+    // For buckets, require typing the bucket name
+    if (this.target?.type === "bucket") {
+      if (!this.confirmText.trim()) {
+        this.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: { message: this.t("deleteErrorEmpty"), type: "error" },
+            bubbles: true,
+            composed: true,
+          }),
+        );
+        return;
+      }
+      
+      if (this.confirmText !== this.target.name) {
+        this.dispatchEvent(
+          new CustomEvent("toast", {
+            detail: { message: this.t("deleteErrorConfirm"), type: "error" },
+            bubbles: true,
+            composed: true,
+          }),
+        );
+        return;
+      }
     }
 
     this.dispatchEvent(
@@ -57,7 +70,7 @@ export class DeleteModal extends LitElement {
     if (!this.open) return html``;
 
     const isBucket = this.target?.type === "bucket";
-    const canDelete = !isBucket || this.confirmText === "DELETE";
+    const canDelete = !isBucket || this.confirmText === this.target?.name;
 
     return html`
       <div class="${TW.deleteModal.backdrop}" @click="${this.handleCancel}">
@@ -107,7 +120,7 @@ export class DeleteModal extends LitElement {
                   <input
                     type="text"
                     class="w-full px-3 py-2.5 bg-white dark:bg-dark-800 border border-slate-300 dark:border-dark-700 rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition-all font-mono"
-                    placeholder="${this.t("deleteConfirmPlaceholder")}"
+                    placeholder="${this.target?.name}"
                     .value="${this.confirmText}"
                     @input="${(e: Event) =>
                       (this.confirmText = (
