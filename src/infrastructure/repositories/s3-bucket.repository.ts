@@ -89,7 +89,40 @@ export class S3BucketRepository implements IBucketRepository {
   }
 
   async deleteBucket(providerId: string, bucketName: string): Promise<void> {
-    await this.getClient(providerId).removeBucket(bucketName);
+    const client = this.getClient(providerId);
+    
+    // First, list all objects in the bucket (recursively)
+    const objectsToDelete: string[] = [];
+    
+    return new Promise((resolve, reject) => {
+      const stream = client.listObjectsV2(bucketName, '', true);
+      
+      stream.on('data', (obj) => {
+        if (obj.name) {
+          objectsToDelete.push(obj.name);
+        }
+      });
+      
+      stream.on('error', (err) => reject(err));
+      
+      stream.on('end', async () => {
+        try {
+          // If there are objects, delete them first
+          if (objectsToDelete.length > 0) {
+            console.log(`Deleting ${objectsToDelete.length} objects from bucket ${bucketName}...`);
+            await client.removeObjects(bucketName, objectsToDelete);
+            console.log(`Objects deleted from bucket ${bucketName}`);
+          }
+          
+          // Now delete the empty bucket
+          await client.removeBucket(bucketName);
+          console.log(`Bucket ${bucketName} deleted successfully`);
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      });
+    });
   }
 
   async setBucketVisibility(providerId: string, bucketName: string, isPublic: boolean): Promise<void> {

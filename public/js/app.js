@@ -115,6 +115,16 @@ function initializeWebSocket() {
         if (progressPanel) {
             progressPanel.updateJob(job.id, job);
             showToast(`Copy completed: ${job.sourceBucket} → ${job.targetBucket}`, 'success');
+            
+            // Refresh bucket list to show new bucket
+            setTimeout(() => {
+                loadData(false);
+            }, 1000);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                progressPanel.removeJob(job.id);
+            }, 5000);
         }
     });
 
@@ -123,6 +133,11 @@ function initializeWebSocket() {
         if (progressPanel) {
             progressPanel.updateJob(job.id, job);
             showToast(`Copy failed: ${job.sourceBucket}`, 'error');
+            
+            // Auto-dismiss failed jobs after 10 seconds
+            setTimeout(() => {
+                progressPanel.removeJob(job.id);
+            }, 10000);
         }
     });
 
@@ -131,6 +146,11 @@ function initializeWebSocket() {
         if (progressPanel) {
             progressPanel.updateJob(job.id, job);
             showToast(`Copy cancelled: ${job.sourceBucket}`, 'warning');
+            
+            // Auto-dismiss cancelled jobs after 5 seconds
+            setTimeout(() => {
+                progressPanel.removeJob(job.id);
+            }, 5000);
         }
     });
 }
@@ -147,6 +167,8 @@ function openCopyModal(bucket) {
         size: bucket.size
     };
     modal.providers = store.providers || [];
+    modal.allBuckets = store.buckets || [];
+    modal.lang = localStorage.getItem('lang') || 'en';
     modal.open = true;
 }
 
@@ -286,6 +308,7 @@ function openDeleteModal(providerId, name) {
     const modal = document.getElementById('deleteModalComponent');
     if (modal) {
         modal.target = { providerId, name, type: 'bucket' };
+        modal.lang = localStorage.getItem('lang') || 'en';
         modal.open = true;
     }
 }
