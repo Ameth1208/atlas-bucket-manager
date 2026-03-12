@@ -203,4 +203,20 @@ export class S3BucketRepository implements IBucketRepository {
   async getObjectStream(providerId: string, bucketName: string, objectName: string): Promise<any> {
     return await this.getClient(providerId).getObject(bucketName, objectName);
   }
+
+  async objectExists(providerId: string, bucketName: string, objectName: string): Promise<boolean> {
+    try {
+      await this.getClient(providerId).statObject(bucketName, objectName);
+      return true;
+    } catch (err: any) {
+      if (err.code === 'NotFound') {
+        return false;
+      }
+      throw err;
+    }
+  }
+
+  async uploadStream(providerId: string, bucketName: string, objectName: string, stream: any, size: number): Promise<void> {
+    await this.getClient(providerId).putObject(bucketName, objectName, stream, size);
+  }
 }
