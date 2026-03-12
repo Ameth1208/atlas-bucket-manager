@@ -159,6 +159,8 @@ copyManager.on('job-completed', (job) => {
     socketManager.emitCopyCompleted(job);
   } else if (job.status === 'failed') {
     socketManager.emitCopyFailed(job);
+  } else if (job.status === 'cancelled') {
+    socketManager.emitCopyCancelled(job);
   }
 });
 
