@@ -1,350 +1,473 @@
-# Frontend Migration to Lit + TypeScript
+# Lit Web Components - Developer Guide
 
-## 🎯 Objetivo
+## 🎯 Overview
 
-Modernizar el frontend de Atlas Bucket Manager con Web Components (Lit) + TypeScript para mejorar:
-1. **Mantenibilidad** - Componentes modulares e independientes
-2. **Escalabilidad** - Paginación nativa (100 items por página)
-3. **Developer Experience** - TypeScript + Hot Module Replacement
-4. **Facilidad de actualización** - Cada componente es autocontenido
-
-## ✅ Estado Actual
-
-### Instalado
-- ✅ Lit v3.3.2
-- ✅ Vite v7.3.1
-- ✅ TypeScript v5.9.3
-
-### Configuración
-- ✅ `vite.config.ts` - Build y dev server configurado
-- ✅ `tsconfig.frontend.json` - TypeScript para frontend
-- ✅ Scripts npm actualizados
-
-### Componentes Creados (3)
-
-#### 1. `<bucket-card>` ✅
-**Ubicación:** `public/js/components-lit/bucket/bucket-card.ts`
-
-**Features:**
-- Card individual de bucket
-- Toggle público/privado
-- Acciones: Explore, Delete, Refresh Stats
-- Estilos encapsulados con Shadow DOM
-- Type-safe con TypeScript
-
-**Props:**
-```typescript
-bucket: Bucket  // Datos del bucket
-lang: string    // Idioma para formateo
-```
-
-**Events:**
-```typescript
-'explore'        // Al explorar bucket
-'delete'         // Al eliminar bucket
-'refresh-stats'  // Al refrescar estadísticas
-'policy-change'  // Al cambiar público/privado
-```
-
-#### 2. `<pagination-controls>` ✅
-**Ubicación:** `public/js/components-lit/shared/pagination-controls.ts`
-
-**Features:**
-- Controles de paginación inteligentes
-- Muestra rango de items (ej: "Showing 1-100 of 500")
-- Números de página con ellipsis (...)
-- Responsive (móvil-friendly)
-
-**Props:**
-```typescript
-total: number     // Total de items
-page: number      // Página actual
-pageSize: number  // Items por página (default: 100)
-```
-
-**Events:**
-```typescript
-'page-change'  // { detail: { page: number } }
-```
-
-#### 3. `<file-list>` ✅
-**Ubicación:** `public/js/components-lit/explorer/file-list.ts`
-
-**Features:**
-- Lista de archivos con paginación integrada
-- Selección múltiple con checkboxes
-- Iconos por tipo de archivo (imagen, video, código, etc.)
-- Acciones: Preview, Share, Download, Delete
-- Formato inteligente de tamaño y fecha
-- Auto-scroll al cambiar página
-
-**Props:**
-```typescript
-items: FileObject[]  // Array de archivos/carpetas
-pageSize: number     // Items por página (default: 100)
-```
-
-**Events:**
-```typescript
-'navigate'          // Al click en carpeta
-'preview'           // Al click en archivo
-'selection-change'  // Al seleccionar/deseleccionar
-'share'             // Acción compartir
-'download'          // Acción descargar  
-'delete'            // Acción eliminar
-```
-
-**API Pública:**
-```typescript
-clearSelection()     // Limpiar selección
-getSelected()        // Obtener archivos seleccionados
-```
-
-## 📦 Estructura Creada
-
-```
-public/js/components-lit/
-├── bucket/
-│   └── bucket-card.ts           ✅ Componente de bucket
-├── explorer/
-│   └── file-list.ts             ✅ Lista con paginación
-├── shared/
-│   └── pagination-controls.ts   ✅ Controles de paginación
-├── ui/
-│   └── (pending)
-├── index.ts                      ✅ Export central
-└── README.md                     ✅ Documentación
-```
-
-## 🚀 Cómo Usar
-
-### 1. Desarrollo (Con Hot Reload)
-
-```bash
-# Frontend only
-npm run dev:frontend  # http://localhost:3001
-
-# Backend + Frontend simultáneo
-npm run dev:all
-```
-
-### 2. Build para Producción
-
-```bash
-npm run build:frontend
-```
-
-Genera archivos optimizados en `dist-frontend/`:
-- Minificación automática
-- Tree-shaking
-- Code splitting
-- TypeScript → JavaScript
-
-### 3. Integrar en HTML
-
-```html
-<!-- Importar componentes -->
-<script type="module" src="/js/components-lit/index.js"></script>
-
-<!-- Usar componentes -->
-<bucket-card
-  .bucket="${bucketData}"
-  lang="es"
-  @explore="${handleExplore}"
-  @delete="${handleDelete}"
-  @policy-change="${handlePolicyChange}">
-</bucket-card>
-
-<file-list
-  .items="${files}"
-  .pageSize="${100}"
-  @navigate="${handleNavigate}"
-  @preview="${handlePreview}"
-  @selection-change="${handleSelection}">
-</file-list>
-```
-
-## 🎨 Theming
-
-Los componentes usan CSS Variables para theming compatible con dark mode:
-
-```css
---bg-card: white
---bg-secondary: #f1f5f9
---bg-hover: #f8fafc
---border-color: #e2e8f0
---text-primary: #1e293b
---text-muted: #64748b
---color-rose-500: #f43f5e
---color-indigo-500: #6366f1
---color-green-500: #22c55e
---color-amber-500: #f59e0b
-```
-
-## 📊 Beneficios vs Vanilla JS
-
-| Aspecto | Vanilla JS (Antes) | Lit (Ahora) |
-|---------|-------------------|-------------|
-| **Código** | 95 líneas (BucketList.js) | 40 líneas (bucket-card.ts) |
-| **Reactividad** | ❌ Manual (innerHTML) | ✅ Automático (reactive properties) |
-| **Tipos** | ❌ No | ✅ TypeScript |
-| **Paginación** | ❌ No implementada | ✅ Integrada (100 items/página) |
-| **Encapsulación** | ⚠️ CSS global | ✅ Shadow DOM |
-| **Reusabilidad** | ⚠️ Limitada | ✅ Total (Web Components) |
-| **Testing** | ❌ Difícil | ✅ Fácil (componentes aislados) |
-| **Hot Reload** | ❌ No | ✅ Con Vite |
-
-## 🔄 Migración Incremental
-
-### Completado ✅
-- [x] Setup de Lit + Vite + TypeScript
-- [x] Componente `<bucket-card>`
-- [x] Componente `<pagination-controls>`
-- [x] Componente `<file-list>` con paginación
-- [x] **Integración en `manager.html`** ✨ NUEVO
-- [x] **Actualización de `BucketList.js`** con Lit/Vanilla fallback
-- [x] **Actualización de `Explorer.js`** con Lit/Vanilla fallback
-- [x] **Entry point Vite** (`public/js/main.ts`)
-- [x] Documentación básica
-
-### Próximos Pasos 📋
-- [ ] Componente `<search-bar>` con debounce
-- [ ] Componente `<modal-base>` reutilizable
-- [ ] Componente `<theme-toggle>`
-- [ ] Componente `<language-selector>`
-- [ ] Tests unitarios con Web Test Runner
-- [ ] Actualizar AGENTS.md con info de Lit
-
-## ⚡ Cómo Funciona la Integración
-
-### Arquitectura Híbrida
-
-El sistema ahora soporta **dos modos** de renderizado:
-
-1. **Lit Components (Modo Dev)** - Cuando accedes via `http://localhost:3001` (Vite)
-2. **Vanilla JS (Fallback)** - Cuando accedes via `http://localhost:3000` (Express)
-
-### Detección Automática
-
-Ambos archivos (`BucketList.js` y `Explorer.js`) detectan automáticamente si Lit está disponible:
-
-```javascript
-// Detectar si los componentes Lit están registrados
-const useLitComponents = customElements.get('bucket-card'); // o 'file-list'
-
-if (useLitComponents) {
-  // 🔥 Usar Lit Web Components con paginación
-  renderWithLit(...);
-} else {
-  // 📦 Usar implementación Vanilla JS original
-  renderVanilla(...);
-}
-```
-
-### Archivos Modificados
-
-#### 1. `manager.html`
-Agregado script que carga componentes Lit solo en modo dev:
-
-```javascript
-<script type="module">
-  const isDev = window.location.port === '3001' || window.location.hostname === 'localhost';
-  if (isDev) {
-    import('/js/main.ts').catch(err => console.warn('Lit components not loaded:', err));
-  }
-</script>
-```
-
-#### 2. `public/js/main.ts` ✨ NUEVO
-Entry point de Vite que registra todos los componentes Lit:
-
-```typescript
-// Import Lit components (auto-register via @customElement decorators)
-import './components-lit/bucket/bucket-card.js';
-import './components-lit/explorer/file-list.js';
-import './components-lit/shared/pagination-controls.js';
-```
-
-#### 3. `BucketList.js`
-Ahora incluye dos implementaciones:
-
-- **`renderBucketsWithLit()`** - Usa `<bucket-card>` con eventos
-- **`renderBucketsVanilla()`** - Código original (58% más código)
-
-#### 4. `Explorer.js`
-Ahora incluye dos implementaciones:
-
-- **`renderExplorerWithLit()`** - Usa `<file-list>` con **PAGINACIÓN** (100 items/página)
-- **`renderExplorerVanilla()`** - Código original SIN paginación
-
-### Ventajas de Este Enfoque
-
-✅ **Zero Breaking Changes** - La app funciona igual en producción
-✅ **Progressive Enhancement** - Lit solo se carga en desarrollo
-✅ **Easy Testing** - Prueba ambos modos lado a lado
-✅ **Gradual Migration** - Puedes migrar componente por componente
-✅ **Production Ready** - Vanilla JS sigue siendo el fallback
-
-## 🐛 Notas de TypeScript
-
-Los errores de LSP sobre decorators son **esperados** hasta que se compile con Vite. Los decorators de Lit (`@property`, `@state`) usan TypeScript experimental y funcionan correctamente en runtime.
-
-Para desarrollo, ejecuta:
-```bash
-npm run dev:frontend
-```
-
-Vite compilará TypeScript correctamente y los errores desaparecerán.
-
-## 📚 Referencias
-
-- [Lit Documentation](https://lit.dev/)
-- [Vite Guide](https://vitejs.dev/guide/)
-- [TypeScript Decorators](https://www.typescriptlang.org/docs/handbook/decorators.html)
-- [Web Components MDN](https://developer.mozilla.org/en-US/docs/Web/Web_Components)
-
-## 🚀 Testing the Integration
-
-### Option 1: Vite Dev Server (Lit Components + Pagination)
-```bash
-# Terminal 1: Backend
-npm run dev
-
-# Terminal 2: Frontend with Vite
-npm run dev:frontend
-
-# Open: http://localhost:3001
-```
-
-**What you'll see:**
-- ✨ Lit Web Components (`<bucket-card>`, `<file-list>`)
-- 📄 **Pagination** in file lists (100 items per page)
-- ⚡ Hot Module Replacement (HMR)
-- 🎨 TypeScript errors in browser console (if any)
-
-### Option 2: Express Server (Vanilla JS Fallback)
-```bash
-npm run dev
-
-# Open: http://localhost:3000
-```
-
-**What you'll see:**
-- 📦 Original Vanilla JS components
-- ❌ No pagination (all items shown)
-- ✅ Proven stable code
-
-### Verify Lit Components are Working
-
-Open browser console and check:
-```javascript
-customElements.get('bucket-card')  // Should return class definition
-customElements.get('file-list')    // Should return class definition
-```
-
-If these return `undefined`, Lit components aren't loaded.
+Atlas Bucket Manager uses **Lit v3.2.1** for building modern, reusable Web Components with TypeScript. This document serves as a reference guide for creating new components following the established patterns.
 
 ---
 
-**Última actualización:** 2026-03-06  
-**Estado:** ✅ **INTEGRATED** - 3/10 componentes creados, 2/2 integrados en app
+## ✅ Current Architecture
+
+### Tech Stack
+- **Lit v3.2.1** - Web Components framework
+- **Vite v7.3.1** - Build tool with HMR
+- **TypeScript v5.9.3** - Type safety
+- **Tailwind CSS v3.4.17** - Utility-first CSS (compiled, ~15KB)
+
+### Build Configuration
+- ✅ `vite.config.ts` - Build and dev server
+- ✅ `tsconfig.frontend.json` - TypeScript for frontend
+- ✅ `tailwind.config.js` - Tailwind purge and production config
+- ✅ Scripts: `build:frontend`, `build:css`, `build:css:watch`
+
+---
+
+## 📦 Component Structure
+
+```
+public/js/components-lit/
+├── forms/
+│   └── login-form.ts                # Login component
+├── bucket/
+│   └── bucket-card.ts               # Bucket card with stats/actions
+├── explorer/
+│   ├── explorer-header.ts           # Navigation header
+│   ├── file-list.ts                 # File browser with pagination
+│   └── pagination-controls.ts       # Reusable pagination
+├── shared/
+│   └── toggle-switch.ts             # Reusable toggle
+├── modals/
+│   ├── preview-modal.ts             # File preview
+│   ├── share-modal.ts               # Share links
+│   ├── folder-modal.ts              # Create folder
+│   └── delete-modal.ts              # Delete confirmation
+├── styles/
+│   ├── index.ts                     # Main export
+│   ├── tailwind-classes.ts          # TW namespace
+│   ├── base.tw.ts                   # Forms, buttons
+│   ├── layout.tw.ts                 # Cards, spacing
+│   ├── modal.tw.ts                  # All modals
+│   ├── bucket.tw.ts                 # Bucket cards
+│   ├── explorer.tw.ts               # Explorer header
+│   ├── file-list.tw.ts              # File list
+│   ├── pagination.tw.ts             # Pagination
+│   └── login.tw.ts                  # Login form
+├── index.ts                         # Main entry point
+└── main.ts                          # Vite entry (registers all)
+```
+
+**Total: 11 Lit Components + 10 Tailwind Style Modules**
+
+---
+
+## 🏗️ How to Create a New Component
+
+### 1. Component File Structure
+
+```typescript
+// public/js/components-lit/[category]/my-component.ts
+import { LitElement, html } from 'lit';
+import { customElement, property, state } from 'lit/decorators.js';
+import { TW } from '../styles/tailwind-classes';
+
+@customElement('my-component')
+export class MyComponent extends LitElement {
+  // Public properties (reactive)
+  @property({ type: String }) title = '';
+  @property({ type: Boolean }) disabled = false;
+  
+  // Internal state (reactive)
+  @state() private _loading = false;
+
+  // Disable Shadow DOM to use Tailwind directly
+  createRenderRoot(): HTMLElement | DocumentFragment {
+    return this as unknown as HTMLElement;
+  }
+
+  // Event handlers (private methods with underscore)
+  private _handleClick() {
+    this.dispatchEvent(
+      new CustomEvent('my-event', {
+        detail: { value: 'data' },
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
+
+  // Render method
+  render() {
+    return html`
+      <div class="${TW.myComponent.container}">
+        <h1 class="${TW.myComponent.title}">${this.title}</h1>
+        <button 
+          class="${TW.myComponent.button}"
+          ?disabled="${this.disabled}"
+          @click="${this._handleClick}">
+          Click Me
+        </button>
+      </div>
+    `;
+  }
+}
+
+// TypeScript declaration
+declare global {
+  interface HTMLElementTagNameMap {
+    'my-component': MyComponent;
+  }
+}
+```
+
+### 2. Create Tailwind Style Module
+
+```typescript
+// public/js/components-lit/styles/my-component.tw.ts
+export const myComponentStyles = {
+  container: "p-4 bg-white dark:bg-dark-900 rounded-lg",
+  title: "text-xl font-bold text-slate-900 dark:text-white",
+  button: "px-4 py-2 bg-rose-500 text-white rounded hover:bg-rose-600 disabled:opacity-50",
+};
+```
+
+### 3. Add to Tailwind Classes Namespace
+
+```typescript
+// public/js/components-lit/styles/tailwind-classes.ts
+import { myComponentStyles } from './my-component.tw';
+
+export const TW = {
+  // ... existing styles
+  myComponent: myComponentStyles,
+};
+```
+
+### 4. Register Component
+
+```typescript
+// public/js/main.ts
+import './components-lit/[category]/my-component.js';
+```
+
+### 5. Build
+
+```bash
+# Build frontend (TypeScript → JavaScript)
+npm run build:frontend
+
+# Build CSS (Tailwind compilation)
+npm run build:css
+
+# Or watch mode for development
+npm run build:css:watch
+```
+
+---
+
+## 🎨 Styling Guidelines
+
+### Why No Shadow DOM?
+
+We **disable Shadow DOM** with `createRenderRoot()` to use Tailwind CSS directly:
+
+```typescript
+createRenderRoot(): HTMLElement | DocumentFragment {
+  return this as unknown as HTMLElement;
+}
+```
+
+**Benefits:**
+- ✅ Direct Tailwind class usage
+- ✅ No style duplication
+- ✅ Smaller bundle size
+- ✅ Dark mode works automatically
+
+### Tailwind Class Organization
+
+**Modular approach** (10 style files):
+
+- `base.tw.ts` - Forms, buttons, inputs, labels
+- `layout.tw.ts` - Cards, containers, spacing
+- `modal.tw.ts` - All modal components (shared styles)
+- `bucket.tw.ts` - Bucket card specific
+- `explorer.tw.ts` - Explorer header
+- `file-list.tw.ts` - File list and items
+- `pagination.tw.ts` - Pagination controls
+- `login.tw.ts` - Login form
+
+### Naming Convention
+
+```typescript
+export const componentNameStyles = {
+  container: "classes-here",
+  title: "classes-here",
+  button: "classes-here",
+  buttonPrimary: "additional-classes", // Modifiers
+};
+```
+
+---
+
+## 🔄 Component Patterns
+
+### Pattern 1: Event Emission
+
+```typescript
+private _handleAction() {
+  this.dispatchEvent(
+    new CustomEvent('action-name', {
+      detail: { data: 'value' },
+      bubbles: true,     // Event bubbles up DOM
+      composed: true,    // Crosses shadow boundaries
+    })
+  );
+}
+```
+
+### Pattern 2: Reactive Properties
+
+```typescript
+@property({ type: String }) name = '';           // Public prop
+@property({ type: Boolean }) open = false;       // Public prop
+@state() private _internalState = 0;             // Private state
+```
+
+### Pattern 3: Conditional Rendering
+
+```typescript
+render() {
+  return html`
+    ${this.loading ? html`
+      <div>Loading...</div>
+    ` : html`
+      <div>Content</div>
+    `}
+  `;
+}
+```
+
+### Pattern 4: List Rendering
+
+```typescript
+render() {
+  return html`
+    <ul>
+      ${this.items.map(item => html`
+        <li key="${item.id}">${item.name}</li>
+      `)}
+    </ul>
+  `;
+}
+```
+
+### Pattern 5: Public API Methods
+
+```typescript
+// Public method (no underscore)
+public clearSelection() {
+  this._selectedItems = [];
+  this.requestUpdate();
+}
+
+// Private method (with underscore)
+private _handleClick() {
+  // ...
+}
+```
+
+---
+
+## 🧪 Integration with Vanilla JS
+
+### Usage in HTML
+
+```html
+<!-- manager.html -->
+<script type="module" src="/js/main.ts"></script>
+
+<!-- Use component -->
+<my-component 
+  title="Hello"
+  .data="${complexObject}"
+  @my-event="${handleEvent}">
+</my-component>
+```
+
+### Usage in Vanilla JS Orchestrators
+
+```javascript
+// public/js/components/MyOrchestrator.js
+export function renderWithLit(data) {
+  const container = document.getElementById('container');
+  
+  data.forEach(item => {
+    const component = document.createElement('my-component');
+    
+    // Set properties
+    component.title = item.title;
+    component.disabled = item.disabled;
+    
+    // Listen to events
+    component.addEventListener('my-event', (e) => {
+      console.log('Event data:', e.detail);
+    });
+    
+    container.appendChild(component);
+  });
+}
+```
+
+---
+
+## 📊 Component Examples
+
+### Example 1: Simple Button Component
+
+```typescript
+@customElement('app-button')
+export class AppButton extends LitElement {
+  @property({ type: String }) variant: 'primary' | 'secondary' = 'primary';
+  @property({ type: Boolean }) loading = false;
+  
+  createRenderRoot() { return this; }
+  
+  render() {
+    return html`
+      <button 
+        class="${this._getButtonClasses()}"
+        ?disabled="${this.loading}"
+        @click="${this._handleClick}">
+        ${this.loading ? 'Loading...' : html`<slot></slot>`}
+      </button>
+    `;
+  }
+  
+  private _getButtonClasses() {
+    const base = "px-4 py-2 rounded font-medium transition-colors";
+    const variants = {
+      primary: "bg-rose-500 hover:bg-rose-600 text-white",
+      secondary: "bg-slate-200 hover:bg-slate-300 text-slate-900",
+    };
+    return `${base} ${variants[this.variant]}`;
+  }
+  
+  private _handleClick() {
+    this.dispatchEvent(new CustomEvent('click'));
+  }
+}
+```
+
+### Example 2: Modal Component
+
+```typescript
+@customElement('app-modal')
+export class AppModal extends LitElement {
+  @property({ type: Boolean }) open = false;
+  @property({ type: String }) title = '';
+  
+  createRenderRoot() { return this; }
+  
+  render() {
+    if (!this.open) return html``;
+    
+    return html`
+      <div class="${TW.modal.backdrop}" @click="${this._handleClose}">
+        <div class="${TW.modal.content}" @click="${(e: Event) => e.stopPropagation()}">
+          <h2 class="${TW.modal.title}">${this.title}</h2>
+          <div class="${TW.modal.body}">
+            <slot></slot>
+          </div>
+          <div class="${TW.modal.footer}">
+            <button @click="${this._handleClose}">Close</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  private _handleClose() {
+    this.open = false;
+    this.dispatchEvent(new CustomEvent('close'));
+  }
+}
+```
+
+---
+
+## 🚀 Development Workflow
+
+### Commands
+
+```bash
+# Start backend
+npm run dev
+
+# Watch Tailwind CSS (in separate terminal)
+npm run build:css:watch
+
+# Build for production
+npm run build
+```
+
+### Hot Module Replacement
+
+Vite provides **instant HMR** for Lit components in development mode:
+
+1. Save `.ts` file
+2. Browser updates automatically
+3. Component state preserved
+
+---
+
+## ✅ Best Practices
+
+### DO ✅
+- ✅ Use `@customElement` decorator for registration
+- ✅ Disable Shadow DOM with `createRenderRoot()`
+- ✅ Use Tailwind classes from `TW` namespace
+- ✅ Prefix private methods with underscore (`_handleClick`)
+- ✅ Use `@property` for reactive public props
+- ✅ Use `@state` for reactive private state
+- ✅ Emit custom events with `bubbles: true, composed: true`
+- ✅ Add TypeScript declarations (`HTMLElementTagNameMap`)
+
+### DON'T ❌
+- ❌ Don't use inline styles (use Tailwind classes)
+- ❌ Don't use Shadow DOM (breaks Tailwind)
+- ❌ Don't forget to build CSS after style changes
+- ❌ Don't use `any` type in TypeScript
+- ❌ Don't import CSS files (use Tailwind classes only)
+
+---
+
+## 📚 References
+
+- [Lit Documentation](https://lit.dev/)
+- [Lit Decorators](https://lit.dev/docs/components/decorators/)
+- [Vite Guide](https://vitejs.dev/guide/)
+- [TypeScript Decorators](https://www.typescriptlang.org/docs/handbook/decorators.html)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+
+---
+
+## 📝 Component Checklist
+
+When creating a new component:
+
+- [ ] Create `.ts` file in appropriate category folder
+- [ ] Add `@customElement` decorator with kebab-case name
+- [ ] Disable Shadow DOM with `createRenderRoot()`
+- [ ] Create style module in `styles/` folder
+- [ ] Add styles to `TW` namespace in `tailwind-classes.ts`
+- [ ] Use reactive `@property` and `@state` decorators
+- [ ] Emit events with `bubbles: true, composed: true`
+- [ ] Add TypeScript declaration for `HTMLElementTagNameMap`
+- [ ] Register in `main.ts`
+- [ ] Build frontend and CSS
+- [ ] Test in browser
+
+---
+
+**Version 0.0.8** - Lit Web Components Architecture  
+**Last Updated**: 2026-03-09  
+**Status**: ✅ **PRODUCTION READY** - 11 components deployed
