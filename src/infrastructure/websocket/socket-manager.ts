@@ -18,22 +18,22 @@ export class SocketManager {
 
   private setupEventHandlers(): void {
     this.io.on('connection', (socket: Socket) => {
-      console.log(`WebSocket client connected: ${socket.id}`);
+      console.log(`✅ WebSocket client connected: ${socket.id}`);
 
       // Subscribe to copy job updates
-      socket.on('subscribe-copy-job', (data: { jobId: string }) => {
-        socket.join(`copy-job-${data.jobId}`);
-        console.log(`Client ${socket.id} subscribed to job ${data.jobId}`);
+      socket.on('copy:subscribe', (jobId: string) => {
+        socket.join(`copy-job-${jobId}`);
+        console.log(`📡 Client ${socket.id} subscribed to job ${jobId}`);
       });
 
       // Unsubscribe from copy job updates
-      socket.on('unsubscribe-copy-job', (data: { jobId: string }) => {
-        socket.leave(`copy-job-${data.jobId}`);
-        console.log(`Client ${socket.id} unsubscribed from job ${data.jobId}`);
+      socket.on('copy:unsubscribe', (jobId: string) => {
+        socket.leave(`copy-job-${jobId}`);
+        console.log(`🔌 Client ${socket.id} unsubscribed from job ${jobId}`);
       });
 
       socket.on('disconnect', () => {
-        console.log(`WebSocket client disconnected: ${socket.id}`);
+        console.log(`❌ WebSocket client disconnected: ${socket.id}`);
       });
     });
   }
@@ -42,35 +42,28 @@ export class SocketManager {
    * Emit copy job progress to all subscribed clients
    */
   emitCopyProgress(job: CopyJob): void {
-    this.io.to(`copy-job-${job.id}`).emit('copy-progress', {
-      jobId: job.id,
-      status: job.status,
-      progress: job.progress,
-      errors: job.errors
-    });
+    this.io.to(`copy-job-${job.id}`).emit('copy:progress', job);
   }
 
   /**
    * Emit copy job completed event
    */
   emitCopyCompleted(job: CopyJob): void {
-    this.io.to(`copy-job-${job.id}`).emit('copy-completed', {
-      jobId: job.id,
-      status: job.status,
-      progress: job.progress,
-      errors: job.errors
-    });
+    this.io.to(`copy-job-${job.id}`).emit('copy:completed', job);
   }
 
   /**
    * Emit copy job failed event
    */
   emitCopyFailed(job: CopyJob): void {
-    this.io.to(`copy-job-${job.id}`).emit('copy-failed', {
-      jobId: job.id,
-      status: job.status,
-      errors: job.errors
-    });
+    this.io.to(`copy-job-${job.id}`).emit('copy:failed', job);
+  }
+
+  /**
+   * Emit copy job cancelled event
+   */
+  emitCopyCancelled(job: CopyJob): void {
+    this.io.to(`copy-job-${job.id}`).emit('copy:cancelled', job);
   }
 
   getIO(): SocketIOServer {
