@@ -9,12 +9,6 @@ dist
 dist-frontend
 *.map
 
-# Source code (not needed in final image)
-src
-public
-uploads
-temp
-
 # Development
 .git
 .gitignore
@@ -46,3 +40,6 @@ docker-compose*
 # OS
 .DS_Store
 Thumbs.db
+
+# Uploads (temporal)
+uploads/*
