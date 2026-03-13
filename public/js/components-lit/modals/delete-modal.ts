@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { TW } from "../styles/tailwind-classes";
-import { deleteModalTranslations } from "../../i18n/delete-modal.i18n";
+import { deleteModalTranslations } from "../../i18n/translations/delete-modal.i18n";
 
 export interface DeleteTarget {
   providerId: string;

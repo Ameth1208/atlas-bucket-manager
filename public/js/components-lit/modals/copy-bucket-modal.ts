@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { TW } from '../styles/tailwind-classes';
-import { copyModalTranslations } from '../../i18n/copy-modal.i18n';
+import { copyModalTranslations } from '../../i18n/translations/copy-modal.i18n';
 
 export interface Provider {
   id: string;

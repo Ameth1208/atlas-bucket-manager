@@ -12,6 +12,7 @@ import './components-lit/explorer/explorer-header.ts';
 // Shared
 import './components-lit/shared/pagination-controls.ts';
 import './components-lit/shared/toggle-switch.ts';
+import './components-lit/shared/app-version.ts';
 
 // Modals
 import './components-lit/modals/preview-modal.ts';

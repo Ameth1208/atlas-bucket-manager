@@ -1,6 +1,7 @@
 import { LitElement, html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { TW } from "../styles/tailwind-classes";
+import { explorerTranslations } from "../../i18n/translations/explorer.i18n";
 
 export interface BreadcrumbPart {
   name: string;
@@ -13,10 +14,30 @@ export class ExplorerHeader extends LitElement {
   @property({ type: Array }) breadcrumbs: BreadcrumbPart[] = [];
   @property({ type: Boolean }) showBulkDelete = false;
   @property({ type: Number }) selectedCount = 0;
+  @state() currentLang = 'en';
 
   // Desactivar Shadow DOM para usar Tailwind directamente
   createRenderRoot(): HTMLElement | DocumentFragment {
     return this as unknown as HTMLElement;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.currentLang = localStorage.getItem('lang') || 'en';
+    window.addEventListener('languageChanged', this.handleLanguageChange as EventListener);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('languageChanged', this.handleLanguageChange as EventListener);
+  }
+
+  private handleLanguageChange = (e: Event) => {
+    this.currentLang = (e as CustomEvent).detail;
+  };
+
+  private t(key: string): string {
+    return explorerTranslations[this.currentLang]?.[key] || explorerTranslations['en']?.[key] || key;
   }
 
   private handleBack() {
@@ -90,7 +111,7 @@ export class ExplorerHeader extends LitElement {
               <span
                 class="${TW.explorer.header.breadcrumbRoot}"
                 @click=${() => this.handleNavigate("")}
-                >root</span
+                >${this.t('rootLabel')}</span
               >
               ${this.breadcrumbs.map(
                 (part) => html`
@@ -114,13 +135,13 @@ export class ExplorerHeader extends LitElement {
           <button
             class="${TW.explorer.toolbar.btnFolder}"
             @click=${this.handleCreateFolder}
-            data-tooltip="New Folder"
+            data-tooltip="${this.t('newFolderTooltip')}"
           >
             <iconify-icon icon="ph:folder-plus-bold" width="20"></iconify-icon>
           </button>
           <label class="${TW.explorer.toolbar.btnUpload}">
             <iconify-icon icon="ph:upload-simple-bold" width="18"></iconify-icon>
-            <span>Upload</span>
+            <span>${this.t('uploadBtn')}</span>
             <input
               type="file"
               multiple
@@ -134,7 +155,7 @@ export class ExplorerHeader extends LitElement {
                   class="${TW.explorer.toolbar.btnBulkDelete}"
                   @click=${this.handleBulkDelete}
                 >
-                  Delete (${this.selectedCount})
+                  ${this.t('deleteSelectedBtn')} (${this.selectedCount})
                 </button>
               `
             : ""}

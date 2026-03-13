@@ -1,6 +1,7 @@
 import { LitElement, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { TW } from '../styles/tailwind-classes';
+import { previewModalTranslations } from '../../i18n/translations/preview-modal.i18n';
 
 export interface FilePreview {
   providerId: string;
@@ -14,10 +15,30 @@ export class PreviewModal extends LitElement {
   @property({ type: Object }) file: FilePreview | null = null;
   @state() loading = false;
   @state() downloadUrl = '';
+  @state() currentLang = 'en';
 
   // Disable Shadow DOM to use Tailwind directly
   createRenderRoot(): HTMLElement | DocumentFragment {
     return this as unknown as HTMLElement;
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.currentLang = localStorage.getItem('lang') || 'en';
+    window.addEventListener('languageChanged', this.handleLanguageChange as EventListener);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.removeEventListener('languageChanged', this.handleLanguageChange as EventListener);
+  }
+
+  private handleLanguageChange = (e: Event) => {
+    this.currentLang = (e as CustomEvent).detail;
+  };
+
+  private t(key: string): string {
+    return previewModalTranslations[this.currentLang]?.[key] || previewModalTranslations['en']?.[key] || key;
   }
 
   // ============================================
@@ -104,8 +125,8 @@ export class PreviewModal extends LitElement {
       return html`
         <file-placeholder 
           icon="ph:android-logo-fill" 
-          title="Android Package (APK)" 
-          message="Preview not available for binaries."
+          title="${this.t('apkTitle')}" 
+          message="${this.t('apkMessage')}"
           iconColor="android"
         ></file-placeholder>
       `;
@@ -115,8 +136,8 @@ export class PreviewModal extends LitElement {
     return html`
       <file-placeholder 
         icon="ph:file-dashed-duotone" 
-        title="No Preview Available" 
-        message="This file type cannot be previewed."
+        title="${this.t('noPreviewTitle')}" 
+        message="${this.t('noPreviewMessage')}"
         iconColor="default"
       ></file-placeholder>
     `;
@@ -184,7 +205,7 @@ export class PreviewModal extends LitElement {
             <div class="${TW.previewModal.headerActions}">
               <button class="${TW.previewModal.btnDownload}" @click="${this.handleDownload}">
                 <iconify-icon icon="ph:download-bold"></iconify-icon>
-                Download
+                ${this.t('downloadBtn')}
               </button>
               <button class="${TW.previewModal.btnClose}" @click="${this.handleClose}">
                 <iconify-icon icon="ph:x-bold" width="20"></iconify-icon>
