@@ -43,5 +43,33 @@ export const previewModalTranslations: Record<string, Record<string, string>> = 
     apkMessage: '二进制文件无法预览。',
     noPreviewTitle: '无法预览',
     noPreviewMessage: '此文件类型无法预览。'
+  },
+  de: {
+    downloadBtn: 'Herunterladen',
+    apkTitle: 'Android-Paket (APK)',
+    apkMessage: 'Vorschau für Binärdateien nicht verfügbar.',
+    noPreviewTitle: 'Keine Vorschau verfügbar',
+    noPreviewMessage: 'Dieser Dateityp kann nicht in der Vorschau angezeigt werden.'
+  },
+  it: {
+    downloadBtn: 'Scarica',
+    apkTitle: 'Pacchetto Android (APK)',
+    apkMessage: 'Anteprima non disponibile per file binari.',
+    noPreviewTitle: 'Nessuna anteprima disponibile',
+    noPreviewMessage: 'Questo tipo di file non può essere visualizzato in anteprima.'
+  },
+  ru: {
+    downloadBtn: 'Скачать',
+    apkTitle: 'Android пакет (APK)',
+    apkMessage: 'Предпросмотр для бинарных файлов недоступен.',
+    noPreviewTitle: 'Предпросмотр недоступен',
+    noPreviewMessage: 'Этот тип файла не может быть предварительно просмотрен.'
+  },
+  he: {
+    downloadBtn: 'הורד',
+    apkTitle: 'חבילת Android (APK)',
+    apkMessage: 'תצוגה מקדימה לא זמינה עבור קבצים בינאריים.',
+    noPreviewTitle: 'אין תצוגה מקדימה',
+    noPreviewMessage: 'סוג קובץ זה לא ניתן לתצוגה מקדימה.'
   }
 };

@@ -78,6 +78,42 @@ export const translations: Record<string, Record<string, string>> = {
     ...folderModalTranslations.zh,
     ...previewModalTranslations.zh,
     ...explorerTranslations.zh
+  },
+  de: {
+    ...commonTranslations.de,
+    ...copyModalTranslations.de,
+    ...deleteModalTranslations.de,
+    ...shareModalTranslations.de,
+    ...folderModalTranslations.de,
+    ...previewModalTranslations.de,
+    ...explorerTranslations.de
+  },
+  it: {
+    ...commonTranslations.it,
+    ...copyModalTranslations.it,
+    ...deleteModalTranslations.it,
+    ...shareModalTranslations.it,
+    ...folderModalTranslations.it,
+    ...previewModalTranslations.it,
+    ...explorerTranslations.it
+  },
+  ru: {
+    ...commonTranslations.ru,
+    ...copyModalTranslations.ru,
+    ...deleteModalTranslations.ru,
+    ...shareModalTranslations.ru,
+    ...folderModalTranslations.ru,
+    ...previewModalTranslations.ru,
+    ...explorerTranslations.ru
+  },
+  he: {
+    ...commonTranslations.he,
+    ...copyModalTranslations.he,
+    ...deleteModalTranslations.he,
+    ...shareModalTranslations.he,
+    ...folderModalTranslations.he,
+    ...previewModalTranslations.he,
+    ...explorerTranslations.he
   }
 };
 

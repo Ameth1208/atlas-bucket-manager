@@ -43,5 +43,33 @@ export const explorerTranslations: Record<string, Record<string, string>> = {
     uploadBtn: '上传',
     deleteBtn: '删除',
     deleteSelectedBtn: '删除'
+  },
+  de: {
+    rootLabel: 'Stammverzeichnis',
+    newFolderTooltip: 'Neuer Ordner',
+    uploadBtn: 'Hochladen',
+    deleteBtn: 'Löschen',
+    deleteSelectedBtn: 'Löschen'
+  },
+  it: {
+    rootLabel: 'radice',
+    newFolderTooltip: 'Nuova cartella',
+    uploadBtn: 'Carica',
+    deleteBtn: 'Elimina',
+    deleteSelectedBtn: 'Elimina'
+  },
+  ru: {
+    rootLabel: 'корень',
+    newFolderTooltip: 'Новая папка',
+    uploadBtn: 'Загрузить',
+    deleteBtn: 'Удалить',
+    deleteSelectedBtn: 'Удалить'
+  },
+  he: {
+    rootLabel: 'שורש',
+    newFolderTooltip: 'תיקיה חדשה',
+    uploadBtn: 'העלה',
+    deleteBtn: 'מחק',
+    deleteSelectedBtn: 'מחק'
   }
 };

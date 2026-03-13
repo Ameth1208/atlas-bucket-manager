@@ -85,5 +85,61 @@ export const shareModalTranslations: Record<string, Record<string, string>> = {
     generateBtn: '生成链接',
     copyBtn: '复制链接',
     toastCopied: '已复制!'
+  },
+  de: {
+    shareTitle: 'Datei teilen',
+    shareDescription: 'Erstelle einen temporären Download-Link für',
+    expiryLabel: 'ABLAUFZEIT',
+    expiry1min: '1 Minute',
+    expiry1hour: '1 Stunde',
+    expiry24hours: '24 Stunden',
+    expiry7days: '7 Tage',
+    urlLabel: 'GENERIERTER LINK',
+    cancelBtn: 'Abbrechen',
+    generateBtn: 'Link generieren',
+    copyBtn: 'Link kopieren',
+    toastCopied: 'Kopiert!'
+  },
+  it: {
+    shareTitle: 'Condividi file',
+    shareDescription: 'Genera un link di download temporaneo per',
+    expiryLabel: 'TEMPO DI SCADENZA',
+    expiry1min: '1 Minuto',
+    expiry1hour: '1 Ora',
+    expiry24hours: '24 Ore',
+    expiry7days: '7 Giorni',
+    urlLabel: 'LINK GENERATO',
+    cancelBtn: 'Annulla',
+    generateBtn: 'Genera link',
+    copyBtn: 'Copia link',
+    toastCopied: 'Copiato!'
+  },
+  ru: {
+    shareTitle: 'Поделиться файлом',
+    shareDescription: 'Создать временную ссылку для скачивания',
+    expiryLabel: 'ВРЕМЯ ИСТЕЧЕНИЯ',
+    expiry1min: '1 минута',
+    expiry1hour: '1 час',
+    expiry24hours: '24 часа',
+    expiry7days: '7 дней',
+    urlLabel: 'ССЫЛКА СОЗДАНА',
+    cancelBtn: 'Отмена',
+    generateBtn: 'Создать ссылку',
+    copyBtn: 'Копировать ссылку',
+    toastCopied: 'Скопировано!'
+  },
+  he: {
+    shareTitle: 'שתף קובץ',
+    shareDescription: 'צור קישור הורדה זמני עבור',
+    expiryLabel: 'זמן תפוגה',
+    expiry1min: 'דקה אחת',
+    expiry1hour: 'שעה',
+    expiry24hours: '24 שעות',
+    expiry7days: '7 ימים',
+    urlLabel: 'קישור שנוצר',
+    cancelBtn: 'ביטול',
+    generateBtn: 'צור קישור',
+    copyBtn: 'העתק קישור',
+    toastCopied: 'הועתק!'
   }
 };

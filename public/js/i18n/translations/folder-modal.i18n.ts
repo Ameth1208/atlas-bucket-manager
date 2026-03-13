@@ -43,5 +43,33 @@ export const folderModalTranslations: Record<string, Record<string, string>> = {
     folderPlaceholder: '文件夹名称',
     cancelBtn: '取消',
     createBtn: '创建'
+  },
+  de: {
+    folderTitle: 'Neuer Ordner',
+    folderDescription: 'Geben Sie einen Namen für den neuen Ordner ein.',
+    folderPlaceholder: 'ordner-name',
+    cancelBtn: 'Abbrechen',
+    createBtn: 'Erstellen'
+  },
+  it: {
+    folderTitle: 'Nuova cartella',
+    folderDescription: 'Inserisci un nome per la nuova cartella.',
+    folderPlaceholder: 'nome-cartella',
+    cancelBtn: 'Annulla',
+    createBtn: 'Crea'
+  },
+  ru: {
+    folderTitle: 'Новая папка',
+    folderDescription: 'Введите имя для новой папки.',
+    folderPlaceholder: 'имя-папки',
+    cancelBtn: 'Отмена',
+    createBtn: 'Создать'
+  },
+  he: {
+    folderTitle: 'תיקיה חדשה',
+    folderDescription: 'הזן שם עבור התיקיה החדשה.',
+    folderPlaceholder: 'שם-תיקיה',
+    cancelBtn: 'ביטול',
+    createBtn: 'צור'
   }
 };
