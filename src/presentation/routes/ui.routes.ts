@@ -1,5 +1,12 @@
 import { Router, Request, Response } from "express";
 import path from "path";
+import fs from "fs";
+
+// Read app version from package.json
+const packageJson = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "../../../package.json"), "utf-8")
+);
+const APP_VERSION = packageJson.version;
 
 export const createUiRoutes = (authMiddleware: any) => {
   const router = Router();
@@ -13,16 +20,22 @@ export const createUiRoutes = (authMiddleware: any) => {
   router.get("/", (req: Request, res: Response) => res.redirect("/login"));
 
   router.get("/login", (req: Request, res: Response) => {
-    res.sendFile(path.join(htmlDir, "login.html"));
+    const html = fs.readFileSync(path.join(htmlDir, "login.html"), "utf-8")
+      .replace(/\{\{APP_VERSION\}\}/g, APP_VERSION);
+    res.send(html);
   });
 
   router.get("/manager", authMiddleware, (req: Request, res: Response) => {
-    res.sendFile(path.join(htmlDir, "manager.html"));
+    const html = fs.readFileSync(path.join(htmlDir, "manager.html"), "utf-8")
+      .replace(/\{\{APP_VERSION\}\}/g, APP_VERSION);
+    res.send(html);
   });
 
   // SPA routing - serve manager.html for all /manager/* routes
   router.get(/^\/manager\/.*/, authMiddleware, (req: Request, res: Response) => {
-    res.sendFile(path.join(htmlDir, "manager.html"));
+    const html = fs.readFileSync(path.join(htmlDir, "manager.html"), "utf-8")
+      .replace(/\{\{APP_VERSION\}\}/g, APP_VERSION);
+    res.send(html);
   });
 
   return router;
