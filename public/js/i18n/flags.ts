@@ -7,5 +7,9 @@ export const flags = {
   fr: 'flagpack:fr',
   pt: 'flagpack:br',
   ja: 'flagpack:jp',
-  zh: 'flagpack:cn'
+  zh: 'flagpack:cn',
+  de: 'flagpack:de',
+  it: 'flagpack:it',
+  ru: 'flagpack:ru',
+  he: 'flagpack:il'
 };

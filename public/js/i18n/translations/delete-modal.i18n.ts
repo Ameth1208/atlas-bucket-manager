@@ -85,5 +85,61 @@ export const deleteModalTranslations: Record<string, Record<string, string>> = {
     cancelBtn: '取消',
     deleteBtn: '删除',
     bucketName: '存储桶'
+  },
+  de: {
+    deleteTitle: 'Löschen',
+    deleteBucketTitle: 'Bucket löschen',
+    deleteItemTitle: 'Element löschen',
+    deleteBucketDesc: 'Diese Aktion ist irreversibel. Geben Sie den Bucket-Namen zur Bestätigung ein.',
+    deleteItemDesc: 'Löschen bestätigen? Diese Aktion kann nicht rückgängig gemacht werden.',
+    deleteConfirmLabel: 'Bucket-Namen zur Bestätigung eingeben:',
+    deleteConfirmPlaceholder: 'bucket-name',
+    deleteErrorConfirm: 'Bucket-Name stimmt nicht überein',
+    deleteErrorEmpty: 'Bitte geben Sie den Bucket-Namen ein',
+    cancelBtn: 'Abbrechen',
+    deleteBtn: 'Löschen',
+    bucketName: 'Bucket'
+  },
+  it: {
+    deleteTitle: 'Elimina',
+    deleteBucketTitle: 'Elimina Bucket',
+    deleteItemTitle: 'Elimina elemento',
+    deleteBucketDesc: 'Questa azione è irreversibile. Digita il nome del bucket per confermare.',
+    deleteItemDesc: 'Confermare eliminazione? Questa azione non può essere annullata.',
+    deleteConfirmLabel: 'Digita il nome del bucket per confermare:',
+    deleteConfirmPlaceholder: 'nome-bucket',
+    deleteErrorConfirm: 'Il nome del bucket non corrisponde',
+    deleteErrorEmpty: 'Per favore inserisci il nome del bucket',
+    cancelBtn: 'Annulla',
+    deleteBtn: 'Elimina',
+    bucketName: 'Bucket'
+  },
+  ru: {
+    deleteTitle: 'Удалить',
+    deleteBucketTitle: 'Удалить хранилище',
+    deleteItemTitle: 'Удалить элемент',
+    deleteBucketDesc: 'Это действие необратимо. Введите имя хранилища для подтверждения.',
+    deleteItemDesc: 'Подтвердить удаление? Это действие нельзя отменить.',
+    deleteConfirmLabel: 'Введите имя хранилища для подтверждения:',
+    deleteConfirmPlaceholder: 'имя-хранилища',
+    deleteErrorConfirm: 'Имя хранилища не совпадает',
+    deleteErrorEmpty: 'Пожалуйста, введите имя хранилища',
+    cancelBtn: 'Отмена',
+    deleteBtn: 'Удалить',
+    bucketName: 'Хранилище'
+  },
+  he: {
+    deleteTitle: 'מחק',
+    deleteBucketTitle: 'מחק דלי',
+    deleteItemTitle: 'מחק פריט',
+    deleteBucketDesc: 'פעולה זו היא בלתי הפיכה. הקלד את שם הדלי כדי לאשר מחיקה.',
+    deleteItemDesc: 'אשר מחיקה? לא ניתן לבטל פעולה זו.',
+    deleteConfirmLabel: 'הקלד את שם הדלי לאישור:',
+    deleteConfirmPlaceholder: 'שם-דלי',
+    deleteErrorConfirm: 'שם הדלי לא תואם',
+    deleteErrorEmpty: 'אנא הזן את שם הדלי',
+    cancelBtn: 'ביטול',
+    deleteBtn: 'מחק',
+    bucketName: 'דלי'
   }
 };
