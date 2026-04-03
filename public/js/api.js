@@ -37,9 +37,13 @@ export const api = {
     getUrl: async (providerId, bucket, file, expiry = 3600) => 
         handleResponse(await fetch(`/api/buckets/${providerId}/${bucket}/objects/${encodeURIComponent(file)}/url?expiry=${expiry}`)),
     
-    upload: async (providerId, bucket, files, prefix = '') => {
+    upload: async (providerId, bucket, files, prefix = '', uploadId = null, paths = null) => {
         const formData = new FormData();
         formData.append('prefix', prefix);
+        if (uploadId) formData.append('uploadId', uploadId);
+        if (paths) {
+            for (const p of paths) formData.append('paths', p);
+        }
         for (const file of files) formData.append('files', file);
         return handleResponse(await fetch(`/api/buckets/${providerId}/${bucket}/upload`, {
             method: 'POST',
@@ -79,13 +83,14 @@ export const api = {
     },
 
     // Copy operations
-    startCopy: async (sourceProviderId, sourceBucket, targetProviderId, targetBucket, options = {}) =>
+    startCopy: async (sourceProviderId, sourceBucket, targetProviderId, targetBucket, options = {}, sourcePrefix = null) =>
         handleResponse(await fetch('/api/copy/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 sourceProviderId,
                 sourceBucket,
+                sourcePrefix: sourcePrefix || undefined,
                 targetProviderId,
                 targetBucket,
                 options

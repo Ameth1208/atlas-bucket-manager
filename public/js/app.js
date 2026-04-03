@@ -3,7 +3,7 @@ import { initLanguage, setLanguage, renderLanguageSelector, t } from '/js/i18n.j
 import { api } from '/js/api.js';
 import { store } from '/js/store.js';
 import { renderBuckets } from '/js/components/BucketList.js';
-import { openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload, toggleSelect, bulkDelete } from '/js/components/Explorer.js';
+import { openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload, handleFolderUpload, handleFolderUploadDirect, toggleSelect, bulkDelete } from '/js/components/Explorer.js';
 import { renderSupportButton } from '/js/components/SupportButton.js';
 import { initTooltips } from '/js/components/Tooltip.js';
 
@@ -95,12 +95,43 @@ function initializeWebSocket() {
         transports: ['websocket', 'polling']
     });
 
+    // Expose socket globally so Explorer.js can subscribe for upload progress
+    window._socket = socket;
+
     socket.on('connect', () => {
         console.log('✅ WebSocket connected');
     });
 
     socket.on('disconnect', () => {
         console.log('🔌 WebSocket disconnected');
+    });
+
+    // Upload progress events
+    socket.on('upload:start', (data) => {
+        const panel = document.getElementById('uploadProgressPanel');
+        if (panel) panel.startUpload(data.uploadId, { total: data.total, bucket: data.bucket });
+    });
+
+    socket.on('upload:progress', (data) => {
+        const panel = document.getElementById('uploadProgressPanel');
+        if (panel) panel.updateProgress(data.uploadId, { current: data.current, total: data.total, fileName: data.fileName });
+    });
+
+    socket.on('upload:complete', (data) => {
+        const panel = document.getElementById('uploadProgressPanel');
+        if (panel) {
+            panel.completeUpload(data.uploadId);
+            showToast(`Upload complete: ${data.total} file${data.total !== 1 ? 's' : ''}`, 'success');
+            setTimeout(() => panel.removeJob(data.uploadId), 4000);
+        }
+    });
+
+    socket.on('upload:error', (data) => {
+        const panel = document.getElementById('uploadProgressPanel');
+        if (panel) {
+            panel.failUpload(data.uploadId, data.error);
+            showToast('Upload failed', 'error');
+        }
     });
 
     socket.on('copy:progress', (job) => {
@@ -179,7 +210,8 @@ async function startCopyJob(detail) {
             detail.sourceBucket,
             detail.targetProviderId,
             detail.targetBucket,
-            detail.options
+            detail.options,
+            detail.sourcePrefix || null
         );
 
         if (result.error) {
@@ -470,14 +502,58 @@ function handleRouting() {
 
 window.addEventListener('popstate', handleRouting);
 
-// 9. Expose Global API
+// 9. Global Confirm Dialog (Promise-based, replaces native confirm())
+function showConfirm(message, options = {}) {
+    return new Promise((resolve) => {
+        const dialog = document.getElementById('confirmDialog');
+        if (!dialog) { resolve(false); return; }
+
+        dialog.message = message;
+        dialog.title = options.title || '';
+        dialog.icon = options.icon || '';
+        dialog.confirmText = options.confirmText || 'Confirm';
+        dialog.cancelText = options.cancelText || 'Cancel';
+        dialog.danger = options.danger || false;
+        dialog.open = true;
+
+        const onConfirm = () => { cleanup(); resolve(true); };
+        const onCancel  = () => { cleanup(); resolve(false); };
+
+        function cleanup() {
+            dialog.removeEventListener('confirm', onConfirm);
+            dialog.removeEventListener('cancel',  onCancel);
+        }
+
+        dialog.addEventListener('confirm', onConfirm, { once: true });
+        dialog.addEventListener('cancel',  onCancel,  { once: true });
+    });
+}
+
+// 10. Expose Global API
+function openFolderCopyModal(providerId, bucketName, folderPrefix) {
+    const modal = document.getElementById('copyModalComponent');
+    if (!modal) return;
+    const provider = store.providers?.find(p => p.id === providerId);
+    modal.sourceBucket = {
+        name: bucketName,
+        providerId,
+        providerName: provider?.name || providerId,
+        sourcePrefix: folderPrefix,
+    };
+    modal.providers = store.providers || [];
+    modal.allBuckets = store.buckets || [];
+    modal.lang = localStorage.getItem('lang') || 'en';
+    modal.open = true;
+}
+
 window.app = {
-    loadData, openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload, 
+    loadData, openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload, handleFolderUpload, handleFolderUploadDirect,
     createFolder, submitFolder,
     toggleSelect, bulkDelete, openUrlModal, closeUrlModal, generateShareLink,
     openDeleteModal, closeDeleteModal, confirmDelete, openPreview, closePreview,
     setLanguage, toggleTheme, refreshStats, translateError, setFilter, api, showToast,
-    initTooltips, handleLogin, openCopyModal, startCopyJob, cancelCopyJob
+    initTooltips, handleLogin, openCopyModal, openFolderCopyModal, startCopyJob, cancelCopyJob,
+    showConfirm
 };
 
 document.addEventListener('DOMContentLoaded', () => {
