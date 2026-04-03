@@ -97,10 +97,12 @@ export class CopyManager extends EventEmitter {
 
     // Listen to executor events
     executor.on('progress', (updatedJob: CopyJob) => {
+      console.log('[CopyManager] 📊 Progress event received, emitting to socket:', updatedJob.progress.copiedFiles, '/', updatedJob.progress.totalFiles);
       this.emit('job-progress', updatedJob);
     });
 
     executor.on('completed', (completedJob: CopyJob) => {
+      console.log('[CopyManager] ✅ Job completed:', completedJob.status);
       this.activeExecutors.delete(jobId);
       this.emit('job-completed', completedJob);
     });

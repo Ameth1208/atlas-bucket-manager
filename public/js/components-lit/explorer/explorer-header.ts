@@ -16,7 +16,6 @@ export class ExplorerHeader extends LitElement {
   @property({ type: Number }) selectedCount = 0;
   @state() currentLang = 'en';
 
-  // Desactivar Shadow DOM para usar Tailwind directamente
   createRenderRoot(): HTMLElement | DocumentFragment {
     return this as unknown as HTMLElement;
   }
@@ -96,8 +95,6 @@ export class ExplorerHeader extends LitElement {
         console.warn("showDirectoryPicker failed, using fallback:", err);
       }
     }
-
-    // Fallback: webkitdirectory input (Firefox / non-secure contexts)
     this.querySelector<HTMLInputElement>(".folder-fallback-input")?.click();
   }
 
@@ -126,7 +123,6 @@ export class ExplorerHeader extends LitElement {
     if (input.files && input.files.length > 0) {
       const files = Array.from(input.files);
       const paths = files.map((f) => (f as any).webkitRelativePath || f.name);
-      // Browser already showed its own confirm dialog, skip ours
       (window as any).app?.handleFolderUploadDirect(files, paths);
       input.value = "";
     }
@@ -142,46 +138,69 @@ export class ExplorerHeader extends LitElement {
   }
 
   render() {
+    const hasBreadcrumbs = this.breadcrumbs.length > 0;
+    
     return html`
       <div class="${TW.explorer.header.container}">
-        <!-- Left Section: Back button + Bucket name + Breadcrumbs -->
-        <div class="${TW.explorer.header.leftSection}">
+        <!-- Left: Navigation & Title -->
+        <div class="flex items-center gap-4">
+          <!-- Back Button -->
           <button
             class="${TW.explorer.header.backButton}"
             @click=${this.handleBack}
           >
             <iconify-icon icon="ph:arrow-left-bold" width="20"></iconify-icon>
           </button>
-          <div class="${TW.explorer.header.icon}">
-            <iconify-icon icon="ph:folder-open-bold" width="22"></iconify-icon>
-          </div>
-          <div class="${TW.explorer.header.titleWrapper}">
-            <h3 class="${TW.explorer.header.title}">${this.bucketName}</h3>
-            <div class="${TW.explorer.header.breadcrumbWrapper}">
-              <span
-                class="${TW.explorer.header.breadcrumbRoot}"
-                @click=${() => this.handleNavigate("")}
-                >${this.t('rootLabel')}</span
-              >
-              ${this.breadcrumbs.map(
-                (part) => html`
-                  <span class="${TW.explorer.header.breadcrumbSeparator}"
-                    >/</span
-                  >
+          
+          <!-- Divider -->
+          <div class="w-px h-8 bg-border-light dark:bg-white/10"></div>
+          
+          <!-- Bucket Info -->
+          <div class="flex items-center gap-3">
+            <div class="${TW.explorer.header.icon}">
+              <iconify-icon icon="ph:folder-open-bold" width="22"></iconify-icon>
+            </div>
+            <div class="${TW.explorer.header.titleWrapper}">
+              <h3 class="${TW.explorer.header.title}">${this.bucketName}</h3>
+              ${hasBreadcrumbs ? html`
+                <div class="${TW.explorer.header.breadcrumbWrapper}">
                   <span
-                    class="${TW.explorer.header.breadcrumbItem}"
-                    @click=${() => this.handleNavigate(part.path)}
+                    class="${TW.explorer.header.breadcrumbRoot}"
+                    @click=${() => this.handleNavigate("")}
+                    >${this.t('rootLabel')}</span
                   >
-                    ${part.name}
-                  </span>
-                `,
-              )}
+                  ${this.breadcrumbs.map(
+                    (part) => html`
+                      <span class="${TW.explorer.header.breadcrumbSeparator}"
+                        >/</span
+                      >
+                      <span
+                        class="${TW.explorer.header.breadcrumbItem}"
+                        @click=${() => this.handleNavigate(part.path)}
+                      >
+                        ${part.name}
+                      </span>
+                    `,
+                  )}
+                </div>
+              ` : ''}
             </div>
           </div>
         </div>
 
-        <!-- Right Section: Folder + Upload buttons -->
-        <div class="${TW.explorer.toolbar.container}">
+        <!-- Right: Actions -->
+        <div class="flex items-center gap-3">
+          ${this.showBulkDelete ? html`
+            <button
+              class="${TW.explorer.toolbar.btnBulkDelete}"
+              @click=${this.handleBulkDelete}
+            >
+              <iconify-icon icon="ph:trash-bold" width="16"></iconify-icon>
+              ${this.t('deleteSelectedBtn')} (${this.selectedCount})
+            </button>
+          ` : ''}
+          
+          <!-- New Folder -->
           <button
             class="${TW.explorer.toolbar.btnFolder}"
             @click=${this.handleCreateFolder}
@@ -189,6 +208,8 @@ export class ExplorerHeader extends LitElement {
           >
             <iconify-icon icon="ph:folder-plus-bold" width="20"></iconify-icon>
           </button>
+          
+          <!-- Upload -->
           <label class="${TW.explorer.toolbar.btnUpload}">
             <iconify-icon icon="ph:upload-simple-bold" width="18"></iconify-icon>
             <span>${this.t('uploadBtn')}</span>
@@ -199,12 +220,14 @@ export class ExplorerHeader extends LitElement {
               @change=${this.handleUpload}
             />
           </label>
+          
+          <!-- Upload Folder -->
           <button
-            class="${TW.explorer.toolbar.btnUpload}"
+            class="${TW.explorer.toolbar.btnUploadFolder}"
             @click=${this.handleUploadFolderPicker}
+            data-tooltip="Upload folder"
           >
-            <iconify-icon icon="ph:folder-arrow-up-bold" width="18"></iconify-icon>
-            <span>Folder</span>
+            <iconify-icon icon="ph:folder-arrow-up-bold" width="20"></iconify-icon>
           </button>
           <input
             type="file"
@@ -212,16 +235,6 @@ export class ExplorerHeader extends LitElement {
             class="folder-fallback-input hidden"
             @change=${this.handleUploadFolderFallback}
           />
-          ${this.showBulkDelete
-            ? html`
-                <button
-                  class="${TW.explorer.toolbar.btnBulkDelete}"
-                  @click=${this.handleBulkDelete}
-                >
-                  ${this.t('deleteSelectedBtn')} (${this.selectedCount})
-                </button>
-              `
-            : ""}
         </div>
       </div>
     `;

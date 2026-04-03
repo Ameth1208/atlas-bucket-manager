@@ -8,6 +8,7 @@ import './components-lit/bucket/bucket-card.ts';
 // Explorer
 import './components-lit/explorer/file-list.ts';
 import './components-lit/explorer/explorer-header.ts';
+import './components-lit/explorer/context-menu.ts';
 
 // Shared
 import './components-lit/shared/pagination-controls.ts';

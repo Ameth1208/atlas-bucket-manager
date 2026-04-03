@@ -43,66 +43,68 @@
         }
     </script>
 </head>
-<body class="bg-[#fcfcfd] dark:bg-dark-950 text-slate-800 dark:text-slate-200 theme-transition min-h-screen flex flex-col font-sans">
+<body class="bg-surface-base dark:bg-dark-950 text-text-primary dark:text-text-darkPrimary min-h-screen flex flex-col font-sans">
 
-    <!-- Navbar -->
-    <nav class="bg-white dark:bg-dark-900 border-b border-slate-200 dark:border-dark-800 sticky top-0 z-40" role="navigation" aria-label="Main navigation">
-        <div class="container mx-auto px-4 md:px-6 py-3.5 flex justify-between items-center">
+    <!-- Navbar - Premium Glass -->
+    <nav class="bg-white/70 dark:bg-black/70 backdrop-blur-2xl border-b border-border-light dark:border-white/[0.08] sticky top-0 z-40" role="navigation" aria-label="Main navigation">
+        <div class="container mx-auto px-4 md:px-6 py-2.5 flex justify-between items-center max-w-7xl">
             <!-- Logo -->
-            <button 
-                class="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity" 
+            <button
+                class="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
                 onclick="window.location.hash = ''"
                 aria-label="Go to home">
-                <div class="bg-rose-500 p-2 rounded-xl text-white flex items-center justify-center">
-                    <iconify-icon icon="ph:globe-hemisphere-west-duotone" width="22" aria-hidden="true"></iconify-icon>
+                <div class="bg-accent size-8 flex items-center justify-center rounded-lg text-white shadow-lg shadow-accent/20">
+                    <iconify-icon icon="ph:globe-hemisphere-west-duotone" width="18" aria-hidden="true"></iconify-icon>
                 </div>
                 <div class="hidden sm:flex flex-col">
-                    <span class="text-base font-bold dark:text-white leading-tight">Atlas</span>
-                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Manager</span>
+                    <span class="text-[14px] font-medium text-text-primary dark:text-text-darkPrimary leading-tight">Atlas</span>
+                    <span class="text-[9px] font-medium text-text-tertiary dark:text-text-darkTertiary uppercase tracking-wider">Manager</span>
                 </div>
             </button>
 
-            <!-- Desktop Search -->
-            <div class="flex-grow max-w-md mx-4 relative hidden md:block">
-                <label for="globalSearchInput" class="sr-only">Global search</label>
-                <iconify-icon icon="ph:magnifying-glass-bold" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="18" aria-hidden="true"></iconify-icon>
-                <input 
-                    type="text" 
-                    id="globalSearchInput" 
-                    placeholder="Global search objects..." 
-                    class="w-full bg-slate-100 dark:bg-dark-800 border-none rounded-xl pl-10 pr-4 py-2 text-sm focus:ring-2 focus:ring-rose-500/20 transition-all outline-none text-slate-700 dark:text-slate-200"
-                    aria-label="Search for objects across all buckets">
-                <div id="searchResults" class="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-dark-800 rounded-xl shadow-2xl border border-slate-200 dark:border-dark-700 hidden max-h-96 overflow-y-auto z-50 p-2" role="listbox"></div>
-            </div>
+            <!-- Search Trigger -->
+            <button
+                id="searchTrigger"
+                class="hidden md:flex items-center gap-2 flex-grow max-w-md mx-4 px-3 py-1.5 bg-surface-raised dark:bg-white/[0.06] rounded-lg text-sm text-text-tertiary dark:text-white/50 hover:bg-border-light dark:hover:bg-white/[0.1] transition-colors cursor-pointer"
+                aria-label="Open search">
+                <iconify-icon icon="ph:magnifying-glass" width="15" class="text-text-tertiary dark:text-white/40"></iconify-icon>
+                <span class="flex-1 text-left text-[13px]">Search...</span>
+                <div class="flex items-center gap-0.5">
+                    <kbd class="size-[16px] flex items-center justify-center rounded bg-border-light dark:bg-white/[0.1] text-[9px] font-medium text-text-tertiary dark:text-white/30">⌘</kbd>
+                    <kbd class="size-[16px] flex items-center justify-center rounded bg-border-light dark:bg-white/[0.1] text-[9px] font-medium text-text-tertiary dark:text-white/30">K</kbd>
+                </div>
+            </button>
 
             <!-- Actions -->
-            <div class="flex items-center gap-2 md:gap-5">
+            <div class="flex items-center gap-2">
                 <!-- Mobile Search Button -->
-                <button 
-                    id="mobileSearchBtn" 
-                    class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors"
+                <button
+                    id="mobileSearchBtn"
+                    class="md:hidden p-1.5 flex items-center justify-center rounded-lg hover:bg-surface-raised dark:hover:bg-white/[0.08] transition-colors text-text-secondary dark:text-white/60"
                     aria-label="Open search">
-                    <iconify-icon icon="ph:magnifying-glass-bold" width="20"></iconify-icon>
+                    <iconify-icon icon="ph:magnifying-glass" width="18"></iconify-icon>
                 </button>
-                
+
                 <!-- Language Selector -->
                 <div id="langSelectorContainer" role="listbox" aria-label="Select language"></div>
-                
+
                 <!-- Theme Toggle -->
-                <button 
-                    id="themeToggle" 
-                    class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors"
+                <button
+                    id="themeToggle"
+                    class="p-1.5 flex items-center justify-center rounded-lg hover:bg-surface-raised dark:hover:bg-white/[0.08] transition-colors text-text-secondary dark:text-white/60"
                     aria-label="Toggle dark mode">
-                    <iconify-icon icon="ph:moon-bold" class="dark:hidden" width="20" aria-hidden="true"></iconify-icon>
-                    <iconify-icon icon="ph:sun-bold" class="hidden dark:block text-yellow-400" width="20" aria-hidden="true"></iconify-icon>
+                    <iconify-icon icon="ph:moon-duotone" class="dark:hidden" width="18" aria-hidden="true"></iconify-icon>
+                    <iconify-icon icon="ph:sun-duotone" class="hidden dark:block text-amber-400" width="18" aria-hidden="true"></iconify-icon>
                 </button>
-                
+
                 <!-- Logout -->
-                <button 
-                    id="logoutBtn" 
-                    class="text-xs font-bold uppercase tracking-wider hover:text-rose-500" 
+                <button
+                    id="logoutBtn"
+                    class="p-1.5 flex items-center justify-center rounded-lg hover:bg-red-500/10 dark:hover:bg-red-500/20 transition-colors text-text-secondary dark:text-white/60 hover:text-red-500 dark:hover:text-red-400"
                     data-i18n="logout"
-                    aria-label="Logout">Logout</button>
+                    aria-label="Logout">
+                    <iconify-icon icon="ph:sign-out-duotone" width="18"></iconify-icon>
+                </button>
             </div>
         </div>
     </nav>
@@ -110,10 +112,10 @@
     <!-- Mobile Search Modal -->
     <div id="mobileSearchModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm md:hidden">
         <div class="bg-white dark:bg-dark-900 h-full flex flex-col">
-            <div class="p-4 border-b border-slate-200 dark:border-dark-800 flex items-center gap-3">
+            <div class="p-4 border-b border-border-light dark:border-dark-600 flex items-center gap-3">
                 <button 
                     id="closeMobileSearch" 
-                    class="p-2 hover:bg-slate-100 dark:hover:bg-dark-800 rounded-lg transition-colors"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-raised dark:hover:bg-dark-700 transition-colors"
                     aria-label="Close search">
                     <iconify-icon icon="ph:x-bold" width="20"></iconify-icon>
                 </button>
@@ -122,67 +124,73 @@
                     type="text" 
                     id="mobileSearchInput" 
                     placeholder="Search objects..." 
-                    class="flex-1 bg-slate-100 dark:bg-dark-800 border-none rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-rose-500/20 transition-all outline-none text-slate-700 dark:text-slate-200"
+                    class="flex-1 bg-surface-raised dark:bg-dark-700 border-none rounded-xl px-4 py-2.5 text-sm font-light focus:ring-2 focus:ring-accent/20 transition-all outline-none text-text-primary dark:text-text-darkPrimary"
                     aria-label="Search for objects">
             </div>
             <div id="mobileSearchResults" class="flex-1 overflow-y-auto p-4" role="listbox"></div>
         </div>
     </div>
 
-    <main id="mainContent" class="container mx-auto px-4 md:px-6 py-10 flex-grow max-w-6xl" role="main">
+    <main id="mainContent" class="container mx-auto px-6 md:px-8 py-8 flex-grow max-w-7xl" role="main">
         <!-- Bucket List View -->
         <div id="bucketListView">
+            <!-- Header Section -->
             <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
                 <div>
-                    <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-1" data-i18n="title">Storage Buckets</h1>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm" data-i18n="subtitle">Manage visibility and lifecycle.</p>
+                    <h1 class="text-2xl font-semibold text-text-primary dark:text-text-darkPrimary tracking-tight" data-i18n="title">Storage Buckets</h1>
+                    <p class="text-text-tertiary dark:text-text-darkTertiary text-[13px] mt-1" data-i18n="subtitle">Manage visibility and lifecycle.</p>
                 </div>
-                <form id="createBucketForm" class="w-full lg:w-auto flex bg-white dark:bg-dark-900 rounded-xl border border-slate-200 dark:border-dark-800 p-1 focus-within:border-rose-500/50 shadow-sm gap-1" aria-label="Create new bucket">
+                
+                <!-- Create Bucket Form - Elevated -->
+                <form id="createBucketForm" class="w-full lg:w-auto flex bg-white dark:bg-dark-800 rounded-xl border border-border-light dark:border-dark-600 p-1.5 focus-within:border-accent/40 gap-1.5" aria-label="Create new bucket">
                     <label for="createProviderId" class="sr-only">Select provider</label>
-                    <select 
-                        id="createProviderId" 
-                        class="bg-slate-50 dark:bg-dark-800 text-slate-700 dark:text-slate-300 text-xs font-bold px-3 py-2 rounded-lg outline-none border-none"
+                    <select
+                        id="createProviderId"
+                        class="bg-surface-raised dark:bg-dark-700 text-text-secondary dark:text-text-darkSecondary text-[12px] font-medium px-3 py-2 rounded-lg outline-none border-none"
                         aria-label="Provider for new bucket">
                     </select>
                     <label for="newBucketName" class="sr-only">Bucket name</label>
-                    <input 
-                        type="text" 
-                        id="newBucketName" 
-                        placeholder="bucket-name" 
-                        required 
-                        class="bg-transparent text-slate-900 dark:text-white w-full lg:w-48 px-4 py-2 focus:outline-none font-mono text-sm"
+                    <input
+                        type="text"
+                        id="newBucketName"
+                        placeholder="bucket-name"
+                        required
+                        class="bg-transparent text-text-primary dark:text-text-darkPrimary w-full lg:w-48 px-3 py-2 focus:outline-none font-mono text-[13px]"
                         aria-label="Enter bucket name">
-                    <button 
-                        type="submit" 
-                        class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold uppercase px-5 py-2 rounded-lg transition-all active:scale-95 shadow-lg shadow-rose-600/10" 
+                    <button
+                        type="submit"
+                        class="bg-accent hover:bg-accent-dark text-white text-[12px] font-medium px-5 py-2 rounded-lg transition-colors border-0 cursor-pointer whitespace-nowrap"
                         data-i18n="create">Create</button>
                 </form>
             </div>
 
-            <!-- Provider Filters -->
-            <div id="filterContainer" class="flex flex-wrap items-center gap-2 mb-10" role="group" aria-label="Filter buckets by provider">
+            <!-- Provider Filters - Subtle -->
+            <div id="filterContainer" class="flex flex-wrap items-center gap-2 mb-8" role="group" aria-label="Filter buckets by provider">
             </div>
 
-            <div id="loader" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" aria-live="polite" aria-busy="true"><div class="bg-white dark:bg-dark-900 h-40 rounded-xl border border-slate-100 dark:border-dark-800 animate-pulse"></div><div class="bg-white dark:bg-dark-900 h-40 rounded-xl border border-slate-100 dark:border-dark-800 animate-pulse"></div><div class="bg-white dark:bg-dark-900 h-40 rounded-xl border border-slate-100 dark:border-dark-800 animate-pulse"></div></div>
-            <div id="bucketList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 hidden" role="list" aria-label="Bucket list"></div>
-            <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center border border-dashed border-slate-200 dark:border-dark-800 rounded-3xl">
-                <iconify-icon icon="ph:cube-transparent-thin" width="64" class="text-slate-300 dark:text-slate-700 mb-4" aria-hidden="true"></iconify-icon>
-                <h3 class="text-lg font-bold" data-i18n="emptyTitle">No buckets</h3>
+            <div id="loader" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-live="polite" aria-busy="true">
+                <div class="bg-white dark:bg-dark-800 h-44 rounded-2xl border border-border-light dark:border-dark-600 animate-pulse"></div>
+                <div class="bg-white dark:bg-dark-800 h-44 rounded-2xl border border-border-light dark:border-dark-600 animate-pulse"></div>
+                <div class="bg-white dark:bg-dark-800 h-44 rounded-2xl border border-border-light dark:border-dark-600 animate-pulse"></div>
+            </div>
+            <div id="bucketList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 hidden" role="list" aria-label="Bucket list"></div>
+            <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center rounded-2xl">
+                <iconify-icon icon="ph:cube-transparent-duotone" width="56" class="text-border-light dark:text-dark-500 mb-4" aria-hidden="true"></iconify-icon>
+                <h3 class="text-[15px] font-medium text-text-secondary dark:text-text-darkSecondary" data-i18n="emptyTitle">No buckets</h3>
             </div>
         </div>
 
         <!-- Explorer View -->
-        <div id="explorerView" class="hidden animate-fade-in h-[calc(100vh-220px)]">
-            <div class="bg-white dark:bg-dark-900 w-full h-full rounded-2xl shadow-sm border border-slate-200 dark:border-dark-800 flex flex-col overflow-hidden">
+        <div id="explorerView" class="hidden h-[calc(100vh-220px)]">
+            <div class="bg-white dark:bg-[#1c1c1e] w-full h-full rounded-2xl shadow-xl border border-border-light dark:border-white/[0.08] flex flex-col overflow-hidden">
                 <!-- Explorer Header -->
                 <div id="explorerHeaderContainer"></div>
-                
+
                 <!-- File List -->
-                <div class="flex-grow p-4 overflow-y-auto scroll-smooth" id="fileList" role="region" aria-label="File explorer"></div>
-                
+                <div class="flex-grow px-2 py-1 overflow-y-auto scroll-smooth" id="fileList" role="region" aria-label="File explorer"></div>
+
                 <!-- Footer with Pagination -->
-                <div id="explorerFooter" class="border-t border-slate-100 dark:border-dark-800 bg-white dark:bg-dark-900">
-                    <!-- Pagination will be injected here dynamically -->
+                <div id="explorerFooter" class="border-t border-border-light dark:border-white/[0.08]">
                 </div>
             </div>
         </div>
@@ -195,6 +203,43 @@
     <share-modal id="shareModalComponent" role="dialog" aria-modal="true"></share-modal>
     <copy-bucket-modal id="copyModalComponent" role="dialog" aria-modal="true"></copy-bucket-modal>
     <confirm-dialog id="confirmDialog" role="dialog" aria-modal="true"></confirm-dialog>
+    <context-menu id="contextMenu"></context-menu>
+
+    <!-- Spotlight Search Modal -->
+    <div id="spotlightModal" class="fixed inset-0 z-[80] hidden" role="dialog" aria-modal="true" aria-label="Search">
+        <div id="spotlightBackdrop" class="absolute inset-0 bg-black/25 dark:bg-black/60"></div>
+        <div class="relative flex justify-center pt-[12vh] px-4">
+            <div id="spotlightPanel" class="w-full max-w-[560px] bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_24px_80px_-12px_rgba(0,0,0,0.8)] overflow-hidden border border-border-light dark:border-white/[0.08]">
+                <!-- Search Input -->
+                <div class="flex items-center gap-3 px-5 py-4">
+                    <iconify-icon icon="ph:magnifying-glass" width="20" class="text-text-tertiary dark:text-white/40 shrink-0"></iconify-icon>
+                    <input
+                        type="text"
+                        id="globalSearchInput"
+                        placeholder="Search objects across all buckets..."
+                        class="flex-1 bg-transparent border-none outline-none text-[15px] text-text-primary dark:text-white placeholder:text-text-tertiary dark:placeholder:text-white/30"
+                        autocomplete="off"
+                        aria-label="Search">
+                    <kbd class="h-[20px] px-1.5 flex items-center justify-center rounded-md bg-surface-raised dark:bg-white/[0.08] text-[10px] font-medium text-text-tertiary dark:text-white/40">esc</kbd>
+                </div>
+                <!-- Results -->
+                <div id="searchResults" class="hidden max-h-[320px] overflow-y-auto border-t border-border-light dark:border-white/[0.08]" role="listbox"></div>
+                <!-- Empty placeholder -->
+                <div id="searchEmpty" class="py-12 text-center border-t border-border-light dark:border-white/[0.08]">
+                    <iconify-icon icon="ph:magnifying-glass-duotone" width="32" class="text-border-light dark:text-white/20 mb-2"></iconify-icon>
+                    <p class="text-[13px] text-text-tertiary dark:text-white/40">Type to search files, folders, and objects</p>
+                </div>
+                <!-- Footer hint -->
+                <div class="flex items-center justify-between px-5 py-2 border-t border-border-light dark:border-white/[0.08]">
+                    <div class="flex items-center gap-4 text-[11px] text-text-tertiary dark:text-white/40">
+                        <span class="flex items-center gap-1"><kbd class="size-[18px] flex items-center justify-center rounded-md bg-surface-raised dark:bg-white/[0.08] text-[10px] font-medium">↑</kbd><kbd class="size-[18px] flex items-center justify-center rounded-md bg-surface-raised dark:bg-white/[0.08] text-[10px] font-medium">↓</kbd> navigate</span>
+                        <span class="flex items-center gap-1"><kbd class="size-[18px] flex items-center justify-center rounded-md bg-surface-raised dark:bg-white/[0.08] text-[10px] font-medium">↵</kbd> open</span>
+                    </div>
+                    <span class="text-[11px] text-text-tertiary dark:text-white/40">Atlas Search</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Copy Progress Panel -->
     <copy-progress-panel id="copyProgressPanel"></copy-progress-panel>
@@ -204,9 +249,9 @@
 
     <!-- Toast -->
     <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] transform transition-all duration-500 translate-y-20 opacity-0" role="alert" aria-live="assertive">
-        <div class="bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <div class="bg-white dark:bg-[#1c1c1e] border border-border-light dark:border-white/[0.08] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
             <div id="toastIcon" aria-hidden="true"></div>
-            <span id="toastMessage" class="text-sm font-bold text-slate-700 dark:text-slate-200 tracking-tight"></span>
+            <span id="toastMessage" class="text-sm font-medium text-text-primary dark:text-white tracking-tight"></span>
         </div>
     </div>
 
