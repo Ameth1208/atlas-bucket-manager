@@ -135,6 +135,7 @@ function initializeWebSocket() {
     });
 
     socket.on('copy:progress', (job) => {
+        console.log('[Client] 📥 Received copy:progress:', job.progress.copiedFiles, '/', job.progress.totalFiles);
         const progressPanel = document.getElementById('copyProgressPanel');
         if (progressPanel) {
             progressPanel.updateJob(job.id, job);
@@ -187,8 +188,12 @@ function initializeWebSocket() {
 }
 
 function openCopyModal(bucket) {
+    console.log('[Client] 📤 openCopyModal called with bucket:', bucket);
     const modal = document.getElementById('copyModalComponent');
-    if (!modal) return;
+    if (!modal) {
+        console.error('[Client] ❌ copyModalComponent not found in DOM!');
+        return;
+    }
 
     modal.sourceBucket = {
         name: bucket.name,
@@ -201,10 +206,12 @@ function openCopyModal(bucket) {
     modal.allBuckets = store.buckets || [];
     modal.lang = localStorage.getItem('lang') || 'en';
     modal.open = true;
+    console.log('[Client] ✅ Modal properties set, open:', modal.open);
 }
 
 async function startCopyJob(detail) {
     try {
+        console.log('[Client] 🚀 Starting copy job:', detail);
         const result = await api.startCopy(
             detail.sourceProviderId,
             detail.sourceBucket,
@@ -219,6 +226,8 @@ async function startCopyJob(detail) {
             return;
         }
 
+        console.log('[Client] 📋 Copy job started, result:', result);
+
         // Add job to progress panel
         const progressPanel = document.getElementById('copyProgressPanel');
         if (progressPanel && result.job) {
@@ -227,7 +236,10 @@ async function startCopyJob(detail) {
 
             // Subscribe to job updates via WebSocket
             if (socket && socket.connected) {
+                console.log('[Client] 📡 Subscribing to job:', result.job.id);
                 socket.emit('copy:subscribe', result.job.id);
+            } else {
+                console.warn('[Client] ⚠️ Socket not connected, cannot subscribe to job updates');
             }
         }
     } catch (err) {
@@ -421,41 +433,156 @@ async function refreshStats(providerId, bucket) {
 }
 
 // 7. Search
+// 7. Spotlight Search
+let spotlightIndex = -1;
+
+function openSpotlight() {
+    const modal = document.getElementById('spotlightModal');
+    const input = document.getElementById('globalSearchInput');
+    const results = document.getElementById('searchResults');
+    const empty = document.getElementById('searchEmpty');
+    if (!modal) return;
+
+    modal.classList.remove('hidden');
+    results.classList.add('hidden');
+    results.innerHTML = '';
+    if (empty) empty.classList.remove('hidden');
+    spotlightIndex = -1;
+    setTimeout(() => {
+        if (input) { input.value = ''; input.focus(); }
+    }, 50);
+}
+
+function closeSpotlight() {
+    const modal = document.getElementById('spotlightModal');
+    if (modal) modal.classList.add('hidden');
+}
+
 function initSearch() {
     const input = document.getElementById('globalSearchInput');
     const results = document.getElementById('searchResults');
+    const trigger = document.getElementById('searchTrigger');
+    const backdrop = document.getElementById('spotlightBackdrop');
     if (!input || !results) return;
-    
+
+    // Open from trigger button
+    if (trigger) trigger.addEventListener('click', openSpotlight);
+    // Close on backdrop click
+    if (backdrop) backdrop.addEventListener('click', closeSpotlight);
+
     let timeout = null;
     input.addEventListener('input', (e) => {
         clearTimeout(timeout);
         const q = e.target.value.trim();
+        const empty = document.getElementById('searchEmpty');
         if (!q) {
             results.classList.add('hidden');
+            results.innerHTML = '';
+            if (empty) empty.classList.remove('hidden');
+            spotlightIndex = -1;
             return;
         }
+        if (empty) empty.classList.add('hidden');
+        // Show loading
+        results.innerHTML = `
+            <div class="flex items-center justify-center gap-2 py-8 text-slate-400">
+                <iconify-icon icon="line-md:loading-twotone-loop" width="20"></iconify-icon>
+                <span class="text-sm font-light">Searching...</span>
+            </div>`;
+        results.classList.remove('hidden');
         timeout = setTimeout(() => performSearch(q), 300);
     });
+
+    // Keyboard navigation in results
+    input.addEventListener('keydown', (e) => {
+        const items = results.querySelectorAll('[data-result]');
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            spotlightIndex = Math.min(spotlightIndex + 1, items.length - 1);
+            updateSpotlightHighlight(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            spotlightIndex = Math.max(spotlightIndex - 1, 0);
+            updateSpotlightHighlight(items);
+        } else if (e.key === 'Enter' && spotlightIndex >= 0 && items[spotlightIndex]) {
+            e.preventDefault();
+            items[spotlightIndex].click();
+        } else if (e.key === 'Escape') {
+            e.preventDefault();
+            closeSpotlight();
+        }
+    });
+}
+
+function updateSpotlightHighlight(items) {
+    items.forEach((el, i) => {
+        if (i === spotlightIndex) {
+            el.classList.add('!bg-rose-500', '!text-white', '[&_*]:!text-white');
+            el.scrollIntoView({ block: 'nearest' });
+        } else {
+            el.classList.remove('!bg-rose-500', '!text-white', '[&_*]:!text-white');
+        }
+    });
+}
+
+function getFileIcon(name) {
+    const ext = name.split('.').pop()?.toLowerCase() || '';
+    const map = {
+        jpg: 'ph:image-duotone', jpeg: 'ph:image-duotone', png: 'ph:image-duotone',
+        gif: 'ph:image-duotone', webp: 'ph:image-duotone', svg: 'ph:image-duotone',
+        mp4: 'ph:video-duotone', webm: 'ph:video-duotone', mov: 'ph:video-duotone',
+        mp3: 'ph:music-notes-duotone', wav: 'ph:music-notes-duotone',
+        pdf: 'ph:file-pdf-duotone', doc: 'ph:file-doc-duotone', docx: 'ph:file-doc-duotone',
+        js: 'ph:file-js-duotone', ts: 'ph:file-ts-duotone', json: 'ph:brackets-curly-duotone',
+        zip: 'ph:file-zip-duotone', rar: 'ph:file-zip-duotone',
+    };
+    return map[ext] || 'ph:file-duotone';
 }
 
 async function performSearch(query) {
     const results = document.getElementById('searchResults');
+    const empty = document.getElementById('searchEmpty');
     if (!results) return;
-    
+
     try {
         const items = await api.search(query);
+        spotlightIndex = -1;
+
         if (items && items.length > 0) {
-            results.innerHTML = items.map(item => `
-                <div class="p-3 hover:bg-slate-50 dark:hover:bg-dark-700 cursor-pointer border-b border-slate-100 dark:border-dark-700"
-                     onclick="window.app.openExplorer('${item.providerId}', '${item.bucket}', '')">
-                    <div class="font-medium text-slate-800 dark:text-slate-200">${item.object}</div>
-                    <div class="text-xs text-slate-500">${item.bucket} • ${item.providerId}</div>
+            results.innerHTML = `
+                <div class="px-4 pt-3 pb-1">
+                    <span class="text-[11px] font-medium tracking-wider text-slate-400 dark:text-slate-500 uppercase">Results</span>
                 </div>
-            `).join('');
+            ` + items.map((item, i) => {
+                const fileName = item.object.split('/').pop() || item.object;
+                const folder = item.object.includes('/') ? item.object.substring(0, item.object.lastIndexOf('/')) : '';
+                const icon = getFileIcon(fileName);
+                return `
+                <div data-result="${i}"
+                     class="flex items-center gap-3 mx-1.5 px-3 py-2 rounded-[10px] cursor-pointer transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.06]"
+                     onclick="window.app.openExplorer('${item.providerId}', '${item.bucket}', '${folder ? folder + '/' : ''}'); document.getElementById('spotlightModal').classList.add('hidden');">
+                    <div class="size-8 rounded-[8px] bg-slate-50 dark:bg-white/[0.06] flex items-center justify-center text-slate-400 dark:text-slate-400 shrink-0">
+                        <iconify-icon icon="${icon}" width="16"></iconify-icon>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-[13px] font-medium text-slate-700 dark:text-slate-200 truncate">${fileName}</div>
+                        <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate">
+                            ${item.bucket}${folder ? ' / ' + folder : ''} · ${item.providerId}
+                        </div>
+                    </div>
+                    <iconify-icon icon="ph:arrow-bend-down-left" width="12" class="text-slate-300 dark:text-slate-500 shrink-0"></iconify-icon>
+                </div>`;
+            }).join('') + '<div class="h-1.5"></div>';
             results.classList.remove('hidden');
+            if (empty) empty.classList.add('hidden');
         } else {
-            results.innerHTML = '<div class="p-3 text-center text-slate-500">No results found</div>';
+            results.innerHTML = `
+                <div class="py-10 text-center">
+                    <iconify-icon icon="ph:binoculars-duotone" width="28" class="text-slate-200 dark:text-dark-700 mb-2"></iconify-icon>
+                    <p class="text-[13px] text-slate-400 dark:text-slate-500">No results for "${query}"</p>
+                </div>`;
             results.classList.remove('hidden');
+            if (empty) empty.classList.add('hidden');
         }
     } catch (err) {
         console.error('Search failed:', err);
@@ -553,7 +680,7 @@ window.app = {
     openDeleteModal, closeDeleteModal, confirmDelete, openPreview, closePreview,
     setLanguage, toggleTheme, refreshStats, translateError, setFilter, api, showToast,
     initTooltips, handleLogin, openCopyModal, openFolderCopyModal, startCopyJob, cancelCopyJob,
-    showConfirm
+    showConfirm, openSpotlight
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -570,8 +697,50 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Event delegation for bucket card copy button
     document.addEventListener('copy', (e) => {
+        console.log('[Client] 📋 Copy event received:', e.detail);
         if (e.detail && e.detail.bucket) {
             openCopyModal(e.detail.bucket);
+        }
+    });
+
+    // Context menu actions
+    document.getElementById('contextMenu')?.addEventListener('menu-action', async (e) => {
+        const { action, item } = e.detail;
+        const { store } = await import('/js/store.js');
+        switch (action) {
+            case 'navigate':
+                window.app.navigateExplorer(item.name);
+                break;
+            case 'preview':
+                openPreview(store.currentProviderId, store.currentBucket, item.name);
+                break;
+            case 'download':
+                window.app.downloadFile(store.currentProviderId, store.currentBucket, item.name);
+                break;
+            case 'share':
+                openUrlModal(item.name);
+                break;
+            case 'copy-folder':
+                openFolderCopyModal(store.currentProviderId, store.currentBucket, item.name);
+                break;
+            case 'delete': {
+                const label = item.isFolder ? 'folder' : 'item';
+                const ok = await showConfirm(
+                    `Are you sure you want to delete this ${label}? This action cannot be undone.`,
+                    { title: `Delete ${label}`, icon: 'ph:trash-bold', danger: true, confirmText: 'Delete' }
+                );
+                if (ok) {
+                    try {
+                        const { api: apiRef } = await import('/js/api.js');
+                        await apiRef.deleteObjects(store.currentProviderId, store.currentBucket, [item.name]);
+                        showToast('Deleted', 'success');
+                        window.app.openExplorer(store.currentProviderId, store.currentBucket, store.currentPrefix);
+                    } catch (err) {
+                        showToast('Delete failed', 'error');
+                    }
+                }
+                break;
+            }
         }
     });
 

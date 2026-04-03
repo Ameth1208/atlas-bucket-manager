@@ -24,10 +24,10 @@ export interface Bucket {
 
 @customElement('copy-bucket-modal')
 export class CopyBucketModal extends LitElement {
-  @property({ type: Boolean }) open = false;
-  @property({ type: Object }) sourceBucket?: SourceBucket;
-  @property({ type: Array }) providers: Provider[] = [];
-  @property({ type: Array }) allBuckets: Bucket[] = [];
+  @property({ type: Boolean, attribute: false }) open = false;
+  @property({ type: Object, attribute: false }) sourceBucket?: SourceBucket;
+  @property({ type: Array, attribute: false }) providers: Provider[] = [];
+  @property({ type: Array, attribute: false }) allBuckets: Bucket[] = [];
   @property({ type: String }) lang = 'en';
 
   @state() targetProviderId = '';
@@ -44,8 +44,13 @@ export class CopyBucketModal extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    // Set default target provider (different from source)
-    if (this.providers.length > 0 && this.sourceBucket) {
+    console.log('[CopyBucketModal] connectedCallback');
+  }
+
+  // Re-run initialization when open changes to true
+  updated(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('open') && this.open && this.providers.length > 0 && this.sourceBucket) {
+      console.log('[CopyBucketModal] Modal opened, initializing...');
       const differentProvider = this.providers.find(p => p.id !== this.sourceBucket?.providerId);
       if (differentProvider) {
         this.targetProviderId = differentProvider.id;

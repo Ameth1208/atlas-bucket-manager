@@ -31,17 +31,17 @@
         }
     </script>
 </head>
-<body class="bg-[#fcfcfd] dark:bg-dark-950 text-slate-800 dark:text-slate-200 min-h-screen flex flex-col font-sans theme-transition">
+<body class="bg-surface-base dark:bg-dark-950 text-text-primary dark:text-text-darkPrimary min-h-screen flex flex-col font-sans theme-transition">
     
     <!-- Nav -->
-    <nav class="p-6 flex justify-end items-center gap-4">
+    <nav class="p-5 flex justify-end items-center gap-3">
         <div id="langSelectorContainer" role="listbox" aria-label="Select language"></div>
         <button 
             id="themeToggle" 
-            class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-800 transition-colors"
+            class="size-8 flex items-center justify-center rounded-lg hover:bg-surface-raised dark:hover:bg-white/[0.08] transition-colors text-text-secondary dark:text-white/60"
             aria-label="Toggle dark mode">
-            <iconify-icon icon="ph:moon-bold" class="dark:hidden" width="20" aria-hidden="true"></iconify-icon>
-            <iconify-icon icon="ph:sun-bold" class="hidden dark:block text-yellow-400" width="20" aria-hidden="true"></iconify-icon>
+            <iconify-icon icon="ph:moon-bold" class="dark:hidden" width="18" aria-hidden="true"></iconify-icon>
+            <iconify-icon icon="ph:sun-bold" class="hidden dark:block text-amber-400" width="18" aria-hidden="true"></iconify-icon>
         </button>
     </nav>
 
@@ -58,9 +58,9 @@
 
     <!-- Toast -->
     <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 transform transition-all duration-500 translate-y-20 opacity-0" role="alert" aria-live="assertive">
-        <div class="bg-white dark:bg-dark-800 border border-slate-200 dark:border-dark-700 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+        <div class="bg-white dark:bg-[#1c1c1e] border border-border-light dark:border-white/[0.08] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
             <div id="toastIcon" aria-hidden="true"></div>
-            <span id="toastMessage" class="text-sm font-bold text-slate-700 dark:text-slate-200 tracking-tight"></span>
+            <span id="toastMessage" class="text-sm font-medium text-text-primary dark:text-white tracking-tight"></span>
         </div>
     </div>
 

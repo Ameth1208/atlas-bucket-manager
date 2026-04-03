@@ -11,31 +11,99 @@ export interface FileObject {
   prefix?: string;
 }
 
+type SortField = "name" | "size" | "date";
+type SortDir = "asc" | "desc";
+
 @customElement("file-list")
 export class FileList extends LitElement {
   @property({ type: Array }) items: FileObject[] = [];
   @property({ type: Number }) pageSize = 100;
   @state() currentPage = 1;
   @state() selectedFiles = new Set<string>();
+  @state() private sortField: SortField = "name";
+  @state() private sortDir: SortDir = "asc";
 
-  // Desactivar Shadow DOM para usar Tailwind directamente
   createRenderRoot(): HTMLElement | DocumentFragment {
     return this as unknown as HTMLElement;
   }
 
+  private get sortedItems(): FileObject[] {
+    const folders = this.items.filter((i) => i.isFolder);
+    const files = this.items.filter((i) => !i.isFolder);
+
+    const compare = (a: FileObject, b: FileObject): number => {
+      const dir = this.sortDir === "asc" ? 1 : -1;
+      switch (this.sortField) {
+        case "name":
+          return this._getDisplayName(a).localeCompare(this._getDisplayName(b)) * dir;
+        case "size":
+          return (a.size - b.size) * dir;
+        case "date":
+          return (new Date(a.lastModified).getTime() - new Date(b.lastModified).getTime()) * dir;
+        default:
+          return 0;
+      }
+    };
+
+    folders.sort(compare);
+    files.sort(compare);
+    return [...folders, ...files];
+  }
+
   get paginatedItems(): FileObject[] {
     const start = (this.currentPage - 1) * this.pageSize;
-    return this.items.slice(start, start + this.pageSize);
+    return this.sortedItems.slice(start, start + this.pageSize);
   }
 
   get hasSelected(): boolean {
     return this.selectedFiles.size > 0;
   }
 
+  private get selectableItems(): FileObject[] {
+    return this.paginatedItems.filter((i) => !i.isFolder);
+  }
+
+  private get allSelected(): boolean {
+    const selectable = this.selectableItems;
+    return selectable.length > 0 && selectable.every((i) => this.selectedFiles.has(i.name));
+  }
+
+  private _toggleSort(field: SortField) {
+    if (this.sortField === field) {
+      this.sortDir = this.sortDir === "asc" ? "desc" : "asc";
+    } else {
+      this.sortField = field;
+      this.sortDir = "asc";
+    }
+  }
+
+  private _toggleSelectAll() {
+    const selectable = this.selectableItems;
+    if (this.allSelected) {
+      selectable.forEach((i) => this.selectedFiles.delete(i.name));
+    } else {
+      selectable.forEach((i) => this.selectedFiles.add(i.name));
+    }
+    this.requestUpdate();
+    this.dispatchEvent(
+      new CustomEvent("selection-change", {
+        detail: { selected: Array.from(this.selectedFiles) },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private _sortArrow(field: SortField): string {
+    if (this.sortField !== field) return "";
+    return this.sortDir === "asc" ? "ph:caret-up-bold" : "ph:caret-down-bold";
+  }
+
   render() {
     return html`
       <div class="${TW.fileList.container}">
         <div class="${TW.fileList.listWrapper}">
+          ${this.items.length > 0 ? this._renderHeader() : ""}
           <div class="${TW.fileList.list}">
             ${this.items.length === 0
               ? this._renderEmpty()
@@ -46,15 +114,67 @@ export class FileList extends LitElement {
     `;
   }
 
+  private _renderHeader() {
+    const hasSelectable = this.selectableItems.length > 0;
+    return html`
+      <div class="${TW.fileList.listHeader}">
+        ${hasSelectable
+          ? html`
+              <input
+                type="checkbox"
+                class="${TW.fileList.checkbox}"
+                .checked=${this.allSelected}
+                @change=${() => this._toggleSelectAll()}
+              />
+            `
+          : html`<div class="w-4"></div>`}
+
+        <div class="w-9"></div>
+
+        <div class="flex-1 min-w-0 flex items-center gap-4">
+          <span
+            class="${TW.fileList.listHeaderCol} flex-1 ${this.sortField === "name" ? TW.fileList.listHeaderColActive : ""}"
+            @click=${() => this._toggleSort("name")}
+          >
+            Name
+            ${this._sortArrow("name")
+              ? html`<iconify-icon icon="${this._sortArrow("name")}" class="${TW.fileList.sortIcon}"></iconify-icon>`
+              : ""}
+          </span>
+          <span
+            class="${TW.fileList.listHeaderCol} w-20 justify-end ${this.sortField === "size" ? TW.fileList.listHeaderColActive : ""}"
+            @click=${() => this._toggleSort("size")}
+          >
+            Size
+            ${this._sortArrow("size")
+              ? html`<iconify-icon icon="${this._sortArrow("size")}" class="${TW.fileList.sortIcon}"></iconify-icon>`
+              : ""}
+          </span>
+          <span
+            class="${TW.fileList.listHeaderCol} w-24 justify-end ${this.sortField === "date" ? TW.fileList.listHeaderColActive : ""}"
+            @click=${() => this._toggleSort("date")}
+          >
+            Modified
+            ${this._sortArrow("date")
+              ? html`<iconify-icon icon="${this._sortArrow("date")}" class="${TW.fileList.sortIcon}"></iconify-icon>`
+              : ""}
+          </span>
+        </div>
+
+        <div class="w-[120px]"></div>
+      </div>
+    `;
+  }
+
   private _renderEmpty() {
     return html`
       <div class="${TW.fileList.empty}">
         <iconify-icon
-          icon="ph:folder-open-thin"
+          icon="ph:folder-open-duotone"
           class="${TW.fileList.emptyIcon}"
         ></iconify-icon>
         <div class="${TW.fileList.emptyTitle}">No files</div>
-        <div class="text-xs text-slate-400 dark:text-slate-500">
+        <div class="${TW.fileList.emptyDescription}">
           This folder is empty
         </div>
       </div>
@@ -67,8 +187,9 @@ export class FileList extends LitElement {
 
     return html`
       <div
-        class="${TW.fileList.item}"
+        class="${TW.fileList.item} ${isSelected ? TW.fileList.itemSelected : ""}"
         @click=${() => this._handleItemClick(item)}
+        @contextmenu=${(e: MouseEvent) => this._handleContextMenu(e, item)}
       >
         ${!item.isFolder
           ? html`
@@ -84,23 +205,23 @@ export class FileList extends LitElement {
                   )}
               />
             `
-          : ""}
+          : html`<div class="w-4"></div>`}
 
         <div class="${TW.fileList.fileIcon} ${this._getIconClass(item)}">
-          <iconify-icon icon="${icon}" width="20"></iconify-icon>
+          <iconify-icon icon="${icon}" width="18"></iconify-icon>
         </div>
 
-        <div class="${TW.fileList.fileInfo}">
-          <div class="${TW.fileList.fileName}">
-            ${this._getDisplayName(item)}
+        <div class="flex-1 min-w-0 flex items-center gap-4">
+          <div class="flex-1 min-w-0">
+            <div class="${TW.fileList.fileName}">
+              ${this._getDisplayName(item)}
+            </div>
           </div>
-          <div class="${TW.fileList.fileMeta}">
-            ${!item.isFolder
-              ? html`
-                  <span>${this._formatSize(item.size)}</span>
-                  <span>${this._formatDate(item.lastModified)}</span>
-                `
-              : ""}
+          <div class="w-20 text-right text-[11px] text-slate-400 dark:text-slate-500 shrink-0 tabular-nums">
+            ${!item.isFolder ? this._formatSize(item.size) : ""}
+          </div>
+          <div class="w-24 text-right text-[11px] text-slate-400 dark:text-slate-500 shrink-0">
+            ${!item.isFolder ? this._formatDate(item.lastModified) : ""}
           </div>
         </div>
 
@@ -112,7 +233,7 @@ export class FileList extends LitElement {
                   @click=${(e: Event) => this._handleFolderCopy(e, item)}
                   title="Copy folder"
                 >
-                  <iconify-icon icon="ph:copy-bold" width="18"></iconify-icon>
+                  <iconify-icon icon="ph:copy-duotone" width="16"></iconify-icon>
                 </button>
               </div>
             `
@@ -123,7 +244,7 @@ export class FileList extends LitElement {
                   @click=${(e: Event) => this._handleAction(e, "preview", item)}
                   title="Preview"
                 >
-                  <iconify-icon icon="ph:eye-bold" width="18"></iconify-icon>
+                  <iconify-icon icon="ph:eye-duotone" width="16"></iconify-icon>
                 </button>
                 <button
                   class="${TW.fileList.fileActionBtn}"
@@ -131,8 +252,8 @@ export class FileList extends LitElement {
                   title="Share"
                 >
                   <iconify-icon
-                    icon="ph:share-network-bold"
-                    width="18"
+                    icon="ph:link-duotone"
+                    width="16"
                   ></iconify-icon>
                 </button>
                 <button
@@ -142,8 +263,8 @@ export class FileList extends LitElement {
                   title="Download"
                 >
                   <iconify-icon
-                    icon="ph:download-bold"
-                    width="18"
+                    icon="ph:download-simple-duotone"
+                    width="16"
                   ></iconify-icon>
                 </button>
                 <button
@@ -151,7 +272,7 @@ export class FileList extends LitElement {
                   @click=${(e: Event) => this._handleAction(e, "delete", item)}
                   title="Delete"
                 >
-                  <iconify-icon icon="ph:trash-bold" width="18"></iconify-icon>
+                  <iconify-icon icon="ph:trash-duotone" width="16"></iconify-icon>
                 </button>
               </div>
             `}
@@ -160,42 +281,20 @@ export class FileList extends LitElement {
   }
 
   private _getIcon(item: FileObject): string {
-    if (item.isFolder) return "ph:folder-bold";
+    if (item.isFolder) return "ph:folder-duotone";
 
     const ext = item.name.split(".").pop()?.toLowerCase() || "";
     const iconMap: { [key: string]: string } = {
-      // Images
-      jpg: "ph:image-bold",
-      jpeg: "ph:image-bold",
-      png: "ph:image-bold",
-      gif: "ph:image-bold",
-      webp: "ph:image-bold",
-      svg: "ph:image-bold",
-      // Videos
-      mp4: "ph:video-bold",
-      webm: "ph:video-bold",
-      mov: "ph:video-bold",
-      // Audio
-      mp3: "ph:music-notes-bold",
-      wav: "ph:music-notes-bold",
-      ogg: "ph:music-notes-bold",
-      oga: "ph:music-notes-bold",
-      // Documents
-      pdf: "ph:file-pdf-bold",
-      doc: "ph:file-doc-bold",
-      docx: "ph:file-doc-bold",
-      // Code
-      js: "ph:file-js-bold",
-      ts: "ph:file-ts-bold",
-      json: "ph:brackets-curly-bold",
-      html: "ph:file-html-bold",
-      css: "ph:file-css-bold",
-      // Archives
-      zip: "ph:file-zip-bold",
-      rar: "ph:file-zip-bold",
-      tar: "ph:file-zip-bold",
+      jpg: "ph:image-duotone", jpeg: "ph:image-duotone", png: "ph:image-duotone",
+      gif: "ph:image-duotone", webp: "ph:image-duotone", svg: "ph:image-duotone",
+      mp4: "ph:video-duotone", webm: "ph:video-duotone", mov: "ph:video-duotone",
+      mp3: "ph:music-notes-duotone", wav: "ph:music-notes-duotone",
+      ogg: "ph:music-notes-duotone", oga: "ph:music-notes-duotone",
+      pdf: "ph:file-pdf-duotone", doc: "ph:file-doc-duotone", docx: "ph:file-doc-duotone",
+      js: "ph:file-js-duotone", ts: "ph:file-ts-duotone",
+      json: "ph:brackets-curly-duotone", html: "ph:file-html-duotone", css: "ph:file-css-duotone",
+      zip: "ph:file-zip-duotone", rar: "ph:file-zip-duotone", tar: "ph:file-zip-duotone",
     };
-
     return iconMap[ext] || "ph:file-bold";
   }
 
@@ -204,30 +303,24 @@ export class FileList extends LitElement {
 
     const ext = item.name.split(".").pop()?.toLowerCase() || "";
     if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(ext))
-      return "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-500";
+      return "bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400";
     if (["mp4", "webm", "mov"].includes(ext))
-      return "bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-500";
+      return "bg-pink-50 dark:bg-pink-500/10 text-pink-500 dark:text-pink-400";
+    if (["mp3", "wav", "ogg", "oga"].includes(ext))
+      return "bg-cyan-50 dark:bg-cyan-500/10 text-cyan-500 dark:text-cyan-400";
     if (["js", "ts", "json", "html", "css"].includes(ext))
-      return "bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-500";
+      return "bg-yellow-50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400";
     if (["zip", "rar", "tar", "gz"].includes(ext))
-      return "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-500";
-
+      return "bg-purple-50 dark:bg-purple-500/10 text-purple-500 dark:text-purple-400";
+    if (["pdf"].includes(ext))
+      return "bg-red-50 dark:bg-red-500/10 text-red-500 dark:text-red-400";
     return "";
   }
 
   private _getDisplayName(item: FileObject): string {
-    // Extract the last segment of the path for both files and folders
-    // Examples:
-    //   "images/" -> "images"
-    //   "folder1/folder2/" -> "folder2"
-    //   "images/photo.jpg" -> "photo.jpg"
-    //   "docs/reports/2024.pdf" -> "2024.pdf"
-
-    const cleanName = item.name.replace(/\/+$/, ""); // Remove trailing slashes
+    const cleanName = item.name.replace(/\/+$/, "");
     const segments = cleanName.split("/");
-    const lastSegment = segments[segments.length - 1];
-
-    return lastSegment || cleanName;
+    return segments[segments.length - 1] || cleanName;
   }
 
   private _formatSize(bytes: number): string {
@@ -309,6 +402,18 @@ export class FileList extends LitElement {
     );
   }
 
+  private _handleContextMenu(e: MouseEvent, item: FileObject) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.dispatchEvent(
+      new CustomEvent("context-menu", {
+        detail: { item, x: e.clientX, y: e.clientY },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
   private _handlePageChange(e: CustomEvent) {
     this.currentPage = e.detail.page;
     this.scrollTo({ top: 0, behavior: "smooth" });
@@ -322,6 +427,18 @@ export class FileList extends LitElement {
 
   public getSelected(): string[] {
     return Array.from(this.selectedFiles);
+  }
+
+  public selectAll() {
+    this.selectableItems.forEach((i) => this.selectedFiles.add(i.name));
+    this.requestUpdate();
+    this.dispatchEvent(
+      new CustomEvent("selection-change", {
+        detail: { selected: Array.from(this.selectedFiles) },
+        bubbles: true,
+        composed: true,
+      }),
+    );
   }
 }
 

@@ -305,6 +305,13 @@ async function renderExplorerWithLit(items, container) {
         }
     });
 
+    // Context menu (right-click)
+    fileListComponent.addEventListener('context-menu', (e) => {
+        const { item, x, y } = e.detail;
+        const menu = document.getElementById('contextMenu');
+        if (menu) menu.show(x, y, item, item.isFolder);
+    });
+
     // Render pagination in footer
     renderPaginationInFooter(fileListComponent);
 
@@ -513,3 +520,69 @@ export async function generateShareLink() {
         showToast('Link generation failed', 'error');
     }
 }
+
+// --- Keyboard Shortcuts ---
+function isExplorerVisible() {
+    const view = document.getElementById('explorerView');
+    return view && !view.classList.contains('hidden');
+}
+
+function getFileListComponent() {
+    return document.querySelector('#fileList file-list');
+}
+
+document.addEventListener('keydown', async (e) => {
+    // Ctrl+K / Cmd+K → open spotlight search (works globally)
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        if (window.app && window.app.openSpotlight) {
+            window.app.openSpotlight();
+        }
+        return;
+    }
+
+    // Ignore shortcuts when typing in an input/textarea
+    const tag = (e.target && e.target.tagName) || '';
+    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag)) return;
+    if (!isExplorerVisible()) return;
+
+    const fileList = getFileListComponent();
+
+    // Delete → delete selected files
+    if (e.key === 'Delete' && selectedObjects.size > 0) {
+        e.preventDefault();
+        await bulkDelete();
+    }
+
+    // Ctrl+A / Cmd+A → select all files
+    if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+        e.preventDefault();
+        if (fileList && fileList.selectAll) {
+            fileList.selectAll();
+            selectedObjects = new Set(fileList.getSelected());
+            updateBulkDeleteUI();
+        }
+    }
+
+    // Escape → go back one level or close explorer
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        if (store.currentPrefix) {
+            const parts = store.currentPrefix.split('/').filter(Boolean);
+            parts.pop();
+            const parentPath = parts.length > 0 ? parts.join('/') + '/' : '';
+            navigateExplorer(parentPath);
+        } else {
+            closeExplorer();
+        }
+    }
+
+    // Backspace → navigate to parent folder
+    if (e.key === 'Backspace' && store.currentPrefix) {
+        e.preventDefault();
+        const parts = store.currentPrefix.split('/').filter(Boolean);
+        parts.pop();
+        const parentPath = parts.length > 0 ? parts.join('/') + '/' : '';
+        navigateExplorer(parentPath);
+    }
+});

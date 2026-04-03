@@ -162,10 +162,12 @@ const uiRoutes = createUiRoutes(authMiddleware);
 
 // Connect CopyManager events to Socket.io
 copyManager.on('job-progress', (job) => {
+  console.log('[Server] 📡 Emitting copy:progress to socket, files:', job.progress.copiedFiles, '/', job.progress.totalFiles);
   socketManager.emitCopyProgress(job);
 });
 
 copyManager.on('job-completed', (job) => {
+  console.log('[Server] 📡 Emitting copy completed/failed to socket, status:', job.status);
   if (job.status === 'completed') {
     socketManager.emitCopyCompleted(job);
   } else if (job.status === 'failed') {
