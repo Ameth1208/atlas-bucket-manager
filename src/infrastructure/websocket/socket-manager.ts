@@ -32,6 +32,15 @@ export class SocketManager {
         console.log(`🔌 Client ${socket.id} unsubscribed from job ${jobId}`);
       });
 
+      // Subscribe to upload progress
+      socket.on('upload:subscribe', (uploadId: string) => {
+        socket.join(`upload-${uploadId}`);
+      });
+
+      socket.on('upload:unsubscribe', (uploadId: string) => {
+        socket.leave(`upload-${uploadId}`);
+      });
+
       socket.on('disconnect', () => {
         console.log(`❌ WebSocket client disconnected: ${socket.id}`);
       });
@@ -64,6 +73,22 @@ export class SocketManager {
    */
   emitCopyCancelled(job: CopyJob): void {
     this.io.to(`copy-job-${job.id}`).emit('copy:cancelled', job);
+  }
+
+  emitUploadStart(uploadId: string, data: { total: number; bucket: string }): void {
+    this.io.to(`upload-${uploadId}`).emit('upload:start', { uploadId, ...data });
+  }
+
+  emitUploadProgress(uploadId: string, data: { current: number; total: number; fileName: string }): void {
+    this.io.to(`upload-${uploadId}`).emit('upload:progress', { uploadId, ...data });
+  }
+
+  emitUploadComplete(uploadId: string, data: { total: number }): void {
+    this.io.to(`upload-${uploadId}`).emit('upload:complete', { uploadId, ...data });
+  }
+
+  emitUploadError(uploadId: string, error: string): void {
+    this.io.to(`upload-${uploadId}`).emit('upload:error', { uploadId, error });
   }
 
   getIO(): SocketIOServer {
