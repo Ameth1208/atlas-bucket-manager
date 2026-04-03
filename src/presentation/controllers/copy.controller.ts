@@ -16,11 +16,12 @@ export class CopyController {
 
   async startCopy(req: Request, res: Response): Promise<void> {
     try {
-      const { sourceProviderId, sourceBucket, targetProviderId, targetBucket, options } = req.body;
+      const { sourceProviderId, sourceBucket, sourcePrefix, targetProviderId, targetBucket, options } = req.body;
 
       const job = await this.startCopyUseCase.execute({
         sourceProviderId,
         sourceBucket,
+        sourcePrefix: sourcePrefix || undefined,
         targetProviderId,
         targetBucket,
         options: options || {

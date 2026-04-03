@@ -1,4 +1,5 @@
 import fs from 'fs/promises';
+import { mkdirSync } from 'fs';
 import path from 'path';
 import { CopyJob } from '../../domain/entities/copy-job.entity';
 
@@ -7,12 +8,8 @@ export class CopyJobStore {
 
   constructor(baseDir: string = 'temp') {
     this.jobsDir = path.join(process.cwd(), baseDir, 'copy-jobs');
-    this.ensureJobsDir();
-  }
-
-  private async ensureJobsDir(): Promise<void> {
     try {
-      await fs.mkdir(this.jobsDir, { recursive: true });
+      mkdirSync(this.jobsDir, { recursive: true });
     } catch (err) {
       console.error('Error creating jobs directory:', err);
     }

@@ -8,6 +8,7 @@ import { CopyExecutor } from './copy-executor';
 export interface StartCopyParams {
   sourceProviderId: string;
   sourceBucket: string;
+  sourcePrefix?: string;
   targetProviderId: string;
   targetBucket: string;
   options: CopyJobOptions;
@@ -26,9 +27,6 @@ export class CopyManager extends EventEmitter {
   }
 
   private async initialize(): Promise<void> {
-    // Create jobs directory
-    await this.jobStore['ensureJobsDir']();
-
     // Start cleanup scheduler (every hour)
     this.cleanupInterval = setInterval(() => {
       this.cleanupOldJobs();
@@ -58,6 +56,7 @@ export class CopyManager extends EventEmitter {
       status: 'queued',
       sourceProviderId: params.sourceProviderId,
       sourceBucket: params.sourceBucket,
+      sourcePrefix: params.sourcePrefix,
       targetProviderId: params.targetProviderId,
       targetBucket: params.targetBucket,
       options: params.options,

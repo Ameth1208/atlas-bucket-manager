@@ -30,6 +30,7 @@ export interface CopyJob {
   // Source
   sourceProviderId: string;
   sourceBucket: string;
+  sourcePrefix?: string;
 
   // Target
   targetProviderId: string;

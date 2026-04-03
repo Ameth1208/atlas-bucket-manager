@@ -15,9 +15,10 @@ export class StartCopyUseCase {
       throw new Error('Target provider and bucket are required');
     }
 
-    // Cannot copy to same bucket
-    if (dto.sourceProviderId === dto.targetProviderId && 
-        dto.sourceBucket === dto.targetBucket) {
+    // Cannot copy to same bucket (unless copying a specific prefix)
+    if (dto.sourceProviderId === dto.targetProviderId &&
+        dto.sourceBucket === dto.targetBucket &&
+        !dto.sourcePrefix) {
       throw new Error('Cannot copy bucket to itself');
     }
 
@@ -25,6 +26,7 @@ export class StartCopyUseCase {
     const job = await this.copyManager.createJob({
       sourceProviderId: dto.sourceProviderId,
       sourceBucket: dto.sourceBucket,
+      sourcePrefix: dto.sourcePrefix,
       targetProviderId: dto.targetProviderId,
       targetBucket: dto.targetBucket,
       options: dto.options
