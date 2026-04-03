@@ -8,9 +8,9 @@ export const modalStyles = {
   // ============================================
   modal: {
     overlay:
-      "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4",
+      "fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center overflow-y-auto z-50 p-4",
     content:
-      "bg-white dark:bg-dark-900 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 dark:border-dark-800",
+      "bg-white dark:bg-dark-900 rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 dark:border-dark-800 my-auto",
     header: "text-xl font-bold text-slate-900 dark:text-white mb-4",
     footer: "flex gap-3 mt-6",
   },
@@ -20,9 +20,9 @@ export const modalStyles = {
   // ============================================
   deleteModal: {
     backdrop:
-      "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur",
+      "fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 bg-slate-900/50 backdrop-blur",
     content:
-      "relative bg-white dark:bg-dark-900 w-full max-w-md rounded-xl border border-slate-200 dark:border-dark-800 p-8 shadow-2xl animate-in",
+      "relative bg-white dark:bg-dark-900 w-full max-w-md rounded-xl border border-slate-200 dark:border-dark-800 p-8 shadow-2xl animate-in my-auto",
     iconContainer:
       "w-14 h-14 rounded-xl flex items-center justify-center bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-500 mb-6",
     title: "text-xl font-bold mb-2 text-slate-900 dark:text-white",
@@ -39,9 +39,9 @@ export const modalStyles = {
   // ============================================
   folderModal: {
     backdrop:
-      "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur",
+      "fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 bg-slate-900/50 backdrop-blur",
     content:
-      "relative bg-white dark:bg-dark-900 w-full max-w-md rounded-xl border border-slate-200 dark:border-dark-800 p-6 shadow-2xl animate-in",
+      "relative bg-white dark:bg-dark-900 w-full max-w-md rounded-xl border border-slate-200 dark:border-dark-800 p-6 shadow-2xl animate-in my-auto",
     iconContainer:
       "w-12 h-12 rounded-xl flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-500 mb-4",
     title: "text-lg font-bold mb-2 text-slate-900 dark:text-white",
@@ -59,9 +59,9 @@ export const modalStyles = {
   // ============================================
   shareModal: {
     backdrop:
-      "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur",
+      "fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 bg-slate-900/50 backdrop-blur",
     content:
-      "relative bg-white dark:bg-dark-900 w-full max-w-md rounded-xl border border-slate-200 dark:border-dark-800 p-6 shadow-2xl animate-in",
+      "relative bg-white dark:bg-dark-900 w-full max-w-md rounded-xl border border-slate-200 dark:border-dark-800 p-6 shadow-2xl animate-in my-auto",
     iconContainer:
       "w-12 h-12 rounded-xl flex items-center justify-center bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-500 mb-4",
     title: "text-lg font-bold mb-2 text-slate-900 dark:text-white",
@@ -85,9 +85,9 @@ export const modalStyles = {
   // ============================================
   copyModal: {
     backdrop:
-      "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur",
+      "fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 bg-slate-900/50 backdrop-blur",
     content:
-      "relative bg-white dark:bg-dark-900 w-full max-w-lg rounded-xl border border-slate-200 dark:border-dark-800 p-6 shadow-2xl animate-in",
+      "relative bg-white dark:bg-dark-900 w-full max-w-lg rounded-xl border border-slate-200 dark:border-dark-800 p-6 shadow-2xl animate-in my-auto",
     iconContainer:
       "w-12 h-12 rounded-xl flex items-center justify-center bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-500 mb-4",
     title: "text-lg font-bold mb-2 text-slate-900 dark:text-white",
@@ -210,7 +210,7 @@ export const modalStyles = {
   // ============================================
   previewModal: {
     backdrop:
-      "fixed inset-0 z-[9999] bg-black/90 backdrop-blur flex items-center justify-center p-4",
+      "fixed inset-0 z-[9999] bg-black/90 backdrop-blur flex items-start justify-center overflow-y-auto p-4",
     content:
       "relative max-w-4xl w-full flex flex-col items-center",
     header: "w-full flex justify-between items-center mb-4 gap-4",

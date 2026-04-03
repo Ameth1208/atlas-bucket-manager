@@ -104,8 +104,19 @@ export class FileList extends LitElement {
           </div>
         </div>
 
-        ${!item.isFolder
+        ${item.isFolder
           ? html`
+              <div class="${TW.fileList.fileActions}">
+                <button
+                  class="${TW.fileList.fileActionBtn}"
+                  @click=${(e: Event) => this._handleFolderCopy(e, item)}
+                  title="Copy folder"
+                >
+                  <iconify-icon icon="ph:copy-bold" width="18"></iconify-icon>
+                </button>
+              </div>
+            `
+          : html`
               <div class="${TW.fileList.fileActions}">
                 <button
                   class="${TW.fileList.fileActionBtn}"
@@ -143,8 +154,7 @@ export class FileList extends LitElement {
                   <iconify-icon icon="ph:trash-bold" width="18"></iconify-icon>
                 </button>
               </div>
-            `
-          : ""}
+            `}
       </div>
     `;
   }
@@ -282,6 +292,17 @@ export class FileList extends LitElement {
     this.dispatchEvent(
       new CustomEvent(action, {
         detail: { file: item },
+        bubbles: true,
+        composed: true,
+      }),
+    );
+  }
+
+  private _handleFolderCopy(e: Event, item: FileObject) {
+    e.stopPropagation();
+    this.dispatchEvent(
+      new CustomEvent("copy-folder", {
+        detail: { folder: item },
         bubbles: true,
         composed: true,
       }),

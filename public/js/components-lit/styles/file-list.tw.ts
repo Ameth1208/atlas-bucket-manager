@@ -43,7 +43,7 @@ export const fileListStyles = {
   fileActions:
     "flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity",
   fileActionBtn:
-    "p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-dark-700 transition-all border-0 bg-transparent cursor-pointer",
+    "p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-slate-100 dark:hover:bg-dark-700 transition-all border-0 bg-transparent cursor-pointer flex item-center justify-center",
 
   // Pagination
   pagination: "flex items-center justify-between py-3 px-4 border-t border-slate-100 dark:border-dark-800",
