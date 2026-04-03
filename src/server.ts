@@ -109,7 +109,7 @@ const cancelCopyUseCase = new CancelCopyUseCase(copyManager);
 const listCopyJobsUseCase = new ListCopyJobsUseCase(copyManager);
 const deleteCopyJobUseCase = new DeleteCopyJobUseCase(copyManager);
 
-// 5. Initialize Controllers
+// 5. Initialize Controllers (objectController needs socketManager, initialized below)
 const authController = new AuthController(loginUseCase);
 const bucketController = new BucketController(
   getProvidersUseCase,
@@ -119,6 +119,25 @@ const bucketController = new BucketController(
   updateBucketPolicyUseCase,
   getBucketStatsUseCase
 );
+const copyController = new CopyController(
+  startCopyUseCase,
+  getCopyStatusUseCase,
+  cancelCopyUseCase,
+  listCopyJobsUseCase,
+  deleteCopyJobUseCase
+);
+
+// ============================================
+// Express Application Setup
+// ============================================
+
+const app = express();
+const httpServer = createServer(app);
+
+// Initialize Socket.io (must be before ObjectController)
+const socketManager = new SocketManager(httpServer);
+
+// Initialize ObjectController with socketManager
 const objectController = new ObjectController(
   listObjectsUseCase,
   uploadFileUseCase,
@@ -127,14 +146,8 @@ const objectController = new ObjectController(
   searchObjectsUseCase,
   getPresignedUrlUseCase,
   getObjectStreamUseCase,
-  getBucketStatsUseCase
-);
-const copyController = new CopyController(
-  startCopyUseCase,
-  getCopyStatusUseCase,
-  cancelCopyUseCase,
-  listCopyJobsUseCase,
-  deleteCopyJobUseCase
+  getBucketStatsUseCase,
+  socketManager
 );
 
 // 6. Initialize Middleware
@@ -146,16 +159,6 @@ const bucketRoutes = createBucketRoutes(bucketController, authMiddleware);
 const objectRoutes = createObjectRoutes(objectController, authMiddleware);
 const copyRoutes = createCopyRoutes(copyController, authMiddleware);
 const uiRoutes = createUiRoutes(authMiddleware);
-
-// ============================================
-// Express Application Setup
-// ============================================
-
-const app = express();
-const httpServer = createServer(app);
-
-// Initialize Socket.io
-const socketManager = new SocketManager(httpServer);
 
 // Connect CopyManager events to Socket.io
 copyManager.on('job-progress', (job) => {
