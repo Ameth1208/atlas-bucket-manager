@@ -95,14 +95,12 @@ export class CopyExecutor extends EventEmitter {
   }
 
   private async listAllObjects(): Promise<Array<{ name: string; size: number; isFolder: boolean }>> {
-    // Use the recursive method that lists all objects in one call
     const result = await this.sourceRepo.listAllObjectsRecursive(
       this.job.sourceProviderId,
       this.job.sourceBucket,
-      ''
+      this.job.sourcePrefix || ''
     );
 
-    // Transform to the format expected by the copy executor
     return result.map(obj => ({
       name: obj.name,
       size: obj.size,
