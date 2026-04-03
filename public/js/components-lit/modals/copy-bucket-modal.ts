@@ -12,6 +12,7 @@ export interface SourceBucket {
   name: string;
   providerId: string;
   providerName: string;
+  sourcePrefix?: string;
   count?: number;
   size?: number;
 }
@@ -119,6 +120,7 @@ export class CopyBucketModal extends LitElement {
       detail: {
         sourceProviderId: this.sourceBucket?.providerId,
         sourceBucket: this.sourceBucket?.name,
+        sourcePrefix: this.sourceBucket?.sourcePrefix,
         targetProviderId: this.targetProviderId,
         targetBucket: this.targetBucketName,
         options: {
@@ -181,7 +183,10 @@ export class CopyBucketModal extends LitElement {
                 <iconify-icon icon="ph:package-duotone" width="24"></iconify-icon>
               </div>
               <div class="${TW.copyModal.bucketInfo}">
-                <div class="${TW.copyModal.bucketName}">${this.sourceBucket.name}</div>
+                <div class="${TW.copyModal.bucketName}">
+                  ${this.sourceBucket.name}
+                  ${this.sourceBucket.sourcePrefix ? html`<span class="text-rose-500 font-mono text-xs ml-1">/${this.sourceBucket.sourcePrefix}</span>` : ''}
+                </div>
                 <div class="${TW.copyModal.bucketMeta}">
                   ${this.sourceBucket.providerName}
                   ${this.sourceBucket.count !== undefined ? ` • ${this.sourceBucket.count} ${this.t('filesCount')}` : ''}

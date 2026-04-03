@@ -78,7 +78,57 @@ export class ExplorerHeader extends LitElement {
           composed: true,
         }),
       );
-      input.value = ""; // Reset input
+      input.value = "";
+    }
+  }
+
+  private async handleUploadFolderPicker() {
+    if ("showDirectoryPicker" in window) {
+      try {
+        const dirHandle = await (window as any).showDirectoryPicker({ mode: "read" });
+        const { files, paths } = await this._readDirRecursive(dirHandle, "");
+        if (files.length > 0) {
+          (window as any).app?.handleFolderUpload(files, paths);
+        }
+        return;
+      } catch (err: any) {
+        if (err.name === "AbortError") return;
+        console.warn("showDirectoryPicker failed, using fallback:", err);
+      }
+    }
+
+    // Fallback: webkitdirectory input (Firefox / non-secure contexts)
+    this.querySelector<HTMLInputElement>(".folder-fallback-input")?.click();
+  }
+
+  private async _readDirRecursive(
+    dirHandle: any,
+    basePath: string,
+  ): Promise<{ files: File[]; paths: string[] }> {
+    const files: File[] = [];
+    const paths: string[] = [];
+    for await (const [name, handle] of dirHandle.entries()) {
+      const entryPath = basePath ? `${basePath}/${name}` : name;
+      if (handle.kind === "file") {
+        files.push(await handle.getFile());
+        paths.push(entryPath);
+      } else if (handle.kind === "directory") {
+        const sub = await this._readDirRecursive(handle, entryPath);
+        files.push(...sub.files);
+        paths.push(...sub.paths);
+      }
+    }
+    return { files, paths };
+  }
+
+  private handleUploadFolderFallback(e: Event) {
+    const input = e.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const files = Array.from(input.files);
+      const paths = files.map((f) => (f as any).webkitRelativePath || f.name);
+      // Browser already showed its own confirm dialog, skip ours
+      (window as any).app?.handleFolderUploadDirect(files, paths);
+      input.value = "";
     }
   }
 
@@ -149,6 +199,19 @@ export class ExplorerHeader extends LitElement {
               @change=${this.handleUpload}
             />
           </label>
+          <button
+            class="${TW.explorer.toolbar.btnUpload}"
+            @click=${this.handleUploadFolderPicker}
+          >
+            <iconify-icon icon="ph:folder-arrow-up-bold" width="18"></iconify-icon>
+            <span>Folder</span>
+          </button>
+          <input
+            type="file"
+            webkitdirectory
+            class="folder-fallback-input hidden"
+            @change=${this.handleUploadFolderFallback}
+          />
           ${this.showBulkDelete
             ? html`
                 <button
