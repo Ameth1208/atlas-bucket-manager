@@ -17,43 +17,64 @@ export class BucketController {
   ) {}
 
   getProviders = (req: Request, res: Response) => {
-    const providers = this.getProvidersUseCase.execute();
-    res.json(providers);
+    try {
+      const providers = this.getProvidersUseCase.execute();
+      res.json(providers);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   };
 
   listBuckets = async (req: Request, res: Response) => {
-    const buckets = await this.listBucketsUseCase.execute();
-    res.json(buckets);
+    try {
+      const buckets = await this.listBucketsUseCase.execute();
+      res.json(buckets);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   };
 
   createBucket = async (req: Request, res: Response) => {
-    const { providerId, name } = req.body;
-    await this.createBucketUseCase.execute({ providerId, name });
-    res.json({ success: true });
+    try {
+      const { providerId, name } = req.body;
+      await this.createBucketUseCase.execute({ providerId, name });
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   };
 
   updatePolicy = async (req: Request, res: Response) => {
-    const providerId = req.params.providerId as string;
-    const name = req.params.name as string;
-    const isPublic = req.body.public as boolean;
-    
-    await this.updateBucketPolicyUseCase.execute(providerId, name, isPublic);
-    res.json({ success: true });
+    try {
+      const providerId = req.params.providerId as string;
+      const name = req.params.name as string;
+      const isPublic = req.body.public as boolean;
+      await this.updateBucketPolicyUseCase.execute(providerId, name, isPublic);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   };
 
   deleteBucket = async (req: Request, res: Response) => {
-    const providerId = req.params.providerId as string;
-    const name = req.params.name as string;
-    
-    await this.deleteBucketUseCase.execute(providerId, name);
-    res.json({ success: true });
+    try {
+      const providerId = req.params.providerId as string;
+      const name = req.params.name as string;
+      await this.deleteBucketUseCase.execute(providerId, name);
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   };
 
   getStats = async (req: Request, res: Response) => {
-    const providerId = req.params.providerId as string;
-    const name = req.params.name as string;
-    
-    const stats = await this.getBucketStatsUseCase.execute(providerId, name);
-    res.json(stats);
+    try {
+      const providerId = req.params.providerId as string;
+      const name = req.params.name as string;
+      const stats = await this.getBucketStatsUseCase.execute(providerId, name);
+      res.json(stats);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   };
 }
