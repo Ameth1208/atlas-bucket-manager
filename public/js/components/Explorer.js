@@ -79,6 +79,32 @@ export async function navigateExplorer(prefix) {
     await renderExplorerContent();
 }
 
+function setupDragDrop(element) {
+    // Avoid attaching duplicate listeners
+    if (element._dragDropSetup) return;
+    element._dragDropSetup = true;
+
+    element.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        element.classList.add('ring-2', 'ring-rose-400', 'ring-inset');
+    });
+
+    element.addEventListener('dragleave', (e) => {
+        if (!element.contains(e.relatedTarget)) {
+            element.classList.remove('ring-2', 'ring-rose-400', 'ring-inset');
+        }
+    });
+
+    element.addEventListener('drop', (e) => {
+        e.preventDefault();
+        element.classList.remove('ring-2', 'ring-rose-400', 'ring-inset');
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) {
+            handleUpload(files);
+        }
+    });
+}
+
 async function renderExplorerContent() {
     console.log(`📂 Rendering Explorer: ${store.currentProviderId}/${store.currentBucket}, prefix: "${store.currentPrefix}"`);
     const prefix = store.currentPrefix;
@@ -97,6 +123,9 @@ async function renderExplorerContent() {
     if (headerContainer) {
         updateExplorerHeader(headerContainer, store.currentBucket, prefix);
     }
+
+    // Drag & drop on the file list container
+    setupDragDrop(list);
 
     list.innerHTML = '<div class="text-center py-16 flex justify-center text-slate-400"><iconify-icon icon="line-md:loading-twotone-loop" width="40"></iconify-icon></div>';
     
@@ -166,7 +195,11 @@ function updateExplorerHeader(container, bucketName, prefix) {
     header.addEventListener('upload', (e) => {
         window.app.handleUpload(e.detail.files);
     });
-    
+
+    header.addEventListener('upload-folder', (e) => {
+        handleFolderUpload(e.detail.files, e.detail.paths);
+    });
+
     header.addEventListener('bulk-delete', () => {
         window.app.bulkDelete();
     });
@@ -245,10 +278,11 @@ async function renderExplorerWithLit(items, container) {
         window.app.downloadFile(store.currentProviderId, store.currentBucket, fileName);
     });
 
-    fileListComponent.addEventListener('delete', (e) => {
+    fileListComponent.addEventListener('delete', async (e) => {
         // file-list sends { file: item }, extract the name
         const fileName = e.detail.file?.name;
-        if (confirm(`Delete ${fileName}?`)) {
+        const ok = await window.app.showConfirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`, { title: 'Delete item', icon: 'ph:trash-bold', danger: true, confirmText: 'Delete' });
+        if (ok) {
             api.deleteObjects(store.currentProviderId, store.currentBucket, [fileName])
                 .then(() => {
                     showToast('Item deleted', 'success');
@@ -262,6 +296,13 @@ async function renderExplorerWithLit(items, container) {
         // Update selected objects for bulk delete
         selectedObjects = new Set(e.detail.selected);
         updateBulkDeleteUI();
+    });
+
+    fileListComponent.addEventListener('copy-folder', (e) => {
+        const folderName = e.detail.folder?.name;
+        if (window.app.openFolderCopyModal) {
+            window.app.openFolderCopyModal(store.currentProviderId, store.currentBucket, folderName);
+        }
     });
 
     // Render pagination in footer
@@ -331,7 +372,8 @@ export function toggleSelect(name, e) {
 
 export async function bulkDelete() {
     if (selectedObjects.size === 0) return;
-    if (!confirm(`Delete ${selectedObjects.size} objects?`)) return;
+    const ok = await window.app.showConfirm(`Are you sure you want to delete ${selectedObjects.size} item${selectedObjects.size !== 1 ? 's' : ''}? This action cannot be undone.`, { title: 'Delete items', icon: 'ph:trash-bold', danger: true, confirmText: 'Delete' });
+    if (!ok) return;
     
     showToast(`Deleting ${selectedObjects.size} items...`, 'info');
     const res = await api.deleteObjects(store.currentProviderId, store.currentBucket, Array.from(selectedObjects));
@@ -353,18 +395,65 @@ export async function downloadFile(providerId, bucket, name) {
     }
 }
 
+async function doFolderUpload(files, paths) {
+    const uploadId = crypto.randomUUID();
+    if (window._socket && window._socket.connected) {
+        window._socket.emit('upload:subscribe', uploadId);
+    }
+    try {
+        await api.upload(store.currentProviderId, store.currentBucket, files, store.currentPrefix, uploadId, paths);
+        await renderExplorerContent();
+    } catch (err) {
+        showToast('Folder upload failed', 'error');
+    } finally {
+        if (window._socket) {
+            window._socket.emit('upload:unsubscribe', uploadId);
+        }
+    }
+}
+
+// Called from showDirectoryPicker path — shows our confirm dialog
+export async function handleFolderUpload(files, paths) {
+    if (!files.length) return;
+    const ok = await window.app.showConfirm(
+        `${files.length} file${files.length !== 1 ? 's' : ''} will be uploaded to "${store.currentBucket}".`,
+        { title: 'Upload folder', icon: 'ph:folder-arrow-up-bold', confirmText: 'Upload' }
+    );
+    if (!ok) return;
+    await doFolderUpload(files, paths);
+}
+
+// Called from webkitdirectory fallback — browser already showed its dialog, skip ours
+export async function handleFolderUploadDirect(files, paths) {
+    if (!files.length) return;
+    await doFolderUpload(files, paths);
+}
+
 export async function handleUpload(files) {
     if (!files.length) return;
-    showToast(`Uploading ${files.length} files...`, 'info');
+
+    const ok = await window.app.showConfirm(
+        `${files.length} file${files.length !== 1 ? 's' : ''} will be uploaded to "${store.currentBucket}".`,
+        { title: 'Upload files', icon: 'ph:upload-simple-bold', confirmText: 'Upload' }
+    );
+    if (!ok) return;
+
+    const uploadId = crypto.randomUUID();
+
+    // Subscribe to socket before sending the request so we don't miss events
+    if (window._socket && window._socket.connected) {
+        window._socket.emit('upload:subscribe', uploadId);
+    }
+
     try {
-        const res = await api.upload(store.currentProviderId, store.currentBucket, files, store.currentPrefix);
-        if (res.error) showToast(res.error, 'error');
-        else {
-            showToast('Upload complete', 'success');
-            await renderExplorerContent();
-        }
+        await api.upload(store.currentProviderId, store.currentBucket, files, store.currentPrefix, uploadId);
+        await renderExplorerContent();
     } catch (err) {
         showToast('Upload failed', 'error');
+    } finally {
+        if (window._socket) {
+            window._socket.emit('upload:unsubscribe', uploadId);
+        }
     }
 }
 
