@@ -21,6 +21,7 @@ interface AppStore {
   setProviders: (providers: Provider[]) => void;
   buckets: Bucket[];
   setBuckets: (buckets: Bucket[]) => void;
+  updateBucketLimit: (name: string, providerId: string, limit: number) => void;
 
   // Modals
   createBucketOpen: boolean;
@@ -49,6 +50,12 @@ export const useAppStore = create<AppStore>()(
       setProviders: (providers) => set({ providers }),
       buckets: [],
       setBuckets: (buckets) => set({ buckets }),
+      updateBucketLimit: (name, providerId, limit) =>
+        set(s => ({
+          buckets: s.buckets.map(b =>
+            b.name === name && b.providerId === providerId ? { ...b, limit } : b
+          ),
+        })),
 
       createBucketOpen: false,
       setCreateBucketOpen: (open) => set({ createBucketOpen: open }),

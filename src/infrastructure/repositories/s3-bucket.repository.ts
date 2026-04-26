@@ -89,7 +89,8 @@ export class S3BucketRepository implements IBucketRepository {
 
   async listBuckets(): Promise<Bucket[]> {
     const allBuckets: Bucket[] = [];
-    
+    const db = getDatabase();
+
     for (const [id, client] of this.clients.entries()) {
       const buckets = await client.listBuckets();
       const providerName = this.providerConfigs.get(id)!.name;
@@ -100,20 +101,22 @@ export class S3BucketRepository implements IBucketRepository {
           const policyStr = await client.getBucketPolicy(bucket.name);
           if (policyStr) {
             const policy = JSON.parse(policyStr);
-            isPublic = policy.Statement?.some((stmt: any) => 
-              stmt.Effect === 'Allow' && 
+            isPublic = policy.Statement?.some((stmt: any) =>
+              stmt.Effect === 'Allow' &&
               stmt.Principal?.AWS?.includes('*') &&
               stmt.Action?.includes('s3:GetObject')
             );
           }
         } catch { isPublic = false; }
 
+        const config = db.prepare('SELECT max_size FROM bucket_configs WHERE provider_id = ? AND name = ?').get(id, bucket.name) as any;
         return {
           name: bucket.name,
           creationDate: bucket.creationDate,
           isPublic,
           providerId: id,
-          providerName
+          providerName,
+          limit: config?.max_size ?? undefined,
         };
       }));
       allBuckets.push(...bucketInfos);
@@ -121,12 +124,18 @@ export class S3BucketRepository implements IBucketRepository {
     return allBuckets;
   }
 
-  async createBucket(providerId: string, bucketName: string): Promise<void> {
+  async createBucket(providerId: string, bucketName: string, limit?: number): Promise<void> {
     const client = this.getClient(providerId);
     const conf = this.providerConfigs.get(providerId)!;
-    
+
     console.log(`[S3Repository] Creating bucket "${bucketName}" on provider "${providerId}"...`);
     await client.makeBucket(bucketName, conf.region || '');
+
+    const db = getDatabase();
+    db.prepare(`
+      INSERT OR IGNORE INTO bucket_configs (id, provider_id, name, max_size)
+      VALUES (lower(hex(randomblob(16))), ?, ?, ?)
+    `).run(providerId, bucketName, limit ?? null);
   }
 
   async deleteBucket(providerId: string, bucketName: string): Promise<void> {
@@ -182,20 +191,37 @@ export class S3BucketRepository implements IBucketRepository {
     } else {
       await client.setBucketPolicy(bucketName, "");
     }
+
+    const db = getDatabase();
+    db.prepare(`
+      UPDATE bucket_configs SET is_public = ?
+      WHERE provider_id = ? AND name = ?
+    `).run(isPublic ? 1 : 0, providerId, bucketName);
+  }
+
+  async setBucketLimit(providerId: string, bucketName: string, limit: number): Promise<void> {
+    const db = getDatabase();
+    db.prepare(`
+      UPDATE bucket_configs SET max_size = ?
+      WHERE provider_id = ? AND name = ?
+    `).run(limit, providerId, bucketName);
   }
 
   async getBucketStats(providerId: string, bucketName: string): Promise<BucketStats> {
     const client = this.getClient(providerId);
+    const db = getDatabase();
+    const config = db.prepare('SELECT max_size FROM bucket_configs WHERE provider_id = ? AND name = ?').get(providerId, bucketName) as any;
+
     return new Promise((resolve, reject) => {
-      let size = 0;
-      let count = 0;
+      let totalSize = 0;
+      let totalObjects = 0;
       const stream = client.listObjectsV2(bucketName, '', true);
       stream.on('data', (obj) => {
-        size += obj.size || 0;
-        count++;
+        totalSize += obj.size || 0;
+        totalObjects++;
       });
       stream.on('error', (err) => reject(err));
-      stream.on('end', () => resolve({ size, count }));
+      stream.on('end', () => resolve({ totalSize, totalObjects, limit: config?.max_size ?? undefined, providerId }));
     });
   }
 

@@ -80,6 +80,19 @@ export class BucketController {
     }
   };
 
+  setLimit = async (req: Request, res: Response) => {
+    try {
+      const providerId = req.params.providerId as string;
+      const name = req.params.name as string;
+      const limit = Number(req.body.limit);
+      if (!limit || limit <= 0) return res.status(400).json({ error: 'limit must be a positive number' });
+      await this.createBucketUseCase.execute({ providerId, name, limit });
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+
   deleteBucket = async (req: Request, res: Response) => {
     try {
       const providerId = req.params.providerId as string;

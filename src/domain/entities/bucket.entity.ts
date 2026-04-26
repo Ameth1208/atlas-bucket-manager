@@ -4,9 +4,12 @@ export interface Bucket {
   providerName: string;
   creationDate: Date;
   isPublic: boolean;
+  limit?: number;
 }
 
 export interface BucketStats {
-  size: number;
-  count: number;
+  totalSize: number;
+  totalObjects: number;
+  limit?: number;
+  providerId: string;
 }

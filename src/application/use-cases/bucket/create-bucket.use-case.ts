@@ -9,7 +9,6 @@ export class CreateBucketUseCase {
       throw new Error('Provider ID and bucket name are required');
     }
 
-    // Validar nombre del bucket (reglas S3)
     if (dto.name.length < 3 || dto.name.length > 63) {
       throw new Error('Bucket name must be between 3 and 63 characters');
     }
@@ -18,6 +17,6 @@ export class CreateBucketUseCase {
       throw new Error('Bucket name must follow S3 naming conventions');
     }
 
-    await this.bucketRepository.createBucket(dto.providerId, dto.name);
+    await this.bucketRepository.createBucket(dto.providerId, dto.name, dto.limit);
   }
 }

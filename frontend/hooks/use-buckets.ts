@@ -55,3 +55,11 @@ export function useBuckets() {
     isDeleting: deleteMutation.isPending,
   };
 }
+
+export function useBucketStats(bucketName: string, providerId: string) {
+  return useQuery({
+    queryKey: ['bucket-stats', bucketName, providerId],
+    queryFn: () => api.buckets.stats(bucketName, providerId),
+    enabled: !!bucketName && !!providerId,
+  });
+}

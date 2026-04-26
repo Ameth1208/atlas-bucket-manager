@@ -9,9 +9,10 @@ export interface IBucketRepository {
 
   // Bucket operations
   listBuckets(): Promise<Bucket[]>;
-  createBucket(providerId: string, bucketName: string): Promise<void>;
+  createBucket(providerId: string, bucketName: string, limit?: number): Promise<void>;
   deleteBucket(providerId: string, bucketName: string): Promise<void>;
   setBucketVisibility(providerId: string, bucketName: string, isPublic: boolean): Promise<void>;
+  setBucketLimit(providerId: string, bucketName: string, limit: number): Promise<void>;
   getBucketStats(providerId: string, bucketName: string): Promise<BucketStats>;
 
   // Object operations

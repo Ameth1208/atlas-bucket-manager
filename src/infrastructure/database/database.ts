@@ -72,5 +72,16 @@ function runMigrations(db: Database.Database): void {
       region TEXT NOT NULL DEFAULT 'us-east-1',
       created_at INTEGER NOT NULL DEFAULT (unixepoch())
     );
+
+    CREATE TABLE IF NOT EXISTS bucket_configs (
+      id TEXT PRIMARY KEY,
+      provider_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      is_public INTEGER NOT NULL DEFAULT 0,
+      max_size INTEGER,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      FOREIGN KEY (provider_id) REFERENCES provider_configs(id) ON DELETE CASCADE,
+      UNIQUE(provider_id, name)
+    );
   `);
 }
