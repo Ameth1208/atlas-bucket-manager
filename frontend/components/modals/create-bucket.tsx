@@ -1,33 +1,48 @@
 'use client';
 import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useAppStore } from '@/lib/store';
+import { useProviders } from '@/hooks/use-providers';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 
-export function CreateBucketModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CreateBucketModal() {
   const qc = useQueryClient();
+  const open = useAppStore(s => s.createBucketOpen);
+  const close = () => useAppStore.getState().setCreateBucketOpen(false);
+  const { providers } = useProviders();
+  const { setBuckets } = useAppStore();
+
   const [name, setName] = useState('');
   const [providerId, setProviderId] = useState('');
 
-  const { data: providers = [] } = useQuery({ queryKey: ['providers'], queryFn: api.buckets.providers, enabled: open });
-
   const createMutation = useMutation({
     mutationFn: () => api.buckets.create({ name, providerId }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['buckets'] });
+    onSuccess: (newBucket) => {
+      const prev = qc.getQueryData<any[]>(['buckets']) ?? [];
+      const next = [...prev, newBucket];
+      qc.setQueryData(['buckets'], next);
+      setBuckets(next);
       toast.success(`Bucket "${name}" creado`);
       setName(''); setProviderId('');
-      onClose();
+      close();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   return (
-    <Modal open={open} onClose={onClose} title="Nuevo bucket">
+    <Modal open={open} onClose={close} title="Nuevo bucket">
       <div className="flex flex-col gap-4">
         <div className="grid gap-1.5">
           <Label>Nombre del bucket</Label>
@@ -40,14 +55,16 @@ export function CreateBucketModal({ open, onClose }: { open: boolean; onClose: (
 
         <div className="grid gap-1.5">
           <Label>Proveedor</Label>
-          <select
-            value={providerId}
-            onChange={e => setProviderId(e.target.value)}
-            className="h-8 w-full rounded-md border border-input bg-transparent px-2.5 py-1 text-sm text-foreground outline-none focus:border-ring transition-colors"
-          >
-            <option value="">Seleccionar proveedor</option>
-            {providers.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
+          <Select value={providerId} onValueChange={(v) => setProviderId(v ?? '')}>
+            <SelectTrigger>
+              <SelectValue placeholder="Seleccionar proveedor" />
+            </SelectTrigger>
+            <SelectContent>
+              {providers.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {providers.length === 0 && (
@@ -55,7 +72,7 @@ export function CreateBucketModal({ open, onClose }: { open: boolean; onClose: (
         )}
 
         <div className="flex gap-2 pt-2">
-          <Button variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+          <Button variant="outline" className="flex-1" onClick={close}>Cancelar</Button>
           <Button
             className="flex-1"
             disabled={!name || !providerId || createMutation.isPending}

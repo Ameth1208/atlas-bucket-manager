@@ -55,6 +55,8 @@ export const api = {
     stats: (name: string, providerId: string) =>
       request<BucketStats>(`/buckets/${name}/stats?providerId=${providerId}`),
     providers: () => request<Provider[]>('/providers'),
+    createProvider: (body: CreateProviderBody) =>
+      request<Provider>('/providers', { method: 'POST', body: JSON.stringify(body) }),
   },
 
   objects: {
@@ -144,17 +146,33 @@ export interface Bucket {
   creationDate?: string;
   providerId: string;
   providerName?: string;
+  isPublic?: boolean;
+  used?: number;
+  limit?: number;
 }
 
 export interface BucketStats {
   totalObjects: number;
   totalSize: number;
+  used?: number;
+  limit?: number;
   providerId: string;
 }
 
 export interface Provider {
   id: string;
   name: string;
+}
+
+export interface CreateProviderBody {
+  name: string;
+  kind: string;
+  endpoint: string;
+  port: number;
+  ssl: boolean;
+  accessKey: string;
+  secretKey: string;
+  region: string;
 }
 
 export interface StorageObject {

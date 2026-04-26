@@ -1,6 +1,8 @@
 'use client';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useBuckets } from '@/hooks/use-buckets';
+import { useProviders } from '@/hooks/use-providers';
 import { Toolbar } from '@/components/layout/toolbar';
 import { BucketCard } from '@/components/dashboard/bucket-card';
 import { StatCard } from '@/components/dashboard/stat-card';
@@ -16,8 +18,8 @@ import Link from 'next/link';
 export default function DashboardPage() {
   const { setCreateBucketOpen } = useAppStore();
 
-  const { data: buckets = [], isLoading: loadingB } = useQuery({ queryKey: ['buckets'], queryFn: api.buckets.list });
-  const { data: providers = [] } = useQuery({ queryKey: ['providers'], queryFn: api.buckets.providers });
+  const { buckets, isLoading: loadingB } = useBuckets();
+  const { providers } = useProviders();
   const { data: activity = [] } = useQuery({ queryKey: ['activity'], queryFn: () => api.activity.list(10) });
 
   return (

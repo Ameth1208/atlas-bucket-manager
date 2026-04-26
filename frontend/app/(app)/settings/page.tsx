@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useAppStore } from '@/lib/store';
+import { useTheme } from 'next-themes';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { User, Shield, Palette, Users, Settings2, Sun, Moon, Plus, Trash2 } from 'lucide-react';
@@ -102,7 +103,7 @@ function ProfileSection() {
 }
 
 function AppearanceSection() {
-  const { theme, toggleTheme } = useAppStore();
+  const { theme, setTheme } = useTheme();
   return (
     <SectionBlock title="Apariencia">
       <div className="flex items-center justify-between py-3">
@@ -114,7 +115,7 @@ function AppearanceSection() {
           {[{ v: 'light', label: 'Claro', icon: Sun }, { v: 'dark', label: 'Oscuro', icon: Moon }].map(opt => (
             <button
               key={opt.v}
-              onClick={() => { if (theme !== opt.v) toggleTheme(); }}
+              onClick={() => setTheme(opt.v)}
               className={cn(
                 'flex items-center gap-1.5 px-3 py-1.5 transition-colors',
                 theme === opt.v ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-muted'

@@ -1,27 +1,17 @@
 'use client';
 import { useParams, useSearchParams } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, StorageObject } from '@/lib/api';
+import { useBucketObjects } from '@/hooks/use-bucket-objects';
+import { useAppStore } from '@/lib/store';
 import { Toolbar } from '@/components/layout/toolbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { fmtBytes, fmtDate } from '@/lib/utils';
+import { fmtBytes, fmtDate, cn } from '@/lib/utils';
 import { Upload, Grid, List, Folder, File, Trash2, Download, RefreshCw, Search, ChevronRight } from 'lucide-react';
-import { useState, useRef } from 'react';
-import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 
 type Layout = 'grid' | 'list';
 type Filter = 'all' | 'image' | 'video' | 'audio' | 'code';
-
-const EXT_MAP: Record<string, Filter> = {
-  jpg: 'image', jpeg: 'image', png: 'image', gif: 'image', webp: 'image', svg: 'image',
-  mp4: 'video', mov: 'video', avi: 'video', mkv: 'video',
-  mp3: 'audio', wav: 'audio', ogg: 'audio', flac: 'audio',
-  ts: 'code', tsx: 'code', js: 'code', jsx: 'code', py: 'code', go: 'code', rs: 'code',
-};
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: 'all', label: 'Todos' },
@@ -31,65 +21,35 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: 'code', label: 'Código' },
 ];
 
-function getKind(key: string): Filter {
-  return EXT_MAP[key.split('.').pop()?.toLowerCase() || ''] || 'all';
-}
-
 export default function BucketPage() {
   const params = useParams();
   const searchParams = useSearchParams();
-  const qc = useQueryClient();
 
   const name = decodeURIComponent(params.name as string);
   const providerId = searchParams.get('provider') || '';
 
-  const [path, setPath] = useState<string[]>([]);
-  const [layout, setLayout] = useState<Layout>('grid');
-  const [filter, setFilter] = useState<Filter>('all');
-  const [search, setSearch] = useState('');
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const fileInput = useRef<HTMLInputElement>(null);
-
-  const prefix = path.join('/') + (path.length > 0 ? '/' : '');
-
-  const { data: objects = [], isLoading, refetch } = useQuery({
-    queryKey: ['objects', name, providerId, prefix],
-    queryFn: () => api.objects.list(name, providerId, prefix),
-    enabled: !!providerId,
-  });
-
-  const uploadMutation = useMutation({
-    mutationFn: (files: File[]) => api.objects.upload(name, providerId, files, prefix),
-    onSuccess: () => { toast.success('Archivos subidos'); refetch(); },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (keys: string[]) => api.objects.delete(name, providerId, keys),
-    onSuccess: () => { toast.success('Eliminados'); setSelected(new Set()); refetch(); },
-    onError: (e: Error) => toast.error(e.message),
-  });
-
-  const filtered = objects.filter(o => {
-    if (search && !o.key.toLowerCase().includes(search.toLowerCase())) return false;
-    if (filter !== 'all' && !o.isFolder && getKind(o.key) !== filter) return false;
-    return true;
-  });
-
-  const navigate = (folder: string) => { setPath([...path, folder]); setSelected(new Set()); };
-  const back = (idx: number) => { setPath(path.slice(0, idx)); setSelected(new Set()); };
-
-  const handleFiles = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    uploadMutation.mutate(Array.from(files));
-  };
-
-  const handleDownload = async (key: string) => {
-    try {
-      const { url } = await api.objects.presignedUrl(name, key, providerId);
-      window.open(url, '_blank');
-    } catch (e: any) { toast.error(e.message); }
-  };
+  const {
+    objects,
+    isLoading,
+    refetch,
+    path,
+    navigate,
+    back,
+    layout,
+    setLayout,
+    filter,
+    setFilter,
+    search,
+    setSearch,
+    selected,
+    setSelected,
+    fileInput,
+    handleFiles,
+    handleDownload,
+    uploadMutation,
+    deleteMutation,
+    filtered,
+  } = useBucketObjects(name, providerId);
 
   const crumbs = [
     { label: 'Atlas', href: '/dashboard' },

@@ -1,6 +1,7 @@
 export interface Provider {
   id: string;
   name: string;
+  kind?: string;
   endPoint: string;
   port: number;
   useSSL: boolean;

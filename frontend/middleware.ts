@@ -12,7 +12,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/login', req.url));
   }
 
-  if (hasToken && (pathname === '/login' || pathname === '/setup')) {
+  if (hasToken && pathname === '/login') {
     return NextResponse.redirect(new URL('/dashboard', req.url));
   }
 

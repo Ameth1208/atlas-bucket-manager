@@ -1,5 +1,6 @@
 'use client';
-import { Sidebar } from '@/components/layout/sidebar';
+import { AppSidebar } from '@/components/layout/sidebar';
+import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useQuery } from '@tanstack/react-query';
@@ -11,7 +12,7 @@ import { CreateApiKeyModal } from '@/components/modals/create-api-key';
 import { CreateUserModal } from '@/components/modals/create-user';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { setUser, createBucketOpen, connectProviderOpen, createKeyOpen, createUserOpen } = useAppStore();
+  const { setUser } = useAppStore();
   const router = useRouter();
 
   const { data: me, error } = useQuery({
@@ -26,16 +27,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [me, error]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {children}
-      </div>
+    <div className="flex h-dvh overflow-hidden">
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset className="flex flex-col min-h-0">
+          {children}
+        </SidebarInset>
 
-      <CreateBucketModal open={createBucketOpen} onClose={() => useAppStore.getState().setCreateBucketOpen(false)} />
-      <ConnectProviderModal open={connectProviderOpen} onClose={() => useAppStore.getState().setConnectProviderOpen(false)} />
-      <CreateApiKeyModal open={createKeyOpen} onClose={() => useAppStore.getState().setCreateKeyOpen(false)} />
-      <CreateUserModal open={createUserOpen} onClose={() => useAppStore.getState().setCreateUserOpen(false)} />
+        <CreateBucketModal />
+        <ConnectProviderModal />
+        <CreateApiKeyModal />
+        <CreateUserModal />
+      </SidebarProvider>
     </div>
   );
 }

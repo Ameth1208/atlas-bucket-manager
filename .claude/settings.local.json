@@ -17,7 +17,8 @@
       "WebFetch(domain:api.anthropic.com)",
       "Bash(npm install *)",
       "Bash(npx shadcn@latest init -d)",
-      "Bash(node -e \"require\\('tailwind-merge'\\); require\\('clsx'\\); require\\('class-variance-authority'\\); console.log\\('ok'\\)\")"
+      "Bash(node -e \"require\\('tailwind-merge'\\); require\\('clsx'\\); require\\('class-variance-authority'\\); console.log\\('ok'\\)\")",
+      "Bash(pnpm dlx *)"
     ]
   }
 }

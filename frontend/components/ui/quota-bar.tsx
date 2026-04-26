@@ -6,18 +6,18 @@ interface QuotaBarProps {
 
 export function QuotaBar({ used, limit, compact }: QuotaBarProps) {
   const pct = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
-  const color = pct > 85 ? 'var(--red)' : pct > 65 ? 'var(--orange)' : 'var(--accent)';
+  const color = pct > 85 ? 'hsl(var(--destructive))' : pct > 65 ? '#ff9500' : 'hsl(var(--primary))';
 
   return (
     <div
       className="w-full rounded-full overflow-hidden"
       style={{
         height: compact ? 3 : 4,
-        background: 'var(--bg-well)',
+        background: 'hsl(var(--muted))',
       }}
     >
       <div
-        className="h-full rounded-full transition-all"
+        className="h-full rounded-full transition-all duration-300"
         style={{ width: `${pct}%`, background: color }}
       />
     </div>

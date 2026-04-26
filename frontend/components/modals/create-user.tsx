@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useAppStore } from '@/lib/store';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +12,11 @@ import { cn } from '@/lib/utils';
 
 const ROLES = ['admin', 'editor', 'viewer'];
 
-export function CreateUserModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CreateUserModal() {
   const qc = useQueryClient();
+  const open = useAppStore(s => s.createUserOpen);
+  const close = () => useAppStore.getState().setCreateUserOpen(false);
+
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'viewer' });
 
   const createMutation = useMutation({
@@ -21,13 +25,13 @@ export function CreateUserModal({ open, onClose }: { open: boolean; onClose: () 
       qc.invalidateQueries({ queryKey: ['users'] });
       toast.success(`Usuario "${form.name}" creado`);
       setForm({ name: '', email: '', password: '', role: 'viewer' });
-      onClose();
+      close();
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
   return (
-    <Modal open={open} onClose={onClose} title="Invitar usuario">
+    <Modal open={open} onClose={close} title="Invitar usuario">
       <div className="flex flex-col gap-4">
         <div className="grid gap-1.5"><Label>Nombre completo</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} /></div>
         <div className="grid gap-1.5"><Label>Correo electrónico</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
@@ -54,7 +58,7 @@ export function CreateUserModal({ open, onClose }: { open: boolean; onClose: () 
         </div>
 
         <div className="flex gap-2 pt-2">
-          <Button variant="outline" className="flex-1" onClick={onClose}>Cancelar</Button>
+          <Button variant="outline" className="flex-1" onClick={close}>Cancelar</Button>
           <Button
             className="flex-1"
             disabled={!form.name || !form.email || !form.password || createMutation.isPending}

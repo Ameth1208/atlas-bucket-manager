@@ -12,7 +12,7 @@ export function SetupCard() {
   const { step } = useSetupStore();
 
   return (
-    <Card className="w-full max-w-[380px] mx-auto bg-white border border-[#D2D2D7]/50 rounded-2xl shadow-sm">
+    <Card className="w-full max-w-95 mx-auto bg-white border border-[#D2D2D7]/50 rounded-2xl shadow-sm">
       <CardHeader className="pb-4 px-6 pt-5">
         <div className="flex items-center gap-3">
           <Logo size="sm" />

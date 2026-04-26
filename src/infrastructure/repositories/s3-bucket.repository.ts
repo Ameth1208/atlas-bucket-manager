@@ -3,6 +3,7 @@ import { IBucketRepository } from '../../domain/repositories/bucket.repository.i
 import { Bucket, BucketStats } from '../../domain/entities/bucket.entity';
 import { StorageObject, SearchResult } from '../../domain/entities/object.entity';
 import { Provider, ProviderInfo } from '../../domain/entities/provider.entity';
+import { getDatabase } from '../database/database';
 
 export class S3BucketRepository implements IBucketRepository {
   private clients: Map<string, Minio.Client> = new Map();
@@ -44,6 +45,46 @@ export class S3BucketRepository implements IBucketRepository {
       id: p.id,
       name: p.name
     }));
+  }
+
+  async addProvider(provider: Provider): Promise<void> {
+    if (!provider.accessKey || !provider.secretKey) {
+      throw new Error('Access key and secret key are required');
+    }
+
+    const client = new Minio.Client({
+      endPoint: provider.endPoint,
+      port: provider.port,
+      useSSL: provider.useSSL,
+      accessKey: provider.accessKey,
+      secretKey: provider.secretKey,
+      ...(provider.region && { region: provider.region }),
+    });
+
+    // Test connectivity before saving
+    await client.listBuckets();
+
+    this.clients.set(provider.id, client);
+    this.providerConfigs.set(provider.id, provider);
+
+    const db = getDatabase();
+    db.prepare(`
+      INSERT OR REPLACE INTO provider_configs
+        (id, name, kind, endpoint, port, use_ssl, access_key, secret_key, region)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(
+      provider.id,
+      provider.name,
+      provider.kind || 'minio',
+      provider.endPoint,
+      provider.port,
+      provider.useSSL ? 1 : 0,
+      provider.accessKey,
+      provider.secretKey,
+      provider.region || 'us-east-1',
+    );
+
+    console.log(`   + Provider added at runtime: ${provider.name} (${provider.id}) ✅`);
   }
 
   async listBuckets(): Promise<Bucket[]> {

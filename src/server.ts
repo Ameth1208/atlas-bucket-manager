@@ -30,6 +30,7 @@ import { CreateBucketUseCase } from './application/use-cases/bucket/create-bucke
 import { DeleteBucketUseCase } from './application/use-cases/bucket/delete-bucket.use-case';
 import { UpdateBucketPolicyUseCase } from './application/use-cases/bucket/update-bucket-policy.use-case';
 import { GetBucketStatsUseCase } from './application/use-cases/bucket/get-bucket-stats.use-case';
+import { CreateProviderUseCase } from './application/use-cases/bucket/create-provider.use-case';
 
 // Use Cases - Object
 import { ListObjectsUseCase } from './application/use-cases/object/list-objects.use-case';
@@ -150,6 +151,7 @@ const logActivityUseCase = new LogActivityUseCase(activityRepository);
 const listActivityUseCase = new ListActivityUseCase(activityRepository);
 
 const getProvidersUseCase = new GetProvidersUseCase(bucketRepository);
+const createProviderUseCase = new CreateProviderUseCase(bucketRepository);
 const listBucketsUseCase = new ListBucketsUseCase(bucketRepository);
 const createBucketUseCase = new CreateBucketUseCase(bucketRepository);
 const deleteBucketUseCase = new DeleteBucketUseCase(bucketRepository);
@@ -185,7 +187,8 @@ copyManager.on('job-completed', job => {
 const authController = new AuthController(loginUseCase, setupUseCase, userRepository);
 const bucketController = new BucketController(
   getProvidersUseCase, listBucketsUseCase, createBucketUseCase,
-  deleteBucketUseCase, updateBucketPolicyUseCase, getBucketStatsUseCase
+  deleteBucketUseCase, updateBucketPolicyUseCase, getBucketStatsUseCase,
+  createProviderUseCase
 );
 const copyController = new CopyController(
   new (require('./application/use-cases/copy/start-copy.use-case').StartCopyUseCase)(copyManager),

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
@@ -83,14 +83,6 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    api.auth.status()
-      .then(({ isSetup }) => { if (!isSetup) router.replace('/setup'); })
-      .catch(() => router.replace('/setup'));
-  }, []);
-
   return (
     <main className="h-dvh w-dvw flex items-center justify-center bg-secondary/30">
       <div className="w-full max-w-[380px]">

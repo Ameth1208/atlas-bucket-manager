@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, CreatedApiKey } from '@/lib/api';
+import { useAppStore } from '@/lib/store';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +13,11 @@ import { cn } from '@/lib/utils';
 
 const SCOPES = ['read', 'write', 'delete'];
 
-export function CreateApiKeyModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function CreateApiKeyModal() {
   const qc = useQueryClient();
+  const open = useAppStore(s => s.createKeyOpen);
+  const close = () => useAppStore.getState().setCreateKeyOpen(false);
+
   const [name, setName] = useState('');
   const [scopes, setScopes] = useState<string[]>(['read']);
   const [created, setCreated] = useState<CreatedApiKey | null>(null);
@@ -37,7 +41,7 @@ export function CreateApiKeyModal({ open, onClose }: { open: boolean; onClose: (
 
   const handleClose = () => {
     setName(''); setScopes(['read']); setCreated(null); setCopied(false);
-    onClose();
+    close();
   };
 
   return (

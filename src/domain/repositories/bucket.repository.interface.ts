@@ -1,10 +1,11 @@
 import { Bucket, BucketStats } from '../entities/bucket.entity';
 import { StorageObject, SearchResult } from '../entities/object.entity';
-import { ProviderInfo } from '../entities/provider.entity';
+import { Provider, ProviderInfo } from '../entities/provider.entity';
 
 export interface IBucketRepository {
   // Provider operations
   getActiveProviders(): ProviderInfo[];
+  addProvider(provider: Provider): Promise<void>;
 
   // Bucket operations
   listBuckets(): Promise<Bucket[]>;
@@ -20,11 +21,11 @@ export interface IBucketRepository {
   deleteObjects(providerId: string, bucketName: string, objectNames: string[]): Promise<void>;
   createFolder(providerId: string, bucketName: string, folderPath: string): Promise<void>;
   searchObjects(query: string): Promise<SearchResult[]>;
-  
+
   // URL and streaming
   getPresignedUrl(providerId: string, bucketName: string, objectName: string, expiry?: number): Promise<string>;
   getObjectStream(providerId: string, bucketName: string, objectName: string): Promise<any>;
-  
+
   // Copy operations
   objectExists(providerId: string, bucketName: string, objectName: string): Promise<boolean>;
   uploadStream(providerId: string, bucketName: string, objectName: string, stream: any, size: number): Promise<void>;

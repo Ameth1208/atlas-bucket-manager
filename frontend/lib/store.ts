@@ -1,13 +1,9 @@
 'use client';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { User } from './api';
+import type { User, Bucket, Provider } from './api';
 
 interface AppStore {
-  // Theme
-  theme: 'light' | 'dark';
-  toggleTheme: () => void;
-
   // Language
   lang: 'es' | 'en';
   toggleLang: () => void;
@@ -19,6 +15,12 @@ interface AppStore {
   // UI
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
+
+  // Data (cached from API, managed here for reactivity)
+  providers: Provider[];
+  setProviders: (providers: Provider[]) => void;
+  buckets: Bucket[];
+  setBuckets: (buckets: Bucket[]) => void;
 
   // Modals
   createBucketOpen: boolean;
@@ -34,9 +36,6 @@ interface AppStore {
 export const useAppStore = create<AppStore>()(
   persist(
     (set) => ({
-      theme: 'light',
-      toggleTheme: () => set(s => ({ theme: s.theme === 'light' ? 'dark' : 'light' })),
-
       lang: 'es',
       toggleLang: () => set(s => ({ lang: s.lang === 'es' ? 'en' : 'es' })),
 
@@ -45,6 +44,11 @@ export const useAppStore = create<AppStore>()(
 
       sidebarOpen: true,
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
+
+      providers: [],
+      setProviders: (providers) => set({ providers }),
+      buckets: [],
+      setBuckets: (buckets) => set({ buckets }),
 
       createBucketOpen: false,
       setCreateBucketOpen: (open) => set({ createBucketOpen: open }),
@@ -57,7 +61,7 @@ export const useAppStore = create<AppStore>()(
     }),
     {
       name: 'atlas-store',
-      partialize: (s) => ({ theme: s.theme, lang: s.lang }),
+      partialize: (s) => ({ lang: s.lang }),
     }
   )
 );

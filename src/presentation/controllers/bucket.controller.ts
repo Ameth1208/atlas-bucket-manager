@@ -5,6 +5,7 @@ import { CreateBucketUseCase } from '../../application/use-cases/bucket/create-b
 import { DeleteBucketUseCase } from '../../application/use-cases/bucket/delete-bucket.use-case';
 import { UpdateBucketPolicyUseCase } from '../../application/use-cases/bucket/update-bucket-policy.use-case';
 import { GetBucketStatsUseCase } from '../../application/use-cases/bucket/get-bucket-stats.use-case';
+import { CreateProviderUseCase } from '../../application/use-cases/bucket/create-provider.use-case';
 
 export class BucketController {
   constructor(
@@ -13,13 +14,36 @@ export class BucketController {
     private createBucketUseCase: CreateBucketUseCase,
     private deleteBucketUseCase: DeleteBucketUseCase,
     private updateBucketPolicyUseCase: UpdateBucketPolicyUseCase,
-    private getBucketStatsUseCase: GetBucketStatsUseCase
+    private getBucketStatsUseCase: GetBucketStatsUseCase,
+    private createProviderUseCase: CreateProviderUseCase
   ) {}
 
   getProviders = (req: Request, res: Response) => {
     try {
       const providers = this.getProvidersUseCase.execute();
       res.json(providers);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+
+  createProvider = async (req: Request, res: Response) => {
+    try {
+      const { name, kind, endpoint, port, ssl, accessKey, secretKey, region } = req.body;
+      if (!name || !endpoint || !accessKey || !secretKey) {
+        return res.status(400).json({ error: 'name, endpoint, accessKey y secretKey son requeridos' });
+      }
+      const result = await this.createProviderUseCase.execute({
+        name,
+        kind: kind || 'minio',
+        endpoint,
+        port: Number(port) || 9000,
+        ssl: Boolean(ssl),
+        accessKey,
+        secretKey,
+        region: region || 'us-east-1',
+      });
+      res.status(201).json(result);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
