@@ -2,45 +2,173 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Scrollbar - Premium Apple Style */
+/* Apple Design Tokens */
+:root {
+  /* Colors */
+  --bg-base: #f5f5f7;
+  --bg-surface: #ffffff;
+  --text-primary: #1d1d1f;
+  --text-secondary: #86868b;
+  --text-tertiary: #a1a1a6;
+  --accent-blue: #0071e3;
+  --accent-green: #34c759;
+  --accent-orange: #ff9500;
+  --accent-red: #ff3b30;
+  
+  /* Spacing */
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  
+  /* Radius */
+  --radius-pill: 980px;
+  --radius-md: 12px;
+  --radius-xl: 18px;
+}
+
+.dark {
+  --bg-base: #000000;
+  --bg-surface: #1d1d1f;
+  --text-primary: #f5f5f7;
+  --text-secondary: #86868b;
+  --text-tertiary: #6e6e73;
+}
+
+/* Base Styles */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, transform, opacity, box-shadow;
+  transition-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+  transition-duration: 200ms;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glass Morphism */
+.glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.dark .glass {
+  background: rgba(29, 29, 31, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.35);
+  backdrop-filter: saturate(180%) blur(12px);
+}
+
+/* Smooth Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 500ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.animate-modal-slide-up {
+  animation: modalSlideUp 400ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #f5f5f7 0%,
+    #e5e5e5 50%,
+    #f5f5f7 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Focus States */
+*:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-transparent;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-white/15 rounded-full;
+  background: rgba(134, 134, 139, 0.3);
+  border-radius: 980px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400 dark:bg-white/25;
+  background: rgba(134, 134, 139, 0.5);
 }
 
-/* Theme Transitions */
-.theme-transition {
-  @apply transition-all duration-300;
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-/* Animations */
-.animate-fade-in {
-  animation: fadeIn 0.2s ease-out forwards;
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* Premium focus ring */
-.focus-ring {
-  @apply outline-none ring-2 ring-accent/50 ring-offset-2 dark:ring-offset-dark-900;
+/* Selection */
+::selection {
+  background: rgba(0, 113, 227, 0.2);
+  color: var(--text-primary);
 }
 
-/* Smooth transitions */
-.smooth-transition {
-  @apply transition-all duration-300 ease-out;
+/* Button Press Effect */
+.btn-press {
+  transition: transform 100ms cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.btn-press:active {
+  transform: scale(0.96);
 }
 
-/* Glass morphism utility */
-.glass {
-  @apply bg-white/80 dark:bg-[#1c1c1e]/80 backdrop-blur-xl;
+/* Card Hover Effect */
+.card-hover {
+  transition: transform 300ms cubic-bezier(0.19, 1, 0.22, 1),
+              box-shadow 300ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.card-hover:hover {
+  transform: scale(1.02);
+}
+
+/* Toggle Animation */
+.toggle-knob {
+  transition: transform 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
 }

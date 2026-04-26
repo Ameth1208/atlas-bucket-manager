@@ -1,69 +1,109 @@
 services:
-  app:
-    build: 
+  # ── API Backend (Express + SQLite) ──────────────────────────────
+  atlas-api:
+    build:
       context: .
       dockerfile: Dockerfile
-      target: production
-    image: atlas-bucket-manager:latest
-    container_name: atlas-manager
-    ports:
-      - "3000:3000"
+      target: api
+    image: atlas-api:latest
+    container_name: atlas-api
+    expose:
+      - "3001"
     environment:
       - NODE_ENV=production
-      - PORT=3000
-      - ADMIN_USER=${ADMIN_USER:-admin}
-      - ADMIN_PASS=${ADMIN_PASS:-admin}
-      # Local Provider
-      - MINIO_ENDPOINT=minio-server
-      - MINIO_PORT=9000
-      - MINIO_USE_SSL=false
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-minioadmin}
-      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-minioadmin}
+      - PORT=3001
+      - JWT_SECRET=${JWT_SECRET:-atlas-secret-change-me}
+      - DB_PATH=/app/data
+      - CORS_ORIGIN=http://atlas-web:3000
+      - SERVE_STATIC=false
+      # MinIO (optional — set if not using UI provider management)
+      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio-server}
+      - MINIO_PORT=${MINIO_PORT:-9000}
+      - MINIO_USE_SSL=${MINIO_USE_SSL:-false}
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-}
       - MINIO_REGION=${MINIO_REGION:-us-east-1}
-      # AWS S3 Provider
+      # AWS S3 (optional)
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
       - AWS_REGION=${AWS_REGION:-us-east-1}
       - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT:-s3.amazonaws.com}
-      - AWS_S3_PORT=${AWS_S3_PORT:-443}
-      - AWS_S3_USE_SSL=${AWS_S3_USE_SSL:-true}
-    # depends_on:
-    #   - minio-server
+    volumes:
+      - atlas_data:/app/data
+      - atlas_uploads:/app/uploads
+      - atlas_temp:/app/temp
+    depends_on:
+      minio-server:
+        condition: service_healthy
+        required: false
     networks:
       - atlas-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "sh", "-c", "curl -f http://localhost:$$PORT/login || exit 1"]
+      test: ["CMD", "sh", "-c", "curl -f http://localhost:3001/api/auth/status || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 5s
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
+      start_period: 10s
 
-  # minio-server:
-  #   image: minio/minio
-  #   container_name: minio-server
-  #   command: server /data --console-address ":9001"
-  #   ports:
-  #     - "9000:9000"
-  #     - "9001:9001"
-  #   environment:
-  #     - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
-  #     - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
-  #   volumes:
-  #     - atlas_data:/data
-  #   networks:
-  #     - atlas-net
+  # ── Next.js Frontend ─────────────────────────────────────────────
+  atlas-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: atlas-web:latest
+    container_name: atlas-web
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://atlas-api:3001
+    depends_on:
+      atlas-api:
+        condition: service_healthy
+    networks:
+      - atlas-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -f http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── MinIO (optional local S3) ────────────────────────────────────
+  minio-server:
+    image: minio/minio:latest
+    container_name: minio-server
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+    volumes:
+      - minio_data:/data
+    networks:
+      - atlas-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    profiles:
+      - minio
 
 volumes:
   atlas_data:
+    driver: local
+  atlas_uploads:
+    driver: local
+  atlas_temp:
+    driver: local
+  minio_data:
+    driver: local
 
 networks:
   atlas-net:

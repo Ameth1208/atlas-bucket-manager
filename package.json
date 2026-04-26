@@ -25,6 +25,9 @@
     "start": "cross-env NODE_ENV=production node dist/server.js",
     "dev": "npm run build:css && npm run compile:lit && npm run compile:backend && node dist/server.js",
     "dev:watch": "concurrently -n \"css,lit,backend\" -c \"bgGreen,bgMagenta,bgBlue\" \"npm run build:css:watch\" \"npm run compile:lit:watch\" \"npm run compile:backend && node dist/server.js\"",
+    "dev:api": "npm run compile:backend && cross-env PORT=3001 node dist/server.js",
+    "dev:web": "cd frontend && npm run dev",
+    "dev:full": "concurrently -n \"api,web\" -c \"bgBlue,bgGreen\" \"npm run dev:api\" \"npm run dev:web\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -43,6 +46,8 @@
   ],
   "type": "commonjs",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.9.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.2.3",
@@ -54,6 +59,8 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^3.0.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",

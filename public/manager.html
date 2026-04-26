@@ -3,277 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Atlas Bucket Manager - Multi-cloud storage management for S3-compatible providers">
-    <meta name="theme-color" content="#f43f5e">
-    <meta name="author" content="Ameth Galarcio">
-    
-    <!-- Open Graph / Social Media -->
-    <meta property="og:title" content="Atlas Bucket Manager">
-    <meta property="og:description" content="Multi-cloud storage management for S3-compatible providers">
-    <meta property="og:type" content="website">
-    
     <title>Atlas Manager</title>
-    
-    <!-- Preconnect to external resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://code.iconify.design">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    
-    <!-- Favicon -->
-    <link rel="icon" href="https://api.iconify.design/simple-icons:minio.svg?color=%23f43f5e">
-    
-    <!-- Tailwind CSS (built, not CDN) -->
     <link rel="stylesheet" href="/css/style.css">
-    
-    <!-- Plyr.js - Media Player -->
-    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
-    
-    <!-- Iconify -->
-    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js" defer></script>
-    
-    <!-- Theme detection -->
-    <script>
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </head>
-<body class="bg-surface-base dark:bg-dark-950 text-text-primary dark:text-text-darkPrimary min-h-screen flex flex-col font-sans">
-
-    <!-- Navbar - Premium Glass -->
-    <nav class="bg-white/70 dark:bg-black/70 backdrop-blur-2xl border-b border-border-light dark:border-white/[0.08] sticky top-0 z-40" role="navigation" aria-label="Main navigation">
-        <div class="container mx-auto px-4 md:px-6 py-2.5 flex justify-between items-center max-w-7xl">
+<body class="bg-[#0f172a] min-h-screen">
+    
+    <!-- Navbar (from Pencil: h:64, glass) -->
+    <nav class="bg-[#0f172ab3] backdrop-blur-xl border-b border-white/[0.08] sticky top-0 z-40">
+        <div class="max-w-[1440px] mx-auto px-8 h-16 flex items-center justify-between">
+            
             <!-- Logo -->
-            <button
-                class="flex items-center gap-2 cursor-pointer hover:opacity-70 transition-opacity"
-                onclick="window.location.hash = ''"
-                aria-label="Go to home">
-                <div class="bg-accent size-8 flex items-center justify-center rounded-lg text-white shadow-lg shadow-accent/20">
-                    <iconify-icon icon="ph:globe-hemisphere-west-duotone" width="18" aria-hidden="true"></iconify-icon>
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-[#f43f5e] rounded-[8px] flex items-center justify-center">
+                    <iconify-icon icon="ph:globe-hemisphere-west" class="text-[18px] text-white"></iconify-icon>
                 </div>
-                <div class="hidden sm:flex flex-col">
-                    <span class="text-[14px] font-medium text-text-primary dark:text-text-darkPrimary leading-tight">Atlas</span>
-                    <span class="text-[9px] font-medium text-text-tertiary dark:text-text-darkTertiary uppercase tracking-wider">Manager</span>
+                <div class="flex flex-col">
+                    <span class="text-[14px] font-semibold text-[#f8fafc] leading-tight">Atlas</span>
+                    <span class="text-[9px] font-medium text-[#64748b] uppercase tracking-wider">Manager</span>
                 </div>
-            </button>
-
-            <!-- Search Trigger -->
-            <button
-                id="searchTrigger"
-                class="hidden md:flex items-center gap-2 flex-grow max-w-md mx-4 px-3 py-1.5 bg-surface-raised dark:bg-white/[0.06] rounded-lg text-sm text-text-tertiary dark:text-white/50 hover:bg-border-light dark:hover:bg-white/[0.1] transition-colors cursor-pointer"
-                aria-label="Open search">
-                <iconify-icon icon="ph:magnifying-glass" width="15" class="text-text-tertiary dark:text-white/40"></iconify-icon>
-                <span class="flex-1 text-left text-[13px]">Search...</span>
-                <div class="flex items-center gap-0.5">
-                    <kbd class="size-[16px] flex items-center justify-center rounded bg-border-light dark:bg-white/[0.1] text-[9px] font-medium text-text-tertiary dark:text-white/30">⌘</kbd>
-                    <kbd class="size-[16px] flex items-center justify-center rounded bg-border-light dark:bg-white/[0.1] text-[9px] font-medium text-text-tertiary dark:text-white/30">K</kbd>
+            </div>
+            
+            <!-- Search (w:320, h:36) -->
+            <div class="hidden md:flex items-center gap-2 flex-1 max-w-md mx-8">
+                <div class="relative flex-1">
+                    <iconify-icon icon="ph:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 text-[#ffffff66] text-[16px]"></iconify-icon>
+                    <input 
+                        type="text" 
+                        id="globalSearch"
+                        placeholder="Search..."
+                        class="w-full h-9 pl-10 pr-3 bg-[#ffffff0f] rounded-[8px] text-[13px] text-[#f8fafc] placeholder:text-[#ffffff80]
+                               focus:outline-none focus:ring-2 focus:ring-[#f43f5e]/20 transition-all"
+                    />
                 </div>
-            </button>
-
+            </div>
+            
             <!-- Actions -->
             <div class="flex items-center gap-2">
-                <!-- Mobile Search Button -->
-                <button
-                    id="mobileSearchBtn"
-                    class="md:hidden p-1.5 flex items-center justify-center rounded-lg hover:bg-surface-raised dark:hover:bg-white/[0.08] transition-colors text-text-secondary dark:text-white/60"
-                    aria-label="Open search">
-                    <iconify-icon icon="ph:magnifying-glass" width="18"></iconify-icon>
+                <button id="themeToggle" class="w-8 h-8 flex items-center justify-center rounded-[6px] bg-[#ffffff0f] hover:bg-white/10 transition-colors">
+                    <iconify-icon icon="ph:moon" class="hidden dark:block text-[18px] text-[#ffffff99]"></iconify-icon>
+                    <iconify-icon icon="ph:sun" class="block dark:hidden text-[18px] text-[#ffffff99]"></iconify-icon>
                 </button>
-
-                <!-- Language Selector -->
-                <div id="langSelectorContainer" role="listbox" aria-label="Select language"></div>
-
-                <!-- Theme Toggle -->
-                <button
-                    id="themeToggle"
-                    class="p-1.5 flex items-center justify-center rounded-lg hover:bg-surface-raised dark:hover:bg-white/[0.08] transition-colors text-text-secondary dark:text-white/60"
-                    aria-label="Toggle dark mode">
-                    <iconify-icon icon="ph:moon-duotone" class="dark:hidden" width="18" aria-hidden="true"></iconify-icon>
-                    <iconify-icon icon="ph:sun-duotone" class="hidden dark:block text-amber-400" width="18" aria-hidden="true"></iconify-icon>
-                </button>
-
-                <!-- Logout -->
-                <button
-                    id="logoutBtn"
-                    class="p-1.5 flex items-center justify-center rounded-lg hover:bg-red-500/10 dark:hover:bg-red-500/20 transition-colors text-text-secondary dark:text-white/60 hover:text-red-500 dark:hover:text-red-400"
-                    data-i18n="logout"
-                    aria-label="Logout">
-                    <iconify-icon icon="ph:sign-out-duotone" width="18"></iconify-icon>
+                <button id="logoutBtn" class="w-8 h-8 flex items-center justify-center rounded-[6px] bg-[#ffffff0f] hover:bg-red-500/10 hover:text-red-500 transition-colors">
+                    <iconify-icon icon="ph:sign-out" class="text-[18px] text-[#ffffff99]"></iconify-icon>
                 </button>
             </div>
         </div>
     </nav>
-
-    <!-- Mobile Search Modal -->
-    <div id="mobileSearchModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm md:hidden">
-        <div class="bg-white dark:bg-dark-900 h-full flex flex-col">
-            <div class="p-4 border-b border-border-light dark:border-dark-600 flex items-center gap-3">
-                <button 
-                    id="closeMobileSearch" 
-                    class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-raised dark:hover:bg-dark-700 transition-colors"
-                    aria-label="Close search">
-                    <iconify-icon icon="ph:x-bold" width="20"></iconify-icon>
-                </button>
-                <label for="mobileSearchInput" class="sr-only">Search objects</label>
-                <input 
-                    type="text" 
-                    id="mobileSearchInput" 
-                    placeholder="Search objects..." 
-                    class="flex-1 bg-surface-raised dark:bg-dark-700 border-none rounded-xl px-4 py-2.5 text-sm font-light focus:ring-2 focus:ring-accent/20 transition-all outline-none text-text-primary dark:text-text-darkPrimary"
-                    aria-label="Search for objects">
+    
+    <!-- Main Content -->
+    <main class="max-w-[1440px] mx-auto px-8 py-8">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-[24px] font-semibold text-[#f8fafc] tracking-tight">Storage Buckets</h1>
+                <p class="text-[13px] text-[#64748b] mt-1">Manage visibility and lifecycle</p>
             </div>
-            <div id="mobileSearchResults" class="flex-1 overflow-y-auto p-4" role="listbox"></div>
+            
+            <!-- Create Button -->
+            <button 
+                id="createBucketBtn"
+                class="h-11 px-6 bg-[#f43f5e] hover:bg-[#e11d48] text-white 
+                       text-[14px] font-medium rounded-[8px] 
+                       shadow-lg hover:shadow-xl hover:scale-[1.02] 
+                       active:scale-[0.98] transition-all duration-300">
+                Create Bucket
+            </button>
         </div>
-    </div>
-
-    <main id="mainContent" class="container mx-auto px-6 md:px-8 py-8 flex-grow max-w-7xl" role="main">
-        <!-- Bucket List View -->
-        <div id="bucketListView">
-            <!-- Header Section -->
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-6">
-                <div>
-                    <h1 class="text-2xl font-semibold text-text-primary dark:text-text-darkPrimary tracking-tight" data-i18n="title">Storage Buckets</h1>
-                    <p class="text-text-tertiary dark:text-text-darkTertiary text-[13px] mt-1" data-i18n="subtitle">Manage visibility and lifecycle.</p>
-                </div>
-                
-                <!-- Create Bucket Form - Elevated -->
-                <form id="createBucketForm" class="w-full lg:w-auto flex bg-white dark:bg-dark-800 rounded-xl border border-border-light dark:border-dark-600 p-1.5 focus-within:border-accent/40 gap-1.5" aria-label="Create new bucket">
-                    <label for="createProviderId" class="sr-only">Select provider</label>
-                    <select
-                        id="createProviderId"
-                        class="bg-surface-raised dark:bg-dark-700 text-text-secondary dark:text-text-darkSecondary text-[12px] font-medium px-3 py-2 rounded-lg outline-none border-none"
-                        aria-label="Provider for new bucket">
-                    </select>
-                    <label for="newBucketName" class="sr-only">Bucket name</label>
-                    <input
-                        type="text"
-                        id="newBucketName"
-                        placeholder="bucket-name"
-                        required
-                        class="bg-transparent text-text-primary dark:text-text-darkPrimary w-full lg:w-48 px-3 py-2 focus:outline-none font-mono text-[13px]"
-                        aria-label="Enter bucket name">
-                    <button
-                        type="submit"
-                        class="bg-accent hover:bg-accent-dark text-white text-[12px] font-medium px-5 py-2 rounded-lg transition-colors border-0 cursor-pointer whitespace-nowrap"
-                        data-i18n="create">Create</button>
-                </form>
-            </div>
-
-            <!-- Provider Filters - Subtle -->
-            <div id="filterContainer" class="flex flex-wrap items-center gap-2 mb-8" role="group" aria-label="Filter buckets by provider">
-            </div>
-
-            <div id="loader" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" aria-live="polite" aria-busy="true">
-                <div class="bg-white dark:bg-dark-800 h-44 rounded-2xl border border-border-light dark:border-dark-600 animate-pulse"></div>
-                <div class="bg-white dark:bg-dark-800 h-44 rounded-2xl border border-border-light dark:border-dark-600 animate-pulse"></div>
-                <div class="bg-white dark:bg-dark-800 h-44 rounded-2xl border border-border-light dark:border-dark-600 animate-pulse"></div>
-            </div>
-            <div id="bucketList" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 hidden" role="list" aria-label="Bucket list"></div>
-            <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center rounded-2xl">
-                <iconify-icon icon="ph:cube-transparent-duotone" width="56" class="text-border-light dark:text-dark-500 mb-4" aria-hidden="true"></iconify-icon>
-                <h3 class="text-[15px] font-medium text-text-secondary dark:text-text-darkSecondary" data-i18n="emptyTitle">No buckets</h3>
-            </div>
+        
+        <!-- Filters (from Pencil) -->
+        <div class="flex gap-2 mb-8" id="filterContainer">
+            <button class="filter-btn active h-9 px-4 rounded-[8px] text-[13px] font-medium 
+                          bg-[#f43f5e] text-white whitespace-nowrap transition-all" data-provider="all">
+                All
+            </button>
+            <button class="filter-btn h-9 px-4 rounded-[8px] text-[13px] font-medium 
+                          bg-[#ffffff0f] text-[#cbd5e1] hover:text-[#f8fafc] whitespace-nowrap transition-all" data-provider="minio">
+                MinIO
+            </button>
+            <button class="filter-btn h-9 px-4 rounded-[8px] text-[13px] font-medium 
+                          bg-[#ffffff0f] text-[#cbd5e1] hover:text-[#f8fafc] whitespace-nowrap transition-all" data-provider="aws">
+                AWS S3
+            </button>
+            <button class="filter-btn h-9 px-4 rounded-[8px] text-[13px] font-medium 
+                          bg-[#ffffff0f] text-[#cbd5e1] hover:text-[#f8fafc] whitespace-nowrap transition-all" data-provider="r2">
+                R2
+            </button>
         </div>
-
-        <!-- Explorer View -->
-        <div id="explorerView" class="hidden h-[calc(100vh-220px)]">
-            <div class="bg-white dark:bg-[#1c1c1e] w-full h-full rounded-2xl shadow-xl border border-border-light dark:border-white/[0.08] flex flex-col overflow-hidden">
-                <!-- Explorer Header -->
-                <div id="explorerHeaderContainer"></div>
-
-                <!-- File List -->
-                <div class="flex-grow px-2 py-1 overflow-y-auto scroll-smooth" id="fileList" role="region" aria-label="File explorer"></div>
-
-                <!-- Footer with Pagination -->
-                <div id="explorerFooter" class="border-t border-border-light dark:border-white/[0.08]">
-                </div>
-            </div>
+        
+        <!-- Loader -->
+        <div id="loader" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="bg-[#1e293b] h-44 rounded-[16px] border border-[#334155] animate-pulse"></div>
+            <div class="bg-[#1e293b] h-44 rounded-[16px] border border-[#334155] animate-pulse"></div>
+            <div class="bg-[#1e293b] h-44 rounded-[16px] border border-[#334155] animate-pulse"></div>
+        </div>
+        
+        <!-- Bucket Grid (from Pencil: gap:24) -->
+        <div id="bucketList" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-24 text-center">
+            <iconify-icon icon="ph:cube-transparent" class="text-[56px] text-[#64748b] mb-4"></iconify-icon>
+            <h3 class="text-[15px] font-medium text-[#cbd5e1] mb-2">No buckets</h3>
+            <p class="text-[13px] text-[#64748b]">Create your first bucket to get started</p>
         </div>
     </main>
-
-    <!-- Lit Web Components Modals -->
-    <preview-modal id="previewModalComponent" role="dialog" aria-modal="true"></preview-modal>
-    <delete-modal id="deleteModalComponent" role="dialog" aria-modal="true"></delete-modal>
-    <folder-modal id="folderModalComponent" role="dialog" aria-modal="true"></folder-modal>
-    <share-modal id="shareModalComponent" role="dialog" aria-modal="true"></share-modal>
-    <copy-bucket-modal id="copyModalComponent" role="dialog" aria-modal="true"></copy-bucket-modal>
-    <confirm-dialog id="confirmDialog" role="dialog" aria-modal="true"></confirm-dialog>
-    <context-menu id="contextMenu"></context-menu>
-
-    <!-- Spotlight Search Modal -->
-    <div id="spotlightModal" class="fixed inset-0 z-[80] hidden" role="dialog" aria-modal="true" aria-label="Search">
-        <div id="spotlightBackdrop" class="absolute inset-0 bg-black/25 dark:bg-black/60"></div>
-        <div class="relative flex justify-center pt-[12vh] px-4">
-            <div id="spotlightPanel" class="w-full max-w-[560px] bg-white dark:bg-[#1c1c1e] rounded-2xl shadow-[0_24px_80px_-12px_rgba(0,0,0,0.25)] dark:shadow-[0_24px_80px_-12px_rgba(0,0,0,0.8)] overflow-hidden border border-border-light dark:border-white/[0.08]">
-                <!-- Search Input -->
-                <div class="flex items-center gap-3 px-5 py-4">
-                    <iconify-icon icon="ph:magnifying-glass" width="20" class="text-text-tertiary dark:text-white/40 shrink-0"></iconify-icon>
-                    <input
-                        type="text"
-                        id="globalSearchInput"
-                        placeholder="Search objects across all buckets..."
-                        class="flex-1 bg-transparent border-none outline-none text-[15px] text-text-primary dark:text-white placeholder:text-text-tertiary dark:placeholder:text-white/30"
-                        autocomplete="off"
-                        aria-label="Search">
-                    <kbd class="h-[20px] px-1.5 flex items-center justify-center rounded-md bg-surface-raised dark:bg-white/[0.08] text-[10px] font-medium text-text-tertiary dark:text-white/40">esc</kbd>
+    
+    <!-- Create Modal -->
+    <div id="createModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="modalBackdrop"></div>
+        <div class="relative bg-[#1e293b] rounded-[20px] p-8 max-w-md w-full shadow-2xl animate-modal-slide-up border border-white/[0.08]">
+            <h3 class="text-xl font-semibold text-[#f8fafc] mb-2">Create New Bucket</h3>
+            <p class="text-sm text-[#64748b] mb-6">Choose a provider and name</p>
+            <form id="createBucketForm" class="space-y-5">
+                <select id="createProvider" class="w-full h-11 px-4 bg-[#0f172a] rounded-[10px] border border-[#334155] text-[#f8fafc] focus:outline-none focus:border-[#f43f5e] transition-all">
+                    <option value="minio">MinIO</option>
+                    <option value="aws">AWS S3</option>
+                    <option value="r2">Cloudflare R2</option>
+                </select>
+                <input type="text" id="createName" required placeholder="bucket-name" 
+                       class="w-full h-11 px-4 bg-[#0f172a] rounded-[10px] border border-[#334155] text-[#f8fafc] placeholder:text-[#64748b] focus:outline-none focus:border-[#f43f5e] transition-all font-mono">
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" id="cancelCreate" class="h-9 px-5 bg-[#ffffff0f] text-[#f8fafc] text-sm font-medium rounded-pill hover:bg-white/20 transition-all">Cancel</button>
+                    <button type="submit" class="h-9 px-5 bg-[#f43f5e] text-white text-sm font-medium rounded-pill hover:bg-[#e11d48] transition-all">Create</button>
                 </div>
-                <!-- Results -->
-                <div id="searchResults" class="hidden max-h-[320px] overflow-y-auto border-t border-border-light dark:border-white/[0.08]" role="listbox"></div>
-                <!-- Empty placeholder -->
-                <div id="searchEmpty" class="py-12 text-center border-t border-border-light dark:border-white/[0.08]">
-                    <iconify-icon icon="ph:magnifying-glass-duotone" width="32" class="text-border-light dark:text-white/20 mb-2"></iconify-icon>
-                    <p class="text-[13px] text-text-tertiary dark:text-white/40">Type to search files, folders, and objects</p>
-                </div>
-                <!-- Footer hint -->
-                <div class="flex items-center justify-between px-5 py-2 border-t border-border-light dark:border-white/[0.08]">
-                    <div class="flex items-center gap-4 text-[11px] text-text-tertiary dark:text-white/40">
-                        <span class="flex items-center gap-1"><kbd class="size-[18px] flex items-center justify-center rounded-md bg-surface-raised dark:bg-white/[0.08] text-[10px] font-medium">↑</kbd><kbd class="size-[18px] flex items-center justify-center rounded-md bg-surface-raised dark:bg-white/[0.08] text-[10px] font-medium">↓</kbd> navigate</span>
-                        <span class="flex items-center gap-1"><kbd class="size-[18px] flex items-center justify-center rounded-md bg-surface-raised dark:bg-white/[0.08] text-[10px] font-medium">↵</kbd> open</span>
-                    </div>
-                    <span class="text-[11px] text-text-tertiary dark:text-white/40">Atlas Search</span>
-                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+        <div class="relative bg-[#1e293b] rounded-[20px] p-8 max-w-md w-full shadow-2xl animate-modal-slide-up border border-white/[0.08]">
+            <div class="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mb-4">
+                <iconify-icon icon="ph:warning" class="text-2xl text-[#ff3b30]"></iconify-icon>
+            </div>
+            <h3 class="text-xl font-semibold text-[#f8fafc] mb-2">Delete Bucket?</h3>
+            <p class="text-sm text-[#64748b] mb-6">This cannot be undone. Type bucket name to confirm.</p>
+            <input type="text" id="deleteConfirm" class="w-full h-11 px-4 bg-[#0f172a] rounded-[10px] border border-[#334155] text-[#f8fafc] focus:outline-none focus:border-red-500 transition-all font-mono mb-6">
+            <div class="flex justify-end gap-3">
+                <button id="cancelDelete" class="h-9 px-5 bg-[#ffffff0f] text-[#f8fafc] text-sm font-medium rounded-pill hover:bg-white/20 transition-all">Cancel</button>
+                <button id="confirmDelete" disabled class="h-9 px-5 bg-[#ff3b30] text-white text-sm font-medium rounded-pill hover:bg-red-600 transition-all disabled:opacity-50">Delete</button>
             </div>
         </div>
     </div>
-
-    <!-- Copy Progress Panel -->
-    <copy-progress-panel id="copyProgressPanel"></copy-progress-panel>
-
-    <!-- Upload Progress Panel -->
-    <upload-progress-panel id="uploadProgressPanel"></upload-progress-panel>
-
+    
     <!-- Toast -->
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] transform transition-all duration-500 translate-y-20 opacity-0" role="alert" aria-live="assertive">
-        <div class="bg-white dark:bg-[#1c1c1e] border border-border-light dark:border-white/[0.08] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
-            <div id="toastIcon" aria-hidden="true"></div>
-            <span id="toastMessage" class="text-sm font-medium text-text-primary dark:text-white tracking-tight"></span>
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] transform translate-y-20 opacity-0 transition-all duration-300">
+        <div class="flex items-center gap-3 px-6 py-3 bg-[#1e293b] text-white rounded-[10px] shadow-2xl border border-white/[0.08]">
+            <iconify-icon id="toastIcon" icon="ph:check-circle" class="text-lg text-[#34c759]"></iconify-icon>
+            <span id="toastMessage" class="text-sm font-medium">Success!</span>
         </div>
     </div>
-
-     <!-- Support Button -->
-    <div id="supportButtonContainer"></div>
-
-    <!-- Version Badge -->
-    <app-version version="{{APP_VERSION}}"></app-version>
-
-    <!-- Plyr.js Script -->
-    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-
-    <!-- PDF.js Script -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-    <!-- Socket.io Client -->
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
-
-    <!-- Lit Web Components (REQUIRED) -->
-    <script type="module" src="/js/main.js"></script>
-
-    <!-- Main app orchestrator -->
+    
     <script type="module" src="/js/app.js"></script>
+    <script>
+        // Theme
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        html.classList.add('dark');
+        themeToggle?.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+        
+        // Modals
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        
+        document.getElementById('createBucketBtn')?.addEventListener('click', () => openModal('createModal'));
+        document.getElementById('cancelCreate')?.addEventListener('click', () => closeModal('createModal'));
+        document.getElementById('modalBackdrop')?.addEventListener('click', () => { closeModal('createModal'); closeModal('deleteModal'); });
+        
+        // Delete confirm
+        document.getElementById('deleteConfirm')?.addEventListener('input', (e) => {
+            document.getElementById('confirmDelete').disabled = e.target.value !== store.deleteTarget?.name;
+        });
+    </script>
 </body>
 </html>

@@ -3,71 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Login to Atlas Bucket Manager">
-    <meta name="theme-color" content="#f43f5e">
-    
-    <title>Login | Atlas Manager</title>
-    
-    <!-- Preconnect -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://code.iconify.design">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS (built) -->
+    <title>Atlas - Sign In</title>
     <link rel="stylesheet" href="/css/style.css">
-    
-    <!-- Iconify -->
-    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js" defer></script>
-    
-    <!-- Theme detection -->
-    <script>
-        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    </script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </head>
-<body class="bg-surface-base dark:bg-dark-950 text-text-primary dark:text-text-darkPrimary min-h-screen flex flex-col font-sans theme-transition">
+<body class="bg-[#0f172a] min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
     
-    <!-- Nav -->
-    <nav class="p-5 flex justify-end items-center gap-3">
-        <div id="langSelectorContainer" role="listbox" aria-label="Select language"></div>
-        <button 
-            id="themeToggle" 
-            class="size-8 flex items-center justify-center rounded-lg hover:bg-surface-raised dark:hover:bg-white/[0.08] transition-colors text-text-secondary dark:text-white/60"
-            aria-label="Toggle dark mode">
-            <iconify-icon icon="ph:moon-bold" class="dark:hidden" width="18" aria-hidden="true"></iconify-icon>
-            <iconify-icon icon="ph:sun-bold" class="hidden dark:block text-amber-400" width="18" aria-hidden="true"></iconify-icon>
-        </button>
-    </nav>
-
-    <!-- Login Form -->
-    <div class="w-full flex-grow flex items-center justify-center p-4 -mt-12">
-        <login-form id="loginFormComponent" class="flex w-full items-center justify-center"></login-form>
-    </div>
-
-    <!-- Support Button -->
-    <div id="supportButtonContainer"></div>
-
-    <!-- Version Badge -->
-    <app-version version="{{APP_VERSION}}"></app-version>
-
-    <!-- Toast -->
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 transform transition-all duration-500 translate-y-20 opacity-0" role="alert" aria-live="assertive">
-        <div class="bg-white dark:bg-[#1c1c1e] border border-border-light dark:border-white/[0.08] px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
-            <div id="toastIcon" aria-hidden="true"></div>
-            <span id="toastMessage" class="text-sm font-medium text-text-primary dark:text-white tracking-tight"></span>
+    <!-- Background Glows (from Pencil design) -->
+    <div class="absolute top-[100px] right-[100px] w-[600px] h-[600px] bg-[#f43f5e] opacity-12 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-[200px] left-[100px] w-[400px] h-[400px] bg-[#f43f5e] opacity-8 rounded-full blur-3xl"></div>
+    
+    <!-- Theme Toggle -->
+    <button 
+        id="themeToggle"
+        class="absolute top-6 right-6 p-3 rounded-[12px] bg-white/10 backdrop-blur-xl border border-white/10 hover:bg-white/20 transition-all">
+        <iconify-icon icon="ph:sun" class="hidden dark:block text-xl text-white"></iconify-icon>
+        <iconify-icon icon="ph:moon" class="block dark:hidden text-xl text-white"></iconify-icon>
+    </button>
+    
+    <!-- Login Card (from Pencil: x:510, y:150, w:420, h:480) -->
+    <div class="relative w-full max-w-[420px] animate-fade-in">
+        <div class="bg-[#1e293b] rounded-[24px] p-12 flex flex-col gap-8 shadow-2xl">
+            
+            <!-- Logo Section -->
+            <div class="flex flex-col items-center gap-4">
+                <!-- Logo Icon (56x56, radius:14) -->
+                <div class="w-14 h-14 bg-[#f43f5e] rounded-[14px] flex items-center justify-center">
+                    <iconify-icon icon="ph:globe-hemisphere-west" class="text-7 text-white"></iconify-icon>
+                </div>
+                
+                <!-- Title -->
+                <h1 class="text-[26px] font-semibold text-[#f8fafc] tracking-tight">Atlas</h1>
+                
+                <!-- Subtitle (fontSize:11, letterSpacing:2) -->
+                <p class="text-[11px] text-[#64748b] uppercase tracking-[2px]">BUCKET MANAGER</p>
+            </div>
+            
+            <!-- Form -->
+            <form id="loginForm" class="flex flex-col gap-5">
+                
+                <!-- Username Input -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-[13px] font-medium text-[#cbd5e1]">Username</label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="username"
+                            required
+                            placeholder="admin"
+                            class="w-full h-12 px-4 bg-[#0f172a] rounded-[10px] border border-[#334155] 
+                                   text-[15px] text-[#f8fafc] placeholder:text-[#64748b]
+                                   focus:outline-none focus:border-[#f43f5e] focus:ring-2 focus:ring-[#f43f5e]/20
+                                   transition-all"
+                        />
+                    </div>
+                </div>
+                
+                <!-- Password Input -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-[13px] font-medium text-[#cbd5e1]">Password</label>
+                    <div class="relative">
+                        <input 
+                            type="password" 
+                            id="password"
+                            required
+                            placeholder="••••••••"
+                            class="w-full h-12 px-4 bg-[#0f172a] rounded-[10px] border border-[#334155] 
+                                   text-[15px] text-[#f8fafc] placeholder:text-[#64748b]
+                                   focus:outline-none focus:border-[#f43f5e] focus:ring-2 focus:ring-[#f43f5e]/20
+                                   transition-all"
+                        />
+                        <button 
+                            type="button"
+                            id="togglePassword"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-[6px] hover:bg-white/10 transition-colors">
+                            <iconify-icon icon="ph:eye" class="text-lg text-[#64748b]" id="eyeIcon"></iconify-icon>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Remember & Forgot -->
+                <div class="flex items-center justify-between pt-2">
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" class="w-4 h-4 rounded border-[#334155] text-[#f43f5e] focus:ring-[#f43f5e]/20">
+                        <span class="text-sm text-[#cbd5e1]">Remember me</span>
+                    </label>
+                </div>
+                
+                <!-- Submit Button (w:324, h:50) -->
+                <button 
+                    type="submit"
+                    class="w-full h-[50px] bg-[#f43f5e] hover:bg-[#e11d48] text-white 
+                           text-[15px] font-semibold rounded-[10px] 
+                           shadow-lg hover:shadow-xl hover:scale-[1.02] 
+                           active:scale-[0.98] transition-all duration-300">
+                    Sign In
+                </button>
+                
+                <!-- Error Message -->
+                <div id="errorMessage" class="hidden p-3 rounded-[10px] bg-red-500/10 border border-red-500/20">
+                    <p class="text-sm text-[#ff3b30] flex items-center gap-2">
+                        <iconify-icon icon="ph:warning-circle" class="text-lg"></iconify-icon>
+                        <span id="errorText">Invalid credentials</span>
+                    </p>
+                </div>
+            </form>
+            
+            <!-- Footer Text -->
+            <p class="text-center text-[12px] text-[#64748b]">Secure multi-cloud storage management</p>
         </div>
     </div>
-
-    <!-- Lit Components (REQUIRED) -->
-    <script type="module" src="/js/main.js"></script>
     
-    <!-- App Orchestrator -->
-    <script type="module" src="/js/app.js"></script>
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.classList.toggle('dark', savedTheme === 'dark');
+        
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+        
+        // Toggle Password
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('eyeIcon');
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            icon.setAttribute('icon', isPassword ? 'ph:eye-slash' : 'ph:eye');
+        });
+        
+        // Login Form
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                if (res.ok) {
+                    window.location.href = '/manager';
+                } else {
+                    const data = await res.json();
+                    document.getElementById('errorText').textContent = data.message || 'Invalid credentials';
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                }
+            } catch {
+                document.getElementById('errorText').textContent = 'Connection error';
+                document.getElementById('errorMessage').classList.remove('hidden');
+            }
+        });
+    </script>
 </body>
 </html>

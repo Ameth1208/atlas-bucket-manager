@@ -1,832 +1,242 @@
-import { initTheme, toggleTheme, showToast } from '/js/utils.js';
-import { initLanguage, setLanguage, renderLanguageSelector, t } from '/js/i18n.js';
-import { api } from '/js/api.js';
-import { store } from '/js/store.js';
-import { renderBuckets } from '/js/components/BucketList.js';
-import { openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload, handleFolderUpload, handleFolderUploadDirect, toggleSelect, bulkDelete } from '/js/components/Explorer.js';
-import { renderSupportButton } from '/js/components/SupportButton.js';
-import { initTooltips } from '/js/components/Tooltip.js';
-
-// Socket.io WebSocket connection
-let socket = null;
-
-// 1. Error Mapping
-function translateError(errorMsg) {
-    if (!errorMsg) return t('errGeneral');
-    if (errorMsg.includes('bucket name is not available') || errorMsg.includes('BucketAlreadyExists')) return t('errBucketExists');
-    if (errorMsg.includes('Invalid credentials') || errorMsg.includes('Invalid')) return t('errInvalidCredentials');
-    return errorMsg;
-}
-
-// 2. Data Loading
-async function loadData(spinner = true) {
-    const list = document.getElementById('bucketList');
-    const loader = document.getElementById('loader');
-    const empty = document.getElementById('emptyState');
-    if (!list) return;
-
-    // Load providers FIRST to ensure UI is ready
-    await loadProviders();
-
-    if(spinner) { 
-        loader.classList.remove('hidden'); 
-        list.classList.add('hidden'); 
-        empty.classList.add('hidden');
-    }
-
-    try { 
-        const res = await api.list(); 
-        
-        if (res && res.error) {
-            showToast(translateError(res.error), 'error');
-            loader.classList.add('hidden');
-            empty.classList.remove('hidden');
-            return;
-        }
-
-        store.buckets = Array.isArray(res) ? res : [];
-        renderBuckets(store.buckets); 
-        renderFilters(store.buckets);
-    } catch (e) { 
-        console.error("Data load failed:", e);
-        showToast("Connection failed", 'error');
-        loader.classList.add('hidden');
-        empty.classList.remove('hidden');
-    }
-}
-
-// 3. Filters
-function renderFilters(buckets) {
-    const container = document.getElementById('filterContainer');
-    if(!container) return;
-    
-    // Use providers from store if available, otherwise from buckets
-    const providers = (store.providers && store.providers.length > 0) 
-        ? store.providers 
-        : Array.from(new Set(buckets.map(b => b.providerId))).map(id => ({ id, name: id }));
-
-    if(providers.length <= 1) {
-        container.innerHTML = '';
-        return;
-    }
-
-    let html = `<button onclick="window.app.setFilter('all')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all ${store.currentFilter === 'all' ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-100 dark:bg-dark-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-dark-700'}">All Accounts</button>`;
-    
-    providers.forEach(p => {
-        html += `<button onclick="window.app.setFilter('${p.id}')" class="px-4 py-1.5 rounded-full text-xs font-bold transition-all ${store.currentFilter === p.id ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20' : 'bg-slate-100 dark:bg-dark-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-dark-700'}">${p.name}</button>`;
-    });
-    container.innerHTML = html;
-}
-
-function setFilter(filterId) {
-    store.currentFilter = filterId;
-    renderBuckets(store.buckets);
-    renderFilters(store.buckets);
-}
-
-// 3.5. Copy Bucket Functions
-function initializeWebSocket() {
-    if (typeof io === 'undefined') {
-        console.error('Socket.io not loaded');
-        return;
-    }
-
-    socket = io({
-        transports: ['websocket', 'polling']
-    });
-
-    // Expose socket globally so Explorer.js can subscribe for upload progress
-    window._socket = socket;
-
-    socket.on('connect', () => {
-        console.log('✅ WebSocket connected');
-    });
-
-    socket.on('disconnect', () => {
-        console.log('🔌 WebSocket disconnected');
-    });
-
-    // Upload progress events
-    socket.on('upload:start', (data) => {
-        const panel = document.getElementById('uploadProgressPanel');
-        if (panel) panel.startUpload(data.uploadId, { total: data.total, bucket: data.bucket });
-    });
-
-    socket.on('upload:progress', (data) => {
-        const panel = document.getElementById('uploadProgressPanel');
-        if (panel) panel.updateProgress(data.uploadId, { current: data.current, total: data.total, fileName: data.fileName });
-    });
-
-    socket.on('upload:complete', (data) => {
-        const panel = document.getElementById('uploadProgressPanel');
-        if (panel) {
-            panel.completeUpload(data.uploadId);
-            showToast(`Upload complete: ${data.total} file${data.total !== 1 ? 's' : ''}`, 'success');
-            setTimeout(() => panel.removeJob(data.uploadId), 4000);
-        }
-    });
-
-    socket.on('upload:error', (data) => {
-        const panel = document.getElementById('uploadProgressPanel');
-        if (panel) {
-            panel.failUpload(data.uploadId, data.error);
-            showToast('Upload failed', 'error');
-        }
-    });
-
-    socket.on('copy:progress', (job) => {
-        console.log('[Client] 📥 Received copy:progress:', job.progress.copiedFiles, '/', job.progress.totalFiles);
-        const progressPanel = document.getElementById('copyProgressPanel');
-        if (progressPanel) {
-            progressPanel.updateJob(job.id, job);
-        }
-    });
-
-    socket.on('copy:completed', (job) => {
-        const progressPanel = document.getElementById('copyProgressPanel');
-        if (progressPanel) {
-            progressPanel.updateJob(job.id, job);
-            showToast(`Copy completed: ${job.sourceBucket} → ${job.targetBucket}`, 'success');
-            
-            // Refresh bucket list to show new bucket
-            setTimeout(() => {
-                loadData(false);
-            }, 1000);
-            
-            // Auto-dismiss after 5 seconds
-            setTimeout(() => {
-                progressPanel.removeJob(job.id);
-            }, 5000);
-        }
-    });
-
-    socket.on('copy:failed', (job) => {
-        const progressPanel = document.getElementById('copyProgressPanel');
-        if (progressPanel) {
-            progressPanel.updateJob(job.id, job);
-            showToast(`Copy failed: ${job.sourceBucket}`, 'error');
-            
-            // Auto-dismiss failed jobs after 10 seconds
-            setTimeout(() => {
-                progressPanel.removeJob(job.id);
-            }, 10000);
-        }
-    });
-
-    socket.on('copy:cancelled', (job) => {
-        const progressPanel = document.getElementById('copyProgressPanel');
-        if (progressPanel) {
-            progressPanel.updateJob(job.id, job);
-            showToast(`Copy cancelled: ${job.sourceBucket}`, 'warning');
-            
-            // Auto-dismiss cancelled jobs after 5 seconds
-            setTimeout(() => {
-                progressPanel.removeJob(job.id);
-            }, 5000);
-        }
-    });
-}
-
-function openCopyModal(bucket) {
-    console.log('[Client] 📤 openCopyModal called with bucket:', bucket);
-    const modal = document.getElementById('copyModalComponent');
-    if (!modal) {
-        console.error('[Client] ❌ copyModalComponent not found in DOM!');
-        return;
-    }
-
-    modal.sourceBucket = {
-        name: bucket.name,
-        providerId: bucket.providerId,
-        providerName: bucket.providerName,
-        count: bucket.count,
-        size: bucket.size
-    };
-    modal.providers = store.providers || [];
-    modal.allBuckets = store.buckets || [];
-    modal.lang = localStorage.getItem('lang') || 'en';
-    modal.open = true;
-    console.log('[Client] ✅ Modal properties set, open:', modal.open);
-}
-
-async function startCopyJob(detail) {
-    try {
-        console.log('[Client] 🚀 Starting copy job:', detail);
-        const result = await api.startCopy(
-            detail.sourceProviderId,
-            detail.sourceBucket,
-            detail.targetProviderId,
-            detail.targetBucket,
-            detail.options,
-            detail.sourcePrefix || null
-        );
-
-        if (result.error) {
-            showToast(translateError(result.error), 'error');
-            return;
-        }
-
-        console.log('[Client] 📋 Copy job started, result:', result);
-
-        // Add job to progress panel
-        const progressPanel = document.getElementById('copyProgressPanel');
-        if (progressPanel && result.job) {
-            progressPanel.addJob(result.job);
-            showToast('Copy started successfully', 'success');
-
-            // Subscribe to job updates via WebSocket
-            if (socket && socket.connected) {
-                console.log('[Client] 📡 Subscribing to job:', result.job.id);
-                socket.emit('copy:subscribe', result.job.id);
-            } else {
-                console.warn('[Client] ⚠️ Socket not connected, cannot subscribe to job updates');
-            }
-        }
-    } catch (err) {
-        console.error('Error starting copy:', err);
-        showToast('Failed to start copy', 'error');
-    }
-}
-
-async function cancelCopyJob(jobId) {
-    try {
-        const result = await api.cancelCopy(jobId);
-        if (result.error) {
-            showToast(translateError(result.error), 'error');
-        } else {
-            showToast('Copy job cancelled', 'warning');
-        }
-    } catch (err) {
-        console.error('Error cancelling copy:', err);
-        showToast('Failed to cancel copy', 'error');
-    }
-}
-
-// 4. Providers & Creation
-async function loadProviders() {
-    const select = document.getElementById('createProviderId');
-    if(!select) return;
-    try {
-        const providers = await api.listProviders();
-        store.providers = Array.isArray(providers) ? providers : [];
-
-        if(store.providers.length > 1) {
-            select.classList.remove('hidden');
-            select.innerHTML = store.providers.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-        } else if (store.providers.length === 1) {
-            const p = store.providers[0];
-            select.innerHTML = `<option value="${p.id}" selected>${p.name}</option>`;
-            select.value = p.id; // Force value
-            select.classList.add('hidden');
-        } else {
-            select.innerHTML = '<option value="">No Providers</option>';
-            select.classList.add('hidden');
-        }
-    } catch (err) {
-        console.error("Failed to load providers:", err);
-    }
-}
-
-async function createBucket(e) {
-    e.preventDefault();
-    console.log("Submit event triggered on createBucketForm");
-
-    const input = document.getElementById('newBucketName');
-    const providerSelect = document.getElementById('createProviderId');
-    const name = input.value.trim();
-    
-    // Get providerId from select
-    let providerId = providerSelect ? providerSelect.value : null;
-    
-    console.log("Form values -> Name:", name, "ProviderId (from select):", providerId);
-
-    if(!name) {
-        showToast("Please enter a bucket name", "error");
-        return;
-    }
-
-    if(!providerId) {
-        console.warn("ProviderId missing from select, checking store...");
-        if (store.providers && store.providers.length > 0) {
-            providerId = store.providers[0].id;
-            console.log("Using first provider from store:", providerId);
-        }
-    }
-
-    if(!providerId) {
-        showToast("No provider available", 'error');
-        return;
-    }
-
-    try {
-        console.log(`Final attempt: Creating bucket "${name}" on "${providerId}"`);
-        showToast(t('create') + "...", 'info');
-        const res = await api.create(providerId, name);
-        console.log("API Create response:", res);
-
-        if (res && res.error) {
-            showToast(translateError(res.error), 'error');
-        } else { 
-            input.value = ''; 
-            showToast(t('toastCreated'), 'success'); 
-            await loadData(false); 
-        }
-    } catch (err) {
-        console.error("Create bucket unexpected error:", err);
-        showToast("Failed to create bucket", 'error');
-    }
-}
-
-// 5. Deletion & Stats
-async function confirmDelete(detail) {
-    if (!detail) return;
-    const { providerId, name } = detail;
-    const res = await api.delete(providerId, name);
-    if (res.error) showToast(translateError(res.error), 'error'); 
-    else { showToast(t('toastDeleted'), 'success'); loadData(); } 
-    closeDeleteModal();
-}
-
-// 7. Modals Bridge (Lit Integration)
-function openDeleteModal(providerId, name) {
-    const modal = document.getElementById('deleteModalComponent');
-    if (modal) {
-        modal.target = { providerId, name, type: 'bucket' };
-        modal.lang = localStorage.getItem('lang') || 'en';
-        modal.open = true;
-    }
-}
-
-function closeDeleteModal() {
-    const modal = document.getElementById('deleteModalComponent');
-    if (modal) modal.open = false;
-}
-
-function openPreview(providerId, bucket, file) {
-    const modal = document.getElementById('previewModalComponent');
-    if (modal) {
-        modal.file = { providerId, bucket, file };
-        modal.open = true;
-    }
-}
-
-function closePreview() {
-    const modal = document.getElementById('previewModalComponent');
-    if (modal) modal.open = false;
-}
-
-function openUrlModal(fileName) {
-    const modal = document.getElementById('shareModalComponent');
-    if (modal) {
-        modal.fileName = fileName;
-        modal.open = true;
-    }
-}
-
-function closeUrlModal() {
-    const modal = document.getElementById('shareModalComponent');
-    if (modal) modal.open = false;
-}
-
-async function generateShareLink(detail) {
-    const modal = document.getElementById('shareModalComponent');
-    if (!modal) return;
-    try {
-        const { url } = await api.getUrl(store.currentProviderId, store.currentBucket, detail.fileName, detail.expiry);
-        modal.setUrl(url);
-    } catch (err) {
-        showToast('Link generation failed', 'error');
-    }
-}
-
-function createFolder() {
-    const modal = document.getElementById('folderModalComponent');
-    if (modal) modal.open = true;
-}
-
-async function submitFolder(detail) {
-    showToast('Creating folder...', 'info');
-    const modal = document.getElementById('folderModalComponent');
-    try {
-        const res = await api.createFolder(store.currentProviderId, store.currentBucket, detail.name, store.currentPrefix);
-        if (res.error) showToast(res.error, 'error');
-        else {
-            showToast('Folder created', 'success');
-            if (modal) modal.open = false;
-            // Re-render to show new folder
-            if (window.app.openExplorer) window.app.openExplorer(store.currentProviderId, store.currentBucket, store.currentPrefix);
-        }
-    } catch (err) {
-        showToast('Failed to create folder', 'error');
-    }
-}
-
-// 6. Stats Refresh
-async function refreshStats(providerId, bucket) {
-    try {
-        const stats = await api.getStats(providerId, bucket);
-        return stats;
-    } catch (err) {
-        console.error('Failed to refresh stats:', err);
-        return null;
-    }
-}
-
-// 7. Search
-// 7. Spotlight Search
-let spotlightIndex = -1;
-
-function openSpotlight() {
-    const modal = document.getElementById('spotlightModal');
-    const input = document.getElementById('globalSearchInput');
-    const results = document.getElementById('searchResults');
-    const empty = document.getElementById('searchEmpty');
-    if (!modal) return;
-
-    modal.classList.remove('hidden');
-    results.classList.add('hidden');
-    results.innerHTML = '';
-    if (empty) empty.classList.remove('hidden');
-    spotlightIndex = -1;
-    setTimeout(() => {
-        if (input) { input.value = ''; input.focus(); }
-    }, 50);
-}
-
-function closeSpotlight() {
-    const modal = document.getElementById('spotlightModal');
-    if (modal) modal.classList.add('hidden');
-}
-
-function initSearch() {
-    const input = document.getElementById('globalSearchInput');
-    const results = document.getElementById('searchResults');
-    const trigger = document.getElementById('searchTrigger');
-    const backdrop = document.getElementById('spotlightBackdrop');
-    if (!input || !results) return;
-
-    // Open from trigger button
-    if (trigger) trigger.addEventListener('click', openSpotlight);
-    // Close on backdrop click
-    if (backdrop) backdrop.addEventListener('click', closeSpotlight);
-
-    let timeout = null;
-    input.addEventListener('input', (e) => {
-        clearTimeout(timeout);
-        const q = e.target.value.trim();
-        const empty = document.getElementById('searchEmpty');
-        if (!q) {
-            results.classList.add('hidden');
-            results.innerHTML = '';
-            if (empty) empty.classList.remove('hidden');
-            spotlightIndex = -1;
-            return;
-        }
-        if (empty) empty.classList.add('hidden');
-        // Show loading
-        results.innerHTML = `
-            <div class="flex items-center justify-center gap-2 py-8 text-slate-400">
-                <iconify-icon icon="line-md:loading-twotone-loop" width="20"></iconify-icon>
-                <span class="text-sm font-light">Searching...</span>
-            </div>`;
-        results.classList.remove('hidden');
-        timeout = setTimeout(() => performSearch(q), 300);
-    });
-
-    // Keyboard navigation in results
-    input.addEventListener('keydown', (e) => {
-        const items = results.querySelectorAll('[data-result]');
-        if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            spotlightIndex = Math.min(spotlightIndex + 1, items.length - 1);
-            updateSpotlightHighlight(items);
-        } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            spotlightIndex = Math.max(spotlightIndex - 1, 0);
-            updateSpotlightHighlight(items);
-        } else if (e.key === 'Enter' && spotlightIndex >= 0 && items[spotlightIndex]) {
-            e.preventDefault();
-            items[spotlightIndex].click();
-        } else if (e.key === 'Escape') {
-            e.preventDefault();
-            closeSpotlight();
-        }
-    });
-}
-
-function updateSpotlightHighlight(items) {
-    items.forEach((el, i) => {
-        if (i === spotlightIndex) {
-            el.classList.add('!bg-rose-500', '!text-white', '[&_*]:!text-white');
-            el.scrollIntoView({ block: 'nearest' });
-        } else {
-            el.classList.remove('!bg-rose-500', '!text-white', '[&_*]:!text-white');
-        }
-    });
-}
-
-function getFileIcon(name) {
-    const ext = name.split('.').pop()?.toLowerCase() || '';
-    const map = {
-        jpg: 'ph:image-duotone', jpeg: 'ph:image-duotone', png: 'ph:image-duotone',
-        gif: 'ph:image-duotone', webp: 'ph:image-duotone', svg: 'ph:image-duotone',
-        mp4: 'ph:video-duotone', webm: 'ph:video-duotone', mov: 'ph:video-duotone',
-        mp3: 'ph:music-notes-duotone', wav: 'ph:music-notes-duotone',
-        pdf: 'ph:file-pdf-duotone', doc: 'ph:file-doc-duotone', docx: 'ph:file-doc-duotone',
-        js: 'ph:file-js-duotone', ts: 'ph:file-ts-duotone', json: 'ph:brackets-curly-duotone',
-        zip: 'ph:file-zip-duotone', rar: 'ph:file-zip-duotone',
-    };
-    return map[ext] || 'ph:file-duotone';
-}
-
-async function performSearch(query) {
-    const results = document.getElementById('searchResults');
-    const empty = document.getElementById('searchEmpty');
-    if (!results) return;
-
-    try {
-        const items = await api.search(query);
-        spotlightIndex = -1;
-
-        if (items && items.length > 0) {
-            results.innerHTML = `
-                <div class="px-4 pt-3 pb-1">
-                    <span class="text-[11px] font-medium tracking-wider text-slate-400 dark:text-slate-500 uppercase">Results</span>
-                </div>
-            ` + items.map((item, i) => {
-                const fileName = item.object.split('/').pop() || item.object;
-                const folder = item.object.includes('/') ? item.object.substring(0, item.object.lastIndexOf('/')) : '';
-                const icon = getFileIcon(fileName);
-                return `
-                <div data-result="${i}"
-                     class="flex items-center gap-3 mx-1.5 px-3 py-2 rounded-[10px] cursor-pointer transition-colors hover:bg-slate-100 dark:hover:bg-white/[0.06]"
-                     onclick="window.app.openExplorer('${item.providerId}', '${item.bucket}', '${folder ? folder + '/' : ''}'); document.getElementById('spotlightModal').classList.add('hidden');">
-                    <div class="size-8 rounded-[8px] bg-slate-50 dark:bg-white/[0.06] flex items-center justify-center text-slate-400 dark:text-slate-400 shrink-0">
-                        <iconify-icon icon="${icon}" width="16"></iconify-icon>
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="text-[13px] font-medium text-slate-700 dark:text-slate-200 truncate">${fileName}</div>
-                        <div class="text-[11px] text-slate-400 dark:text-slate-500 truncate">
-                            ${item.bucket}${folder ? ' / ' + folder : ''} · ${item.providerId}
-                        </div>
-                    </div>
-                    <iconify-icon icon="ph:arrow-bend-down-left" width="12" class="text-slate-300 dark:text-slate-500 shrink-0"></iconify-icon>
-                </div>`;
-            }).join('') + '<div class="h-1.5"></div>';
-            results.classList.remove('hidden');
-            if (empty) empty.classList.add('hidden');
-        } else {
-            results.innerHTML = `
-                <div class="py-10 text-center">
-                    <iconify-icon icon="ph:binoculars-duotone" width="28" class="text-slate-200 dark:text-dark-700 mb-2"></iconify-icon>
-                    <p class="text-[13px] text-slate-400 dark:text-slate-500">No results for "${query}"</p>
-                </div>`;
-            results.classList.remove('hidden');
-            if (empty) empty.classList.add('hidden');
-        }
-    } catch (err) {
-        console.error('Search failed:', err);
-    }
-}
-
-// 9. Login Handler (Lit Component)
-async function handleLogin(detail) {
-    const { username, password } = detail;
-    const loginComponent = document.getElementById('loginFormComponent');
-    
-    try {
-        const res = await api.login(username, password);
-        if (res.success) {
-            window.location.href = '/manager';
-        } else {
-            throw new Error(res.error || 'Invalid credentials');
-        }
-    } catch (err) {
-        if (loginComponent) {
-            loginComponent.setError(err.message || 'Invalid credentials');
-        }
-    }
-}
-
-// 8. Routing
-function handleRouting() {
-    const path = window.location.pathname;
-    const parts = path.split('/');
-    if (parts[1] === 'manager' && parts.length >= 5 && parts[4] === 'files') {
-        const providerId = parts[2];
-        const bucket = parts[3];
-        const prefix = parts.slice(5).join('/');
-        window.app.openExplorer(providerId, bucket, prefix);
-    } else if (path === '/manager') {
-        const listView = document.getElementById('bucketListView');
-        const explorerView = document.getElementById('explorerView');
-        if (listView && explorerView) {
-            listView.classList.remove('hidden');
-            explorerView.classList.add('hidden');
-        }
-    }
-}
-
-window.addEventListener('popstate', handleRouting);
-
-// 9. Global Confirm Dialog (Promise-based, replaces native confirm())
-function showConfirm(message, options = {}) {
-    return new Promise((resolve) => {
-        const dialog = document.getElementById('confirmDialog');
-        if (!dialog) { resolve(false); return; }
-
-        dialog.message = message;
-        dialog.title = options.title || '';
-        dialog.icon = options.icon || '';
-        dialog.confirmText = options.confirmText || 'Confirm';
-        dialog.cancelText = options.cancelText || 'Cancel';
-        dialog.danger = options.danger || false;
-        dialog.open = true;
-
-        const onConfirm = () => { cleanup(); resolve(true); };
-        const onCancel  = () => { cleanup(); resolve(false); };
-
-        function cleanup() {
-            dialog.removeEventListener('confirm', onConfirm);
-            dialog.removeEventListener('cancel',  onCancel);
-        }
-
-        dialog.addEventListener('confirm', onConfirm, { once: true });
-        dialog.addEventListener('cancel',  onCancel,  { once: true });
-    });
-}
-
-// 10. Expose Global API
-function openFolderCopyModal(providerId, bucketName, folderPrefix) {
-    const modal = document.getElementById('copyModalComponent');
-    if (!modal) return;
-    const provider = store.providers?.find(p => p.id === providerId);
-    modal.sourceBucket = {
-        name: bucketName,
-        providerId,
-        providerName: provider?.name || providerId,
-        sourcePrefix: folderPrefix,
-    };
-    modal.providers = store.providers || [];
-    modal.allBuckets = store.buckets || [];
-    modal.lang = localStorage.getItem('lang') || 'en';
-    modal.open = true;
-}
-
-window.app = {
-    loadData, openExplorer, closeExplorer, navigateExplorer, downloadFile, handleUpload, handleFolderUpload, handleFolderUploadDirect,
-    createFolder, submitFolder,
-    toggleSelect, bulkDelete, openUrlModal, closeUrlModal, generateShareLink,
-    openDeleteModal, closeDeleteModal, confirmDelete, openPreview, closePreview,
-    setLanguage, toggleTheme, refreshStats, translateError, setFilter, api, showToast,
-    initTooltips, handleLogin, openCopyModal, openFolderCopyModal, startCopyJob, cancelCopyJob,
-    showConfirm, openSpotlight
+// Atlas Manager - Based on Pencil Design
+// Implements exact colors, spacing, and layout from atlas-premium.pen
+
+const store = {
+    buckets: [],
+    currentFilter: 'all',
+    isLoading: false,
+    deleteTarget: null,
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Event listeners for Lit Components
-    document.getElementById('loginFormComponent')?.addEventListener('login', (e) => handleLogin(e.detail));
-    document.getElementById('deleteModalComponent')?.addEventListener('confirm', (e) => confirmDelete(e.detail));
-    document.getElementById('shareModalComponent')?.addEventListener('generate', (e) => generateShareLink(e.detail));
-    document.getElementById('shareModalComponent')?.addEventListener('toast', (e) => showToast(e.detail));
-    document.getElementById('folderModalComponent')?.addEventListener('confirm', (e) => submitFolder(e.detail));
-    
-    // Copy Bucket event listeners
-    document.getElementById('copyModalComponent')?.addEventListener('start-copy', (e) => startCopyJob(e.detail));
-    document.getElementById('copyProgressPanel')?.addEventListener('cancel-job', (e) => cancelCopyJob(e.detail.jobId));
-    
-    // Event delegation for bucket card copy button
-    document.addEventListener('copy', (e) => {
-        console.log('[Client] 📋 Copy event received:', e.detail);
-        if (e.detail && e.detail.bucket) {
-            openCopyModal(e.detail.bucket);
-        }
-    });
-
-    // Context menu actions
-    document.getElementById('contextMenu')?.addEventListener('menu-action', async (e) => {
-        const { action, item } = e.detail;
-        const { store } = await import('/js/store.js');
-        switch (action) {
-            case 'navigate':
-                window.app.navigateExplorer(item.name);
-                break;
-            case 'preview':
-                openPreview(store.currentProviderId, store.currentBucket, item.name);
-                break;
-            case 'download':
-                window.app.downloadFile(store.currentProviderId, store.currentBucket, item.name);
-                break;
-            case 'share':
-                openUrlModal(item.name);
-                break;
-            case 'copy-folder':
-                openFolderCopyModal(store.currentProviderId, store.currentBucket, item.name);
-                break;
-            case 'delete': {
-                const label = item.isFolder ? 'folder' : 'item';
-                const ok = await showConfirm(
-                    `Are you sure you want to delete this ${label}? This action cannot be undone.`,
-                    { title: `Delete ${label}`, icon: 'ph:trash-bold', danger: true, confirmText: 'Delete' }
-                );
-                if (ok) {
-                    try {
-                        const { api: apiRef } = await import('/js/api.js');
-                        await apiRef.deleteObjects(store.currentProviderId, store.currentBucket, [item.name]);
-                        showToast('Deleted', 'success');
-                        window.app.openExplorer(store.currentProviderId, store.currentBucket, store.currentPrefix);
-                    } catch (err) {
-                        showToast('Delete failed', 'error');
-                    }
-                }
-                break;
-            }
-        }
-    });
-
-    try {
-        initTheme();
-        initLanguage();
-        
-        const langContainer = document.getElementById('langSelectorContainer');
-        if (langContainer) renderLanguageSelector('langSelectorContainer');
-        
-        const supportContainer = document.getElementById('supportButtonContainer');
-        if (supportContainer) renderSupportButton();
-        
-        initTooltips();
-    } catch (err) {
-        console.error('Error during global init:', err);
-    }
-    
-    // Check if we're on login or manager page
-    const isLoginPage = document.getElementById('loginFormComponent') !== null;
-    
-    if (!isLoginPage) {
-        // Manager page
-        initSearch();
-        loadData();
-        handleRouting();
-        initializeWebSocket();
-    }
-    
-    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
-    document.getElementById('logoutBtn')?.addEventListener('click', api.logout);
-    document.getElementById('createBucketForm')?.addEventListener('submit', createBucket);
-    
-    // Mobile search modal handlers
-    const mobileSearchBtn = document.getElementById('mobileSearchBtn');
-    const mobileSearchModal = document.getElementById('mobileSearchModal');
-    const closeMobileSearch = document.getElementById('closeMobileSearch');
-    const mobileSearchInput = document.getElementById('mobileSearchInput');
-    
-    if (mobileSearchBtn && mobileSearchModal) {
-        mobileSearchBtn.addEventListener('click', () => {
-            mobileSearchModal.classList.remove('hidden');
-            setTimeout(() => mobileSearchInput?.focus(), 100);
+const api = {
+    async request(endpoint, options = {}) {
+        const res = await fetch(`/api${endpoint}`, {
+            ...options,
+            headers: { 'Content-Type': 'application/json', ...options.headers },
         });
-    }
+        if (!res.ok) throw new Error((await res.json()).message || `HTTP ${res.status}`);
+        return res.json();
+    },
     
-    if (closeMobileSearch && mobileSearchModal) {
-        closeMobileSearch.addEventListener('click', () => {
-            mobileSearchModal.classList.add('hidden');
-            mobileSearchInput.value = '';
-            document.getElementById('mobileSearchResults').innerHTML = '';
-        });
-    }
-    
-    if (mobileSearchInput) {
-        mobileSearchInput.addEventListener('input', async (e) => {
-            const query = e.target.value.trim();
-            const resultsContainer = document.getElementById('mobileSearchResults');
+    getBuckets: () => api.request('/buckets'),
+    createBucket: (providerId, name) => api.request('/buckets', { method: 'POST', body: JSON.stringify({ providerId, name }) }),
+    deleteBucket: (providerId, name) => api.request(`/buckets/${providerId}/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+    updateBucketPolicy: (providerId, name, isPublic) => api.request(`/buckets/${providerId}/${encodeURIComponent(name)}/policy`, { method: 'PUT', body: JSON.stringify({ isPublic }) }),
+    logout: () => api.request('/logout', { method: 'POST' }),
+};
+
+const UI = {
+    // Create bucket card EXACTLY as designed in Pencil
+    createBucketCard(bucket) {
+        const card = document.createElement('div');
+        card.className = 'bg-[#1e293b] rounded-[16px] border border-[#334155] p-6 hover:scale-[1.02] transition-all duration-300 animate-fade-in';
+        
+        const providerColors = {
+            minio: 'bg-[#f43f5e26] text-[#f43f5e]',
+            aws: 'bg-[#3b82f626] text-[#3b82f6]',
+            r2: 'bg-[#10b98126] text-[#10b981]',
+        };
+        
+        const providerNames = { minio: 'MinIO', aws: 'AWS S3', r2: 'R2' };
+        const providerColor = providerColors[bucket.provider?.toLowerCase()] || providerColors.minio;
+        const providerName = providerNames[bucket.provider?.toLowerCase()] || bucket.provider;
+        
+        // From Pencil: card w:432, h:180
+        card.innerHTML = `
+            <div class="flex items-start justify-between mb-4">
+                <h3 class="text-[16px] font-semibold text-[#f8fafc] font-mono">${this.escapeHtml(bucket.name)}</h3>
+                <span class="inline-flex items-center px-3 py-1 ${providerColor} text-[11px] font-semibold rounded-[12px]">${providerName}</span>
+            </div>
             
-            if (query.length < 2) {
-                resultsContainer.innerHTML = '';
-                return;
-            }
+            <div class="flex items-center gap-6 mb-6">
+                <div class="flex items-center gap-2 text-[13px] text-[#64748b]">
+                    <iconify-icon icon="ph:database" class="text-lg"></iconify-icon>
+                    <span>${this.formatSize(bucket.size || 0)}</span>
+                </div>
+                <div class="flex items-center gap-2 text-[13px] text-[#64748b]">
+                    <iconify-icon icon="ph:files" class="text-lg"></iconify-icon>
+                    <span>${this.formatNumber(bucket.objectCount || 0)} objects</span>
+                </div>
+            </div>
             
-            const res = await api.search(query);
-            if (!res || res.error || res.length === 0) {
-                resultsContainer.innerHTML = '<div class="text-slate-400 text-sm text-center py-8">No results found</div>';
-                return;
-            }
-            
-            resultsContainer.innerHTML = res.map(r => `
-                <button class="w-full text-left p-3 hover:bg-slate-100 dark:hover:bg-dark-800 rounded-lg transition-colors flex items-center gap-3" 
-                        onclick="window.location.hash='explorer/${r.providerId}/${r.bucket}'; document.getElementById('mobileSearchModal').classList.add('hidden');">
-                    <iconify-icon icon="ph:file-bold" class="text-slate-400" width="18"></iconify-icon>
-                    <div class="flex-1 min-w-0">
-                        <div class="font-mono text-sm truncate">${r.object}</div>
-                        <div class="text-xs text-slate-400">${r.bucket} • ${r.providerId}</div>
+            <div class="flex items-center justify-between">
+                <span class="text-[12px] text-[#475569]">${this.formatDate(bucket.creationDate)}</span>
+                
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" class="sr-only peer policy-toggle" 
+                           data-provider="${bucket.provider}" data-name="${this.escapeHtml(bucket.name)}" ${bucket.isPublic ? 'checked' : ''}>
+                    <div class="w-10 h-6 bg-[#334155] rounded-[12px] peer peer-checked:bg-[#f43f5e] transition-colors relative">
+                        <div class="absolute w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 
+                                    ${bucket.isPublic ? 'translate-x-5' : 'translate-x-0.5'} top-0.5"></div>
                     </div>
-                </button>
-            `).join('');
+                </label>
+            </div>
+        `;
+        
+        return card;
+    },
+    
+    formatSize: (bytes) => {
+        if (!bytes) return '0 B';
+        const k = 1024, sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    },
+    
+    formatNumber: (num) => num.toLocaleString(),
+    
+    formatDate: (dateString) => {
+        const date = new Date(dateString), now = new Date(), diff = now - date;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        if (days === 0) return 'Today';
+        if (days === 1) return 'Yesterday';
+        if (days < 7) return `${days} days ago`;
+        if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+        return `${Math.floor(days / 30)} months ago`;
+    },
+    
+    escapeHtml: (text) => { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; },
+    
+    showToast: (message, type = 'success') => {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMessage').textContent = message;
+        document.getElementById('toastIcon').setAttribute('icon', type === 'success' ? 'ph:check-circle' : 'ph:warning-circle');
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => toast.classList.add('translate-y-20', 'opacity-0'), 3000);
+    },
+};
+
+const app = {
+    async init() {
+        this.bindEvents();
+        await this.loadBuckets();
+    },
+    
+    bindEvents() {
+        document.getElementById('createBucketBtn')?.addEventListener('click', () => this.openModal('createModal'));
+        document.getElementById('cancelCreate')?.addEventListener('click', () => this.closeModal('createModal'));
+        document.getElementById('createBucketForm')?.addEventListener('submit', async (e) => { e.preventDefault(); await this.handleCreateBucket(); });
+        document.getElementById('cancelDelete')?.addEventListener('click', () => this.closeModal('deleteModal'));
+        document.getElementById('deleteConfirm')?.addEventListener('input', (e) => {
+            document.getElementById('confirmDelete').disabled = e.target.value !== store.deleteTarget?.name;
         });
-    }
+        document.getElementById('confirmDelete')?.addEventListener('click', () => this.handleDeleteBucket());
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.addEventListener('click', (e) => this.handleFilter(e.currentTarget)));
+        document.getElementById('bucketList')?.addEventListener('change', async (e) => {
+            if (e.target.classList.contains('policy-toggle')) await this.handlePolicyChange(e.target);
+        });
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => { await api.logout(); window.location.href = '/login'; });
+        document.getElementById('globalSearch')?.addEventListener('input', (e) => this.handleSearch(e.target.value));
+    },
     
-    window.addEventListener('languageChanged', () => {
-        if(store.buckets && store.buckets.length > 0) renderBuckets(store.buckets);
-    });
+    async loadBuckets() {
+        store.isLoading = true;
+        this.updateLoader();
+        try {
+            store.buckets = await api.getBuckets();
+            this.renderBuckets();
+        } catch (error) {
+            UI.showToast('Failed to load buckets', 'error');
+        } finally {
+            store.isLoading = false;
+            this.updateLoader();
+        }
+    },
     
-    console.log('✅ App initialized');
-});
+    renderBuckets() {
+        const container = document.getElementById('bucketList');
+        const emptyState = document.getElementById('emptyState');
+        if (!container) return;
+        
+        let filtered = store.currentFilter === 'all' ? store.buckets : store.buckets.filter(b => b.provider?.toLowerCase() === store.currentFilter);
+        
+        if (filtered.length === 0) {
+            container.classList.add('hidden');
+            emptyState?.classList.remove('hidden');
+            return;
+        }
+        
+        emptyState?.classList.add('hidden');
+        container.classList.remove('hidden');
+        container.innerHTML = '';
+        filtered.forEach(bucket => container.appendChild(UI.createBucketCard(bucket)));
+    },
+    
+    updateLoader() {
+        const loader = document.getElementById('loader');
+        loader?.classList.toggle('hidden', !store.isLoading);
+    },
+    
+    handleFilter(btn) {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('active', 'bg-[#f43f5e]', 'text-white');
+            b.classList.add('bg-[#ffffff0f]', 'text-[#cbd5e1]');
+        });
+        btn.classList.remove('bg-[#ffffff0f]', 'text-[#cbd5e1]');
+        btn.classList.add('active', 'bg-[#f43f5e]', 'text-white');
+        store.currentFilter = btn.dataset.provider;
+        this.renderBuckets();
+    },
+    
+    async handleCreateBucket() {
+        const provider = document.getElementById('createProvider').value;
+        const name = document.getElementById('createName').value.trim();
+        if (!name) return;
+        try {
+            await api.createBucket(provider, name);
+            this.closeModal('createModal');
+            UI.showToast('Bucket created');
+            document.getElementById('createName').value = '';
+            await this.loadBuckets();
+        } catch (error) {
+            UI.showToast(error.message, 'error');
+        }
+    },
+    
+    async handleDeleteBucket() {
+        if (!store.deleteTarget) return;
+        try {
+            await api.deleteBucket(store.deleteTarget.provider, store.deleteTarget.name);
+            this.closeModal('deleteModal');
+            UI.showToast('Bucket deleted');
+            await this.loadBuckets();
+        } catch (error) {
+            UI.showToast(error.message, 'error');
+        } finally {
+            store.deleteTarget = null;
+        }
+    },
+    
+    confirmDelete(provider, name) {
+        store.deleteTarget = { provider, name };
+        document.getElementById('deleteConfirm').value = '';
+        document.getElementById('confirmDelete').disabled = true;
+        this.openModal('deleteModal');
+    },
+    
+    async handlePolicyChange(toggle) {
+        const { provider, name } = toggle.dataset;
+        const isPublic = toggle.checked;
+        try {
+            await api.updateBucketPolicy(provider, name, isPublic);
+            UI.showToast(isPublic ? 'Bucket made public' : 'Bucket made private');
+        } catch (error) {
+            toggle.checked = !isPublic;
+            UI.showToast(error.message, 'error');
+        }
+    },
+    
+    handleSearch(query) {
+        const container = document.getElementById('bucketList');
+        if (!query.trim()) { this.renderBuckets(); return; }
+        const filtered = store.buckets.filter(b => b.name.toLowerCase().includes(query.toLowerCase()));
+        container.innerHTML = '';
+        filtered.forEach(bucket => container.appendChild(UI.createBucketCard(bucket)));
+    },
+    
+    openModal(id) { document.getElementById(id).classList.remove('hidden'); },
+    closeModal(id) { document.getElementById(id).classList.add('hidden'); },
+};
+
+document.addEventListener('DOMContentLoaded', () => app.init());
+window.app = app; window.UI = UI; window.api = api; window.store = store;

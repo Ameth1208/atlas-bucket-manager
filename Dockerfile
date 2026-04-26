@@ -34,7 +34,7 @@ RUN npm run build
 # ============================================
 # Stage 3: Runtime (Production image)
 # ============================================
-FROM node:22-alpine AS production
+FROM node:22-alpine AS api
 
 # Install curl for health checks
 RUN apk add --no-cache curl
@@ -59,8 +59,8 @@ COPY --from=builder --chown=atlasapp:nodejs /app/public ./public
 COPY --from=builder --chown=atlasapp:nodejs /app/package*.json ./
 
 # Create uploads and temp directories with correct permissions
-RUN mkdir -p /app/uploads /app/temp && \
-    chown -R atlasapp:nodejs /app/uploads /app/temp
+RUN mkdir -p /app/uploads /app/temp /app/data && \
+    chown -R atlasapp:nodejs /app/uploads /app/temp /app/data
 
 # Switch to non-root user
 USER atlasapp
