@@ -5,24 +5,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { QuotaBar } from '@/components/ui/quota-bar';
 import { fmtDate, fmtBytes } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import type { Bucket } from '@/lib/api';
 
 interface BucketCardProps {
-  bucket: {
-    name: string;
-    providerId: string;
-    providerName?: string;
-    isPublic?: boolean;
-    used?: number;
-    limit?: number;
-    creationDate?: string;
-    totalObjects?: number;
-  };
+  bucket: Bucket & { used?: number; totalObjects?: number };
   providerColor?: string;
 }
 
 export function BucketCard({ bucket, providerColor }: BucketCardProps) {
   const router = useRouter();
-  const pct = bucket.limit ? Math.min(100, Math.round((bucket.used ?? 0) / bucket.limit * 100)) : 0;
+  const displayUsed = bucket.used ?? 0;
+  const displayLimit = bucket.limit;
+  const pct = displayLimit ? Math.min(100, Math.round(displayUsed / displayLimit * 100)) : 0;
 
   return (
     <Card
@@ -46,11 +40,15 @@ export function BucketCard({ bucket, providerColor }: BucketCardProps) {
           </Badge>
         </div>
 
-        <QuotaBar used={bucket.used ?? 0} limit={bucket.limit ?? 0} />
+        <QuotaBar used={displayUsed} limit={displayLimit ?? 0} />
 
         <div className="flex justify-between items-center mt-2 text-xs text-muted-foreground">
           <span>{bucket.totalObjects?.toLocaleString() ?? '—'} objetos</span>
-          <span>{bucket.limit ? `${fmtBytes(bucket.used ?? 0)} / ${fmtBytes(bucket.limit)}` : '—'}</span>
+          <span>
+            {displayLimit
+              ? `${fmtBytes(displayUsed)} / ${fmtBytes(displayLimit)}`
+              : fmtBytes(displayUsed)}
+          </span>
         </div>
 
         <div className="flex justify-between items-center mt-1 text-xs text-muted-foreground">

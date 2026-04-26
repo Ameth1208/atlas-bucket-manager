@@ -1,7 +1,11 @@
 'use client';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useBucketObjects } from '@/hooks/use-bucket-objects';
-import { useAppStore } from '@/lib/store';
+import { useBuckets } from '@/hooks/use-buckets';
+import { useBucketStats } from '@/hooks/use-buckets';
+import { api } from '@/lib/api';
 import { Toolbar } from '@/components/layout/toolbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +13,8 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fmtBytes, fmtDate, cn } from '@/lib/utils';
 import { Upload, Grid, List, Folder, File, Trash2, Download, RefreshCw, Search, ChevronRight } from 'lucide-react';
+import { BucketHeader } from '@/components/dashboard/bucket-header';
+import { BucketActions } from '@/components/dashboard/bucket-actions';
 
 type Layout = 'grid' | 'list';
 type Filter = 'all' | 'image' | 'video' | 'audio' | 'code';
@@ -24,9 +30,13 @@ const FILTERS: { value: Filter; label: string }[] = [
 export default function BucketPage() {
   const params = useParams();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const name = decodeURIComponent(params.name as string);
   const providerId = searchParams.get('provider') || '';
+
+  const { buckets } = useBuckets();
+  const bucket = buckets.find((b: typeof buckets[0]) => b.name === name && b.providerId === providerId);
 
   const {
     objects,
@@ -53,28 +63,29 @@ export default function BucketPage() {
 
   const crumbs = [
     { label: 'Atlas', href: '/dashboard' },
+    { label: 'Buckets', href: '/dashboard' },
     { label: name },
-    ...path.map((seg, i) => ({ label: seg, href: '#' })),
   ];
+
+  if (!bucket) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <Toolbar crumbs={crumbs} />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-muted-foreground">Bucket no encontrado</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <Toolbar crumbs={crumbs} />
 
       <div className="flex-1 overflow-y-auto p-6">
-        {/* Header */}
         <div className="flex items-start justify-between mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant="outline">s3://{name}</Badge>
-              <Badge variant="secondary">{providerId}</Badge>
-            </div>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">{name}</h1>
-          </div>
+          <BucketHeader bucket={bucket} />
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              <RefreshCw size={13} />
-            </Button>
             <input ref={fileInput} type="file" multiple className="hidden" onChange={e => handleFiles(e.target.files)} />
             <Button size="sm" disabled={uploadMutation.isPending} onClick={() => fileInput.current?.click()}>
               {uploadMutation.isPending
@@ -82,6 +93,7 @@ export default function BucketPage() {
                 : <Upload size={13} />}
               Subir
             </Button>
+            <BucketActions bucket={bucket} onDeleted={() => router.push('/dashboard')} />
           </div>
         </div>
 

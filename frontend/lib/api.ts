@@ -56,6 +56,8 @@ export const api = {
       request<BucketStats>(`/buckets/${providerId}/${name}/stats`),
     setLimit: (name: string, providerId: string, limit: number) =>
       request<{ success: boolean }>(`/buckets/${providerId}/${name}/limit`, { method: 'PUT', body: JSON.stringify({ limit }) }),
+    setPublic: (name: string, providerId: string, isPublic: boolean) =>
+      request<{ success: boolean }>(`/buckets/${providerId}/${name}/policy`, { method: 'PUT', body: JSON.stringify({ public: isPublic }) }),
     providers: () => request<Provider[]>('/providers'),
     createProvider: (body: CreateProviderBody) =>
       request<Provider>('/providers', { method: 'POST', body: JSON.stringify(body) }),
@@ -149,15 +151,12 @@ export interface Bucket {
   providerId: string;
   providerName?: string;
   isPublic?: boolean;
-  used?: number;
   limit?: number;
-  maxSize?: number;
 }
 
 export interface BucketStats {
   totalObjects: number;
   totalSize: number;
-  used?: number;
   limit?: number;
   providerId: string;
 }
