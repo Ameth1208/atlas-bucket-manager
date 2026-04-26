@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.ts$\")",
+      "Bash(npm run:*)",
+      "Bash(pnpm run:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(pnpm rebuild:*)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :3000)",
+      "Bash(taskkill:*)",
+      "Bash(kill 18668)",
+      "Bash(cmd.exe /c \"taskkill /PID 18668 /F\" 2>&1)",
+      "Bash(cmd.exe /c \"for /f \\\\\"tokens=5\\\\\" %a in \\('netstat -aon ^| findstr :3000 ^| findstr LISTENING'\\) do taskkill /PID %a /F\" 2>&1)",
+      "Bash(grep -rn \"window\\\\.alert\\\\|window\\\\.confirm\\\\|\\\\balert\\(\\\\|\\\\bconfirm\\(\" 'C:\\\\Users\\\\USUARIO\\\\Documents\\\\Github\\\\Personal Lib\\\\atlas-bucket-manager\\\\public' --include=*.js --include=*.ts --include=*.html)",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(npm install *)",
+      "Bash(npx shadcn@latest init -d)",
+      "Bash(node -e \"require\\('tailwind-merge'\\); require\\('clsx'\\); require\\('class-variance-authority'\\); console.log\\('ok'\\)\")"
+    ]
+  }
+}
