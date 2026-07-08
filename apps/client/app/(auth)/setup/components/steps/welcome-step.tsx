@@ -35,7 +35,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
         {features.map(({ icon: Icon, text, accent }, i) => (
           <div
             key={i}
-            className="group relative flex items-start gap-2 p-2.5 sm:p-3 rounded-xl border border-black/[0.05] bg-white/55 hover:bg-white/85 hover:border-black/[0.08] hover:shadow-[0_4px_14px_rgba(0,113,227,0.08)] transition-all duration-200 overflow-hidden min-h-[64px] sm:min-h-[68px]"
+            className="group relative flex items-start gap-2 p-2.5 sm:p-3 rounded-xl border border-black/[0.05] bg-white/55 hover:bg-white/85 hover:border-black/[0.08] hover:shadow-[0_4px_14px_rgba(0,113,227,0.08)] transition-all duration-200 overflow-hidden aspect-[2.2/1] sm:aspect-[2.4/1]"
           >
             <div
               aria-hidden="true"
@@ -45,7 +45,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
               <Icon size={14} strokeWidth={1.8} className="sm:hidden" />
               <Icon size={15} strokeWidth={1.8} className="hidden sm:block" />
             </div>
-            <p className="relative text-[12px] sm:text-[12.5px] text-[#3C3C43] leading-[1.4] self-stretch flex items-center">
+            <p className="relative text-[12px] sm:text-[12.5px] text-[#3C3C43] leading-[1.35] line-clamp-2 self-stretch flex items-center">
               {text}
             </p>
           </div>
