@@ -21,21 +21,21 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
   ];
 
   return (
-    <div className="space-y-5 sm:space-y-7">
-      <div className="text-center space-y-1.5 sm:space-y-2">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="text-center space-y-1.5">
         <h2 className="text-[22px] sm:text-[26px] md:text-[28px] font-semibold text-[#1D1D1F] tracking-tight leading-[1.15]">
           {t.welcomeTitle}
         </h2>
-        <p className="text-[13px] sm:text-[14px] text-[#6E6E73] leading-[1.55] max-w-[360px] mx-auto">
+        <p className="text-[12.5px] sm:text-[13.5px] text-[#6E6E73] leading-[1.5] max-w-[360px] mx-auto">
           {t.welcomeDescription}
         </p>
       </div>
 
-      <div className="space-y-1.5 sm:space-y-2">
+      <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
         {features.map(({ icon: Icon, text, accent }, i) => (
           <div
             key={i}
-            className="group relative flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl border border-black/[0.05] bg-white/55 hover:bg-white/85 hover:border-black/[0.08] hover:shadow-[0_4px_14px_rgba(0,113,227,0.08)] transition-all duration-200 overflow-hidden"
+            className="group relative flex items-start gap-2 p-2.5 sm:p-3 rounded-xl border border-black/[0.05] bg-white/55 hover:bg-white/85 hover:border-black/[0.08] hover:shadow-[0_4px_14px_rgba(0,113,227,0.08)] transition-all duration-200 overflow-hidden"
           >
             <div
               aria-hidden="true"
@@ -45,14 +45,14 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
               <Icon size={14} strokeWidth={1.8} className="sm:hidden" />
               <Icon size={15} strokeWidth={1.8} className="hidden sm:block" />
             </div>
-            <p className="relative text-[12.5px] sm:text-[13px] text-[#3C3C43] leading-snug">
+            <p className="relative text-[12px] sm:text-[12.5px] text-[#3C3C43] leading-[1.4]">
               {text}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="space-y-1.5 sm:space-y-2 pt-1">
+      <div className="space-y-1.5 pt-1">
         <Button
           onClick={onNext}
           className="group w-full h-11 sm:h-12 rounded-xl text-white text-[14px] sm:text-[15px] font-semibold active:scale-[0.99] transition-all duration-150"
