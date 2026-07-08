@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowRight, ArrowLeft, Loader2, Check } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2, Check, User, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useSetupStore } from '../../store';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
@@ -22,12 +22,12 @@ function Field({
 }) {
   return (
     <div className="grid gap-1.5">
-      <Label className="text-[12.5px] text-[#3C3C43] font-medium">{label}</Label>
-      {children}
+      <Label className="text-[12.5px] text-[#3C3C43] font-medium tracking-tight">{label}</Label>
+      <div className="group">{children}</div>
       {error && (
         <p className="text-[11.5px] text-[#FF3B30] mt-0.5 flex items-center gap-1.5">
-          <span className="inline-block size-1.5 rounded-full bg-[#FF3B30]" />
-          {error}
+          <AlertCircle size={11} strokeWidth={2} className="shrink-0" />
+          <span>{error}</span>
         </p>
       )}
     </div>
@@ -118,8 +118,10 @@ export function AccountStep() {
             }}
             placeholder={t.fieldNamePh}
             aria-invalid={!!errors.name}
+            invalid={!!errors.name}
+            error={errors.name}
             autoComplete="name"
-            className="h-10 sm:h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[13.5px] sm:text-[14px]"
+            icon={User}
           />
         </Field>
         <Field label={t.fieldEmail} error={errors.email}>
@@ -132,8 +134,10 @@ export function AccountStep() {
             }}
             placeholder={t.fieldEmailPh}
             aria-invalid={!!errors.email}
+            invalid={!!errors.email}
+            error={errors.email}
             autoComplete="email"
-            className="h-10 sm:h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[13.5px] sm:text-[14px]"
+            icon={Mail}
           />
         </Field>
         <Field label={t.fieldPassword} error={errors.password}>
@@ -146,8 +150,10 @@ export function AccountStep() {
             }}
             placeholder={t.fieldPasswordPh}
             aria-invalid={!!errors.password}
+            invalid={!!errors.password}
+            error={errors.password}
             autoComplete="new-password"
-            className="h-10 sm:h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[13.5px] sm:text-[14px]"
+            icon={Lock}
           />
           {admin.password && !errors.password && (
             <div className="mt-1.5 space-y-1">
@@ -181,8 +187,10 @@ export function AccountStep() {
             }}
             placeholder={t.fieldConfirmPh}
             aria-invalid={!!errors.confirm}
+            invalid={!!errors.confirm}
+            error={errors.confirm}
             autoComplete="new-password"
-            className="h-10 sm:h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[13.5px] sm:text-[14px]"
+            icon={Lock}
           />
         </Field>
       </div>
