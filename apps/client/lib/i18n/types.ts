@@ -2,10 +2,10 @@ export type Locale = 'en' | 'es' | 'pt';
 export const LOCALES: Locale[] = ['en', 'es', 'pt'];
 export const DEFAULT_LOCALE: Locale = 'es';
 
-export const LOCALE_META: Record<Locale, { label: string; flag: string; htmlLang: string }> = {
-  en: { label: 'English', flag: '🇺🇸', htmlLang: 'en' },
-  es: { label: 'Español', flag: '🇪🇸', htmlLang: 'es' },
-  pt: { label: 'Português', flag: '🇧🇷', htmlLang: 'pt' },
+export const LOCALE_META: Record<Locale, { label: string; flagCode: string; htmlLang: string }> = {
+  en: { label: 'English', flagCode: 'US', htmlLang: 'en' },
+  es: { label: 'Español', flagCode: 'ES', htmlLang: 'es' },
+  pt: { label: 'Português', flagCode: 'BR', htmlLang: 'pt' },
 };
 
 export interface Dictionary {

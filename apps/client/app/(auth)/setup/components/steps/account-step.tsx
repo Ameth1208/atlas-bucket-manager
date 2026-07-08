@@ -21,12 +21,12 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-1.5">
-      <Label className="text-[12.5px] text-[#3C3C43] font-medium">{label}</Label>
+    <div className="grid gap-2">
+      <Label className="text-[13px] text-[#3C3C43] font-medium">{label}</Label>
       {children}
       {error && (
-        <p className="text-[11.5px] text-[#FF3B30] mt-0.5 flex items-center gap-1">
-          <span className="inline-block size-1 rounded-full bg-[#FF3B30]" />
+        <p className="text-[12px] text-[#FF3B30] mt-0.5 flex items-center gap-1.5">
+          <span className="inline-block size-1.5 rounded-full bg-[#FF3B30]" />
           {error}
         </p>
       )}
@@ -97,17 +97,17 @@ export function AccountStep() {
   };
 
   return (
-    <div className="space-y-5">
-      <div className="space-y-1">
-        <h2 className="text-[22px] font-semibold tracking-tight text-[#1D1D1F]">
+    <div className="space-y-7">
+      <div className="space-y-1.5">
+        <h2 className="text-[24px] font-semibold tracking-tight text-[#1D1D1F] leading-[1.2]">
           {t.accountTitle}
         </h2>
-        <p className="text-[13px] text-[#6E6E73] leading-relaxed">
+        <p className="text-[13.5px] text-[#6E6E73] leading-[1.55]">
           {t.accountSubtitle}
         </p>
       </div>
 
-      <div className="space-y-3.5">
+      <div className="space-y-4.5">
         <Field label={t.fieldName} error={errors.name}>
           <Input
             type="text"
@@ -119,7 +119,7 @@ export function AccountStep() {
             placeholder={t.fieldNamePh}
             aria-invalid={!!errors.name}
             autoComplete="name"
-            className="h-10 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20"
+            className="h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[14px]"
           />
         </Field>
         <Field label={t.fieldEmail} error={errors.email}>
@@ -133,7 +133,7 @@ export function AccountStep() {
             placeholder={t.fieldEmailPh}
             aria-invalid={!!errors.email}
             autoComplete="email"
-            className="h-10 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20"
+            className="h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[14px]"
           />
         </Field>
         <Field label={t.fieldPassword} error={errors.password}>
@@ -147,18 +147,18 @@ export function AccountStep() {
             placeholder={t.fieldPasswordPh}
             aria-invalid={!!errors.password}
             autoComplete="new-password"
-            className="h-10 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20"
+            className="h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[14px]"
           />
           {admin.password && !errors.password && (
-            <div className="mt-1.5 space-y-1">
+            <div className="mt-2 space-y-1.5">
               <div className="h-1 w-full rounded-full bg-black/[0.06] overflow-hidden">
                 <div
                   className={`h-full transition-all duration-300 ${strengthColor[pwdEval.strength]} ${strengthWidth[pwdEval.strength]}`}
                 />
               </div>
-              <p className="text-[10.5px] text-[#86868B] flex items-center gap-1">
+              <p className="text-[11px] text-[#86868B] flex items-center gap-1.5">
                 {pwdEval.strength === 'strong' && (
-                  <Check size={9} className="text-[#34C759]" strokeWidth={3} />
+                  <Check size={10} className="text-[#34C759]" strokeWidth={3} />
                 )}
                 {pwdEval.strength === 'strong'
                   ? t.passwordStrong
@@ -182,40 +182,40 @@ export function AccountStep() {
             placeholder={t.fieldConfirmPh}
             aria-invalid={!!errors.confirm}
             autoComplete="new-password"
-            className="h-10 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20"
+            className="h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[14px]"
           />
         </Field>
       </div>
 
-      <div className="flex gap-2 pt-1">
+      <div className="flex gap-3 pt-2">
         <Button
           variant="outline"
           onClick={() => setStep(1)}
-          className="h-10 flex-1 border-black/[0.08] hover:bg-black/[0.03]"
+          className="h-12 flex-1 border-black/[0.08] hover:bg-black/[0.03] text-[14.5px]"
         >
-          <ArrowLeft size={14} />
+          <ArrowLeft size={15} />
           {t.back}
         </Button>
         <button
           type="button"
           onClick={handleSubmit}
           disabled={loading}
-          className="h-10 flex-1 rounded-lg text-white text-[14px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
+          className="h-12 flex-1 rounded-xl text-white text-[14.5px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
           style={{
             background: 'linear-gradient(180deg, #0091FF 0%, #0066CC 100%)',
             boxShadow:
-              '0 4px 12px -2px rgba(0, 113, 227, 0.4), 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+              '0 4px 14px -2px rgba(0, 113, 227, 0.4), 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
           }}
         >
           {loading ? (
             <>
-              <Loader2 size={14} className="animate-spin" />
+              <Loader2 size={15} className="animate-spin" />
               {t.creating}
             </>
           ) : (
             <>
               {t.create}
-              <ArrowRight size={14} className="ml-0.5" />
+              <ArrowRight size={15} className="ml-0.5" />
             </>
           )}
         </button>

@@ -23,7 +23,7 @@ export function SetupProgress() {
 
         return (
           <div key={num} className="flex items-center">
-            <div className="flex flex-col items-center gap-1.5 min-w-[64px]">
+            <div className="flex flex-col items-center gap-2 min-w-[68px]">
               <div className="relative">
                 {active && (
                   <span
@@ -32,19 +32,19 @@ export function SetupProgress() {
                   />
                 )}
                 <div
-                  className={`relative size-6 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all duration-300 ${
+                  className={`relative size-7 rounded-full flex items-center justify-center text-[12px] font-semibold transition-all duration-300 ${
                     done
-                      ? 'bg-gradient-to-br from-cyan-500 to-[#0071E3] text-white shadow-[0_2px_6px_rgba(0,113,227,0.35)]'
+                      ? 'bg-gradient-to-br from-cyan-500 to-[#0071E3] text-white shadow-[0_2px_8px_rgba(0,113,227,0.4)]'
                       : active
-                        ? 'bg-[#1D1D1F] text-white scale-110'
+                        ? 'bg-[#1D1D1F] text-white scale-110 shadow-[0_2px_10px_rgba(0,0,0,0.2)]'
                         : 'bg-[#E8E8ED] text-[#86868B]'
                   }`}
                 >
-                  {done ? <Check size={11} strokeWidth={3} className="text-white" /> : num}
+                  {done ? <Check size={12} strokeWidth={3} className="text-white" /> : num}
                 </div>
               </div>
               <span
-                className={`text-[10.5px] font-medium tracking-tight transition-colors duration-200 ${
+                className={`text-[11px] font-medium tracking-tight transition-colors duration-200 ${
                   active ? 'text-[#1D1D1F]' : done ? 'text-[#0071E3]' : 'text-[#86868B]'
                 }`}
               >
@@ -53,7 +53,7 @@ export function SetupProgress() {
             </div>
 
             {!isLast && (
-              <div className="relative w-10 h-0.5 mx-1 mb-5 rounded-full bg-[#E8E8ED] overflow-hidden">
+              <div className="relative w-12 h-0.5 mx-1.5 mb-6 rounded-full bg-[#E8E8ED] overflow-hidden">
                 <div
                   className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-cyan-500 to-[#0071E3] transition-all duration-500 ${
                     done ? 'w-full' : 'w-0'
