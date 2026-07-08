@@ -27,8 +27,7 @@ export default function SetupPage() {
   }, [router]);
 
   return (
-    <main className="relative min-h-dvh w-dvw flex items-center justify-center overflow-x-hidden overflow-y-auto px-4 py-6 sm:px-6 sm:py-10">
-      {/* Soft, single ambient gradient — no orbs competing with the card */}
+    <main className="relative min-h-dvh w-dvw flex items-start sm:items-center justify-center overflow-x-hidden overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0"

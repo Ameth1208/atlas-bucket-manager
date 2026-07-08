@@ -21,11 +21,11 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-1.5 sm:gap-2">
-      <Label className="text-[12.5px] sm:text-[13px] text-[#3C3C43] font-medium">{label}</Label>
+    <div className="grid gap-1.5">
+      <Label className="text-[12.5px] text-[#3C3C43] font-medium">{label}</Label>
       {children}
       {error && (
-        <p className="text-[11.5px] sm:text-[12px] text-[#FF3B30] mt-0.5 flex items-center gap-1.5">
+        <p className="text-[11.5px] text-[#FF3B30] mt-0.5 flex items-center gap-1.5">
           <span className="inline-block size-1.5 rounded-full bg-[#FF3B30]" />
           {error}
         </p>
@@ -97,17 +97,17 @@ export function AccountStep() {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-7">
-      <div className="space-y-1.5">
-        <h2 className="text-[21px] sm:text-[24px] font-semibold tracking-tight text-[#1D1D1F] leading-[1.2]">
+    <div className="space-y-5 sm:space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-[20px] sm:text-[22px] md:text-[24px] font-semibold tracking-tight text-[#1D1D1F] leading-[1.2]">
           {t.accountTitle}
         </h2>
-        <p className="text-[13px] sm:text-[13.5px] text-[#6E6E73] leading-[1.55]">
+        <p className="text-[12.5px] sm:text-[13px] text-[#6E6E73] leading-[1.55]">
           {t.accountSubtitle}
         </p>
       </div>
 
-      <div className="space-y-3.5 sm:space-y-4.5">
+      <div className="space-y-3 sm:space-y-3.5">
         <Field label={t.fieldName} error={errors.name}>
           <Input
             type="text"
@@ -119,7 +119,7 @@ export function AccountStep() {
             placeholder={t.fieldNamePh}
             aria-invalid={!!errors.name}
             autoComplete="name"
-            className="h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[14px]"
+            className="h-10 sm:h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[13.5px] sm:text-[14px]"
           />
         </Field>
         <Field label={t.fieldEmail} error={errors.email}>
@@ -133,7 +133,7 @@ export function AccountStep() {
             placeholder={t.fieldEmailPh}
             aria-invalid={!!errors.email}
             autoComplete="email"
-            className="h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[14px]"
+            className="h-10 sm:h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[13.5px] sm:text-[14px]"
           />
         </Field>
         <Field label={t.fieldPassword} error={errors.password}>
@@ -147,18 +147,18 @@ export function AccountStep() {
             placeholder={t.fieldPasswordPh}
             aria-invalid={!!errors.password}
             autoComplete="new-password"
-            className="h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[14px]"
+            className="h-10 sm:h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[13.5px] sm:text-[14px]"
           />
           {admin.password && !errors.password && (
-            <div className="mt-2 space-y-1.5">
+            <div className="mt-1.5 space-y-1">
               <div className="h-1 w-full rounded-full bg-black/[0.06] overflow-hidden">
                 <div
                   className={`h-full transition-all duration-300 ${strengthColor[pwdEval.strength]} ${strengthWidth[pwdEval.strength]}`}
                 />
               </div>
-              <p className="text-[11px] text-[#86868B] flex items-center gap-1.5">
+              <p className="text-[10.5px] text-[#86868B] flex items-center gap-1">
                 {pwdEval.strength === 'strong' && (
-                  <Check size={10} className="text-[#34C759]" strokeWidth={3} />
+                  <Check size={9} className="text-[#34C759]" strokeWidth={3} />
                 )}
                 {pwdEval.strength === 'strong'
                   ? t.passwordStrong
@@ -182,16 +182,16 @@ export function AccountStep() {
             placeholder={t.fieldConfirmPh}
             aria-invalid={!!errors.confirm}
             autoComplete="new-password"
-            className="h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[14px]"
+            className="h-10 sm:h-11 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20 text-[13.5px] sm:text-[14px]"
           />
         </Field>
       </div>
 
-      <div className="flex gap-2.5 sm:gap-3 pt-1.5 sm:pt-2">
+      <div className="flex gap-2 sm:gap-2.5 pt-1.5">
         <Button
           variant="outline"
           onClick={() => setStep(1)}
-          className="h-11 sm:h-12 flex-1 border-black/[0.08] hover:bg-black/[0.03] text-[14px] sm:text-[14.5px]"
+          className="h-11 sm:h-12 flex-1 border-black/[0.08] hover:bg-black/[0.03] text-[13.5px] sm:text-[14.5px]"
         >
           <ArrowLeft size={14} className="sm:hidden" />
           <ArrowLeft size={15} className="hidden sm:block" />
@@ -201,7 +201,7 @@ export function AccountStep() {
           type="button"
           onClick={handleSubmit}
           disabled={loading}
-          className="h-11 sm:h-12 flex-1 rounded-xl text-white text-[14px] sm:text-[14.5px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
+          className="h-11 sm:h-12 flex-1 rounded-xl text-white text-[13.5px] sm:text-[14.5px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
           style={{
             background: 'linear-gradient(180deg, #0091FF 0%, #0066CC 100%)',
             boxShadow:

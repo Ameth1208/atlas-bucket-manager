@@ -36,27 +36,27 @@ export function SetupCard() {
             '0 24px 48px -12px rgba(8, 145, 178, 0.14), 0 10px 24px -8px rgba(15, 23, 42, 0.05), 0 1px 0 rgba(255, 255, 255, 0.8) inset',
         }}
       >
-        <div className="px-6 sm:px-10 md:px-12 pt-9 sm:pt-10 pb-9 sm:pb-10">
+        <div className="px-6 sm:px-10 md:px-12 pt-7 sm:pt-8 pb-7 sm:pb-8">
           {/* Header */}
-          <div className="flex flex-col items-center text-center gap-2 mb-7 sm:mb-9">
+          <div className="flex flex-col items-center text-center gap-1.5 mb-6 sm:mb-7">
             <div className="flex items-center gap-2.5">
               <Logo size="md" showText />
             </div>
-            <p className="text-[12.5px] sm:text-[13px] text-[#6E6E73] mt-0.5">
+            <p className="text-[12px] sm:text-[12.5px] text-[#6E6E73] mt-0.5">
               {tx('cardSubtitle', { step })}
             </p>
           </div>
 
           {/* Progress */}
-          <div className="mb-8 sm:mb-9">
+          <div className="mb-6 sm:mb-7">
             <SetupProgress />
           </div>
 
-          {/* Step content — animated switch */}
-          <div className="relative min-h-[320px] sm:min-h-[340px]">
+          {/* Step content — animated switch (no fixed min-height) */}
+          <div>
             <div
               key={step}
-              className="animate-[step-in_360ms_cubic-bezier(0.22,1,0.36,1)]"
+              className="animate-[step-in_320ms_cubic-bezier(0.22,1,0.36,1)]"
               style={{ animationName: 'step-in' }}
             >
               {step === 1 && <WelcomeStep onNext={() => setStep(2)} />}
@@ -71,7 +71,7 @@ export function SetupCard() {
         @keyframes step-in {
           from {
             opacity: 0;
-            transform: translateY(8px) scale(0.985);
+            transform: translateY(6px) scale(0.99);
           }
           to {
             opacity: 1;

@@ -17,7 +17,7 @@ export function DoneStep() {
 
   return (
     <div
-      className={`text-center space-y-6 sm:space-y-7 transition-all duration-500 ${
+      className={`text-center space-y-5 sm:space-y-6 transition-all duration-500 ${
         show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
       }`}
     >
@@ -52,23 +52,23 @@ export function DoneStep() {
         />
       </div>
 
-      <div className="space-y-1.5 sm:space-y-2">
-        <h2 className="text-[22px] sm:text-[26px] font-semibold text-[#1D1D1F] tracking-tight leading-[1.2]">
+      <div className="space-y-1.5">
+        <h2 className="text-[22px] sm:text-[24px] md:text-[26px] font-semibold text-[#1D1D1F] tracking-tight leading-[1.2]">
           {t.doneTitle}
         </h2>
-        <p className="text-[13.5px] sm:text-[14px] text-[#6E6E73] leading-[1.55] max-w-[340px] mx-auto">
+        <p className="text-[13px] sm:text-[13.5px] text-[#6E6E73] leading-[1.55] max-w-[340px] mx-auto">
           {t.doneDescription}
         </p>
       </div>
 
-      <div className="text-left p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-50/80 to-orange-50/40 border border-amber-200/50 flex gap-3 sm:gap-3.5">
-        <div className="shrink-0 size-8 sm:size-9 rounded-md sm:rounded-lg bg-gradient-to-br from-[#FF9500]/15 to-amber-500/15 flex items-center justify-center text-[#FF9500]">
-          <Lightbulb size={14} strokeWidth={1.8} className="sm:hidden" />
-          <Lightbulb size={16} strokeWidth={1.8} className="hidden sm:block" />
+      <div className="text-left p-3 sm:p-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-50/80 to-orange-50/40 border border-amber-200/50 flex gap-2.5 sm:gap-3">
+        <div className="shrink-0 size-7 sm:size-8 rounded-md sm:rounded-lg bg-gradient-to-br from-[#FF9500]/15 to-amber-500/15 flex items-center justify-center text-[#FF9500]">
+          <Lightbulb size={13} strokeWidth={1.8} className="sm:hidden" />
+          <Lightbulb size={15} strokeWidth={1.8} className="hidden sm:block" />
         </div>
-        <div className="space-y-0.5 sm:space-y-1 pt-0.5">
-          <p className="text-[12.5px] sm:text-[13px] font-semibold text-[#92400E]">{t.tipTitle}</p>
-          <p className="text-[12px] sm:text-[12.5px] text-[#6E6E73] leading-[1.5]">{t.tipDescription}</p>
+        <div className="space-y-0.5 pt-0.5">
+          <p className="text-[12px] sm:text-[13px] font-semibold text-[#92400E]">{t.tipTitle}</p>
+          <p className="text-[11.5px] sm:text-[12.5px] text-[#6E6E73] leading-[1.5]">{t.tipDescription}</p>
         </div>
       </div>
 
