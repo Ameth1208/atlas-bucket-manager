@@ -1,6 +1,7 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
 import { toast } from 'sonner';
@@ -9,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/ui/logo';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { LogIn } from 'lucide-react';
+import { LogIn, UserPlus } from 'lucide-react';
 
 function LoginForm() {
   const router = useRouter();
@@ -83,6 +84,34 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    api.auth.status()
+      .then(({ isSetup }) => {
+        if (cancelled) return;
+        if (!isSetup) {
+          router.replace('/setup');
+          return;
+        }
+        setChecking(false);
+      })
+      .catch(() => {
+        if (!cancelled) setChecking(false);
+      });
+    return () => { cancelled = true; };
+  }, [router]);
+
+  if (checking) {
+    return (
+      <main className="h-dvh w-dvw flex items-center justify-center bg-secondary/30">
+        <span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </main>
+    );
+  }
+
   return (
     <main className="h-dvh w-dvw flex items-center justify-center bg-secondary/30">
       <div className="w-full max-w-[380px]">
@@ -97,11 +126,16 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="pb-6">
             <LoginForm />
-            <div className="mt-5 pt-4 border-t border-border">
+            <div className="mt-5 pt-4 border-t border-border flex flex-col items-center gap-2">
               <p className="text-center text-sm text-muted-foreground">
-                ¿Sin cuenta?{' '}
-                <span className="text-primary font-medium">Contacta al administrador</span>
+                ¿Primera vez en Atlas?
               </p>
+              <Link
+                href="/setup"
+                className="w-full inline-flex items-center justify-center gap-1.5 h-7 px-2.5 rounded-md border border-input bg-background text-[0.8rem] font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                <UserPlus size={15} /> Configurar cuenta de administrador
+              </Link>
             </div>
           </CardContent>
         </Card>
