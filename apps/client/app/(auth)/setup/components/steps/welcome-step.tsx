@@ -14,10 +14,10 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
   const router = useRouter();
 
   const features = [
-    { icon: Database, text: t.featBuckets },
-    { icon: Cloud, text: t.featProviders },
-    { icon: Key, text: t.featApiKeys },
-    { icon: Users, text: t.featUsers },
+    { icon: Database, text: t.featBuckets, accent: 'from-cyan-500/20' },
+    { icon: Cloud, text: t.featProviders, accent: 'from-blue-500/20' },
+    { icon: Key, text: t.featApiKeys, accent: 'from-indigo-500/20' },
+    { icon: Users, text: t.featUsers, accent: 'from-purple-500/20' },
   ];
 
   return (
@@ -32,15 +32,19 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        {features.map(({ icon: Icon, text }, i) => (
+        {features.map(({ icon: Icon, text, accent }, i) => (
           <div
             key={i}
-            className="flex items-start gap-2.5 p-3 rounded-xl border border-transparent hover:border-black/[0.05] hover:bg-black/[0.015] transition-colors duration-150"
+            className="group relative flex items-start gap-2.5 p-3 rounded-xl border border-black/[0.05] bg-white/50 hover:bg-white/80 hover:border-black/[0.08] hover:shadow-[0_4px_12px_rgba(0,113,227,0.06)] transition-all duration-200 overflow-hidden"
           >
-            <div className="shrink-0 size-7 rounded-md bg-[#0071E3]/8 flex items-center justify-center text-[#0071E3]">
+            <div
+              aria-hidden="true"
+              className={`absolute inset-0 bg-gradient-to-br ${accent} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
+            />
+            <div className="relative size-7 rounded-md bg-gradient-to-br from-cyan-500/15 to-[#0071E3]/15 flex items-center justify-center text-[#0071E3]">
               <Icon size={14} strokeWidth={1.8} />
             </div>
-            <p className="text-[12.5px] text-[#3C3C43] leading-snug pt-0.5">
+            <p className="relative text-[12.5px] text-[#3C3C43] leading-snug pt-0.5">
               {text}
             </p>
           </div>
@@ -50,7 +54,12 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
       <div className="space-y-2 pt-1">
         <Button
           onClick={onNext}
-          className="group w-full h-11 bg-[#0071E3] hover:bg-[#0066CC] text-white rounded-lg text-[14.5px] font-medium active:scale-[0.99] transition-all duration-150"
+          className="group w-full h-11 rounded-xl text-white text-[14.5px] font-semibold active:scale-[0.99] transition-all duration-150"
+          style={{
+            background: 'linear-gradient(180deg, #0091FF 0%, #0066CC 100%)',
+            boxShadow:
+              '0 6px 16px -2px rgba(0, 113, 227, 0.4), 0 2px 4px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+          }}
         >
           {t.welcomeCta}
           <ArrowRight

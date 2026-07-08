@@ -119,7 +119,7 @@ export function AccountStep() {
             placeholder={t.fieldNamePh}
             aria-invalid={!!errors.name}
             autoComplete="name"
-            className="h-10"
+            className="h-10 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20"
           />
         </Field>
         <Field label={t.fieldEmail} error={errors.email}>
@@ -133,7 +133,7 @@ export function AccountStep() {
             placeholder={t.fieldEmailPh}
             aria-invalid={!!errors.email}
             autoComplete="email"
-            className="h-10"
+            className="h-10 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20"
           />
         </Field>
         <Field label={t.fieldPassword} error={errors.password}>
@@ -147,7 +147,7 @@ export function AccountStep() {
             placeholder={t.fieldPasswordPh}
             aria-invalid={!!errors.password}
             autoComplete="new-password"
-            className="h-10"
+            className="h-10 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20"
           />
           {admin.password && !errors.password && (
             <div className="mt-1.5 space-y-1">
@@ -182,7 +182,7 @@ export function AccountStep() {
             placeholder={t.fieldConfirmPh}
             aria-invalid={!!errors.confirm}
             autoComplete="new-password"
-            className="h-10"
+            className="h-10 bg-white/70 border-black/[0.08] focus-visible:border-[#0071E3] focus-visible:ring-[#0071E3]/20"
           />
         </Field>
       </div>
@@ -191,15 +191,21 @@ export function AccountStep() {
         <Button
           variant="outline"
           onClick={() => setStep(1)}
-          className="h-10 flex-1"
+          className="h-10 flex-1 border-black/[0.08] hover:bg-black/[0.03]"
         >
           <ArrowLeft size={14} />
           {t.back}
         </Button>
-        <Button
+        <button
+          type="button"
           onClick={handleSubmit}
           disabled={loading}
-          className="h-10 flex-1 bg-[#0071E3] hover:bg-[#0066CC] text-white font-medium disabled:opacity-60 active:scale-[0.99]"
+          className="h-10 flex-1 rounded-lg text-white text-[14px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
+          style={{
+            background: 'linear-gradient(180deg, #0091FF 0%, #0066CC 100%)',
+            boxShadow:
+              '0 4px 12px -2px rgba(0, 113, 227, 0.4), 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+          }}
         >
           {loading ? (
             <>
@@ -212,7 +218,7 @@ export function AccountStep() {
               <ArrowRight size={14} className="ml-0.5" />
             </>
           )}
-        </Button>
+        </button>
       </div>
     </div>
   );

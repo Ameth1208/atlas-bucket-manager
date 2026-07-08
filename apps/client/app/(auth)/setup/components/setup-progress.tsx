@@ -24,16 +24,24 @@ export function SetupProgress() {
         return (
           <div key={num} className="flex items-center">
             <div className="flex flex-col items-center gap-1.5 min-w-[64px]">
-              <div
-                className={`size-6 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all duration-300 ${
-                  done
-                    ? 'bg-[#0071E3] text-white'
-                    : active
-                      ? 'bg-[#1D1D1F] text-white scale-110'
-                      : 'bg-[#E8E8ED] text-[#86868B]'
-                }`}
-              >
-                {done ? <Check size={11} strokeWidth={3} className="text-white" /> : num}
+              <div className="relative">
+                {active && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -inset-1.5 rounded-full bg-[#0071E3]/15 blur-md"
+                  />
+                )}
+                <div
+                  className={`relative size-6 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all duration-300 ${
+                    done
+                      ? 'bg-gradient-to-br from-cyan-500 to-[#0071E3] text-white shadow-[0_2px_6px_rgba(0,113,227,0.35)]'
+                      : active
+                        ? 'bg-[#1D1D1F] text-white scale-110'
+                        : 'bg-[#E8E8ED] text-[#86868B]'
+                  }`}
+                >
+                  {done ? <Check size={11} strokeWidth={3} className="text-white" /> : num}
+                </div>
               </div>
               <span
                 className={`text-[10.5px] font-medium tracking-tight transition-colors duration-200 ${
@@ -47,7 +55,7 @@ export function SetupProgress() {
             {!isLast && (
               <div className="relative w-10 h-0.5 mx-1 mb-5 rounded-full bg-[#E8E8ED] overflow-hidden">
                 <div
-                  className={`absolute inset-y-0 left-0 rounded-full bg-[#0071E3] transition-all duration-500 ${
+                  className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-cyan-500 to-[#0071E3] transition-all duration-500 ${
                     done ? 'w-full' : 'w-0'
                   }`}
                 />
