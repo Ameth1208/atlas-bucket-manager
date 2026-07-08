@@ -20,7 +20,7 @@ export function SetupCard() {
   }, []);
 
   return (
-    <div className="relative w-full max-w-[440px] sm:max-w-[520px] mx-auto">
+    <div className="relative w-full">
       {/* Language switcher — floats over the card top-right */}
       <div className="absolute -top-2 -right-1.5 sm:-top-3 sm:-right-3 z-10">
         <LanguageSwitcher />

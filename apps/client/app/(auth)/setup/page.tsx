@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { SetupCard } from './components';
-import { SetupHero } from './components/setup-hero';
 import { useI18n } from '@/lib/i18n';
 
 export default function SetupPage() {
@@ -28,45 +27,22 @@ export default function SetupPage() {
   }, [router]);
 
   return (
-    <main
-      className="relative min-h-dvh w-dvw flex items-center justify-center overflow-x-hidden overflow-y-auto py-6 sm:py-8 lg:py-0"
-      style={{
-        background:
-          'radial-gradient(ellipse 90% 70% at 50% -10%, #DBEAFE 0%, #EFF6FF 35%, #F8FAFC 70%, #F1F5F9 100%)',
-      }}
-    >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-[520px] h-[520px] rounded-full bg-gradient-to-br from-cyan-200/50 to-blue-300/20 blur-3xl" />
-        <div className="absolute -bottom-32 -right-40 w-[560px] h-[560px] rounded-full bg-gradient-to-tl from-indigo-200/40 to-purple-200/20 blur-3xl" />
-        <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-blue-100/30 to-cyan-100/30 blur-3xl" />
-        <div
-          className="absolute inset-0 opacity-[0.035]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(8, 51, 68, 0.6) 1px, transparent 1px), linear-gradient(90deg, rgba(8, 51, 68, 0.6) 1px, transparent 1px)',
-            backgroundSize: '28px 28px',
-            maskImage:
-              'radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%)',
-            WebkitMaskImage:
-              'radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 80%)',
-          }}
-        />
-      </div>
+    <main className="relative min-h-dvh w-dvw flex items-center justify-center overflow-x-hidden overflow-y-auto px-4 py-6 sm:px-6 sm:py-10">
+      {/* Soft, single ambient gradient — no orbs competing with the card */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse 100% 80% at 50% 0%, #E0F2FE 0%, #F0F9FF 30%, #F8FAFC 70%, #F1F5F9 100%)',
+        }}
+      />
 
-      <div className="relative w-full max-w-[1200px] mx-auto px-4 sm:px-5 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(100dvh-3rem)] lg:min-h-dvh">
+      <div className="relative w-full max-w-[460px] sm:max-w-[480px] md:max-w-[520px] flex items-center justify-center">
         {checking ? (
-          <div className="col-span-full flex items-center justify-center">
-            <span className="w-7 h-7 border-2 border-[#0071E3] border-t-transparent rounded-full animate-spin" />
-          </div>
+          <span className="w-7 h-7 border-2 border-[#0071E3] border-t-transparent rounded-full animate-spin" />
         ) : (
-          <>
-            <div className="order-1 lg:order-1 flex justify-center lg:justify-end">
-              <SetupCard />
-            </div>
-            <div className="hidden lg:flex order-2 lg:order-2">
-              <SetupHero />
-            </div>
-          </>
+          <SetupCard />
         )}
       </div>
     </main>
