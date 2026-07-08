@@ -1,56 +1,69 @@
-import { Check } from 'lucide-react';
-import { useSetupStore, SetupStep } from '../store';
+'use client';
 
-const STEP_LABELS = {
-  1: 'Bienvenida',
-  2: 'Cuenta',
-  3: 'Listo',
-} as const;
+import { Check } from 'lucide-react';
+import { useSetupStore, type SetupStep } from '../store';
+import { useI18n } from '@/lib/i18n';
 
 export function SetupProgress() {
   const { step } = useSetupStore();
+  const { t } = useI18n();
+  const labels: Record<SetupStep, string> = {
+    1: t.stepWelcome,
+    2: t.stepAccount,
+    3: t.stepDone,
+  };
   const steps: SetupStep[] = [1, 2, 3];
 
   return (
-    <div className="flex items-center justify-center gap-1">
+    <div className="flex items-center justify-center gap-0">
       {steps.map((num, i) => {
         const done = num < step;
         const active = num === step;
         const isLast = i === steps.length - 1;
 
         return (
-          <div key={num} className="flex items-center gap-2">
-            <div className="flex flex-col items-center gap-1.5">
-              <div
-                className={`size-5 rounded-full flex items-center justify-center transition-all duration-200 ${done
-                  ? 'bg-[#0071E3]'
-                  : active
-                    ? 'bg-[#1D1D1F]'
-                    : 'bg-[#D2D2D7]'
-                  }`}
-              >
-                {done ? (
-                  <Check size={8} strokeWidth={3} className="text-white" aria-hidden="true" />
-                ) : (
-                  <span className={`text-[10px] font-semibold ${done || active ? 'text-white' : 'text-[#86868B]'}`}>
-                    {num}
-                  </span>
+          <div key={num} className="flex items-center">
+            <div className="flex flex-col items-center gap-1.5 min-w-[64px]">
+              <div className="relative">
+                {active && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -inset-1 rounded-full bg-[#0071E3]/15 blur-sm"
+                  />
                 )}
+                <div
+                  className={`relative size-6 rounded-full flex items-center justify-center text-[11px] font-semibold transition-all duration-300 ${
+                    done
+                      ? 'bg-gradient-to-br from-cyan-500 to-[#0071E3] text-white shadow-[0_2px_6px_rgba(0,113,227,0.35)]'
+                      : active
+                        ? 'bg-[#1D1D1F] text-white scale-110 shadow-[0_2px_8px_rgba(0,0,0,0.18)]'
+                        : 'bg-[#E8E8ED] text-[#86868B]'
+                  }`}
+                >
+                  {done ? (
+                    <Check size={11} strokeWidth={3} className="text-white" />
+                  ) : (
+                    num
+                  )}
+                </div>
               </div>
               <span
-                className={`text-[10px] font-medium hidden sm:block ${active ? 'text-[#1D1D1F]' : 'text-[#86868B]'
-                  }`}
+                className={`text-[10.5px] font-medium tracking-tight transition-colors duration-200 ${
+                  active ? 'text-[#1D1D1F]' : done ? 'text-[#0071E3]' : 'text-[#86868B]'
+                }`}
               >
-                {STEP_LABELS[num]}
+                {labels[num]}
               </span>
             </div>
 
             {!isLast && (
-              <div
-                className={`w-6 h-0.5 mx-2 transition-colors duration-300 rounded-full ${done ? 'bg-[#0071E3]' : 'bg-[#D2D2D7]'
+              <div className="relative w-10 h-0.5 mx-1 mb-5 rounded-full bg-[#E8E8ED] overflow-hidden">
+                <div
+                  className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-cyan-500 to-[#0071E3] transition-all duration-500 ${
+                    done ? 'w-full' : 'w-0'
                   }`}
-                aria-hidden="true"
-              />
+                />
+              </div>
             )}
           </div>
         );
