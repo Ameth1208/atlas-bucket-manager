@@ -1,13 +1,15 @@
 'use client';
 
-import { Languages } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Check, ChevronDown } from 'lucide-react';
 import { LOCALES, LOCALE_META, type Locale } from '@/lib/i18n/types';
 import { useI18n } from '@/lib/i18n';
 
 export function LanguageSwitcher({ className = '' }: { className?: string }) {
-  const { locale, setLocale, t, meta } = useI18n();
+  const { locale, setLocale, t } = useI18n();
   const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const current = LOCALE_META[locale];
 
   useEffect(() => {
     if (!open) return;
@@ -20,24 +22,34 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
   }, [open]);
 
   return (
-    <div data-lang-switcher className={`relative ${className}`}>
+    <div data-lang-switcher ref={wrapperRef} className={`relative ${className}`}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={t.languageLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/70 backdrop-blur-md border border-black/[0.06] text-[#6E6E73] hover:bg-white hover:text-[#1D1D1F] hover:border-black/[0.1] hover:shadow-sm active:scale-95 transition-all duration-150"
+        className="inline-flex items-center gap-1.5 h-8 pl-1.5 pr-2.5 rounded-full border border-black/[0.08] bg-white text-[#1D1D1F] hover:border-black/[0.15] hover:shadow-[0_2px_6px_rgba(0,0,0,0.06)] active:scale-95 transition-all duration-150"
       >
-        <Languages size={14} strokeWidth={1.8} />
+        <span className="text-[15px] leading-none" aria-hidden="true">
+          {current.flag}
+        </span>
+        <span className="text-[12px] font-semibold tracking-wide uppercase text-[#3C3C43]">
+          {locale}
+        </span>
+        <ChevronDown
+          size={11}
+          strokeWidth={2.5}
+          className={`text-[#86868B] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
       </button>
 
       {open && (
         <div
           role="listbox"
           aria-label={t.languageLabel}
-          className="absolute right-0 top-full mt-2 min-w-[160px] py-1 rounded-xl bg-white/95 backdrop-blur-xl border border-black/[0.08] shadow-[0_8px_24px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.04)] overflow-hidden z-50 origin-top-right animate-[lang-pop_120ms_ease-out]"
-          style={{ animationName: 'lang-pop' }}
+          className="absolute right-0 top-full mt-2 min-w-[180px] py-1 rounded-xl bg-white border border-black/[0.08] shadow-[0_8px_24px_rgba(0,0,0,0.08),0_2px_6px_rgba(0,0,0,0.04)] overflow-hidden z-50 origin-top-right"
+          style={{ animation: 'lang-pop 120ms ease-out' }}
         >
           {LOCALES.map((l: Locale) => {
             const m = LOCALE_META[l];
@@ -58,14 +70,15 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
                     : 'text-[#1D1D1F] hover:bg-black/[0.04]'
                 }`}
               >
-                <span className="text-base leading-none" aria-hidden="true">
+                <span
+                  className="text-[16px] leading-none inline-block w-5 text-center"
+                  aria-hidden="true"
+                >
                   {m.flag}
                 </span>
                 <span className="font-medium">{m.label}</span>
                 {active && (
-                  <span className="ml-auto text-[10px] uppercase tracking-wider text-[#0071E3] font-semibold">
-                    ✓
-                  </span>
+                  <Check size={14} strokeWidth={2.5} className="ml-auto text-[#0071E3]" />
                 )}
               </button>
             );
