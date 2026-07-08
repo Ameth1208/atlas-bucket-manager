@@ -21,11 +21,11 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="grid gap-2">
-      <Label className="text-[13px] text-[#3C3C43] font-medium">{label}</Label>
+    <div className="grid gap-1.5 sm:gap-2">
+      <Label className="text-[12.5px] sm:text-[13px] text-[#3C3C43] font-medium">{label}</Label>
       {children}
       {error && (
-        <p className="text-[12px] text-[#FF3B30] mt-0.5 flex items-center gap-1.5">
+        <p className="text-[11.5px] sm:text-[12px] text-[#FF3B30] mt-0.5 flex items-center gap-1.5">
           <span className="inline-block size-1.5 rounded-full bg-[#FF3B30]" />
           {error}
         </p>
@@ -97,17 +97,17 @@ export function AccountStep() {
   };
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-6 sm:space-y-7">
       <div className="space-y-1.5">
-        <h2 className="text-[24px] font-semibold tracking-tight text-[#1D1D1F] leading-[1.2]">
+        <h2 className="text-[21px] sm:text-[24px] font-semibold tracking-tight text-[#1D1D1F] leading-[1.2]">
           {t.accountTitle}
         </h2>
-        <p className="text-[13.5px] text-[#6E6E73] leading-[1.55]">
+        <p className="text-[13px] sm:text-[13.5px] text-[#6E6E73] leading-[1.55]">
           {t.accountSubtitle}
         </p>
       </div>
 
-      <div className="space-y-4.5">
+      <div className="space-y-3.5 sm:space-y-4.5">
         <Field label={t.fieldName} error={errors.name}>
           <Input
             type="text"
@@ -187,20 +187,21 @@ export function AccountStep() {
         </Field>
       </div>
 
-      <div className="flex gap-3 pt-2">
+      <div className="flex gap-2.5 sm:gap-3 pt-1.5 sm:pt-2">
         <Button
           variant="outline"
           onClick={() => setStep(1)}
-          className="h-12 flex-1 border-black/[0.08] hover:bg-black/[0.03] text-[14.5px]"
+          className="h-11 sm:h-12 flex-1 border-black/[0.08] hover:bg-black/[0.03] text-[14px] sm:text-[14.5px]"
         >
-          <ArrowLeft size={15} />
+          <ArrowLeft size={14} className="sm:hidden" />
+          <ArrowLeft size={15} className="hidden sm:block" />
           {t.back}
         </Button>
         <button
           type="button"
           onClick={handleSubmit}
           disabled={loading}
-          className="h-12 flex-1 rounded-xl text-white text-[14.5px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
+          className="h-11 sm:h-12 flex-1 rounded-xl text-white text-[14px] sm:text-[14.5px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
           style={{
             background: 'linear-gradient(180deg, #0091FF 0%, #0066CC 100%)',
             boxShadow:
@@ -209,13 +210,15 @@ export function AccountStep() {
         >
           {loading ? (
             <>
-              <Loader2 size={15} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin sm:hidden" />
+              <Loader2 size={15} className="animate-spin hidden sm:block" />
               {t.creating}
             </>
           ) : (
             <>
               {t.create}
-              <ArrowRight size={15} className="ml-0.5" />
+              <ArrowRight size={14} className="ml-0.5 sm:hidden" />
+              <ArrowRight size={15} className="ml-0.5 hidden sm:block" />
             </>
           )}
         </button>

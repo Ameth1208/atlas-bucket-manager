@@ -20,15 +20,15 @@ export function SetupCard() {
   }, []);
 
   return (
-    <div className="relative w-full max-w-[520px] mx-auto">
+    <div className="relative w-full max-w-[440px] sm:max-w-[520px] mx-auto">
       {/* Language switcher — floats over the card top-right */}
-      <div className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 z-10">
+      <div className="absolute -top-2 -right-1.5 sm:-top-3 sm:-right-3 z-10">
         <LanguageSwitcher />
       </div>
 
       {/* Card — glass with cyan-tinted soft shadows */}
       <div
-        className={`relative rounded-3xl border border-white/70 bg-white/80 backdrop-blur-2xl overflow-hidden transition-all duration-500 ${
+        className={`relative rounded-2xl sm:rounded-3xl border border-white/70 bg-white/80 backdrop-blur-2xl overflow-hidden transition-all duration-500 ${
           mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
         }`}
         style={{
@@ -36,24 +36,24 @@ export function SetupCard() {
             '0 24px 48px -12px rgba(8, 145, 178, 0.14), 0 10px 24px -8px rgba(15, 23, 42, 0.05), 0 1px 0 rgba(255, 255, 255, 0.8) inset',
         }}
       >
-        <div className="px-10 sm:px-12 pt-10 pb-10">
+        <div className="px-6 sm:px-10 md:px-12 pt-9 sm:pt-10 pb-9 sm:pb-10">
           {/* Header */}
-          <div className="flex flex-col items-center text-center gap-2.5 mb-9">
+          <div className="flex flex-col items-center text-center gap-2 mb-7 sm:mb-9">
             <div className="flex items-center gap-2.5">
               <Logo size="md" showText />
             </div>
-            <p className="text-[13px] text-[#6E6E73] mt-0.5">
+            <p className="text-[12.5px] sm:text-[13px] text-[#6E6E73] mt-0.5">
               {tx('cardSubtitle', { step })}
             </p>
           </div>
 
           {/* Progress */}
-          <div className="mb-9">
+          <div className="mb-8 sm:mb-9">
             <SetupProgress />
           </div>
 
           {/* Step content — animated switch */}
-          <div className="relative min-h-[340px]">
+          <div className="relative min-h-[320px] sm:min-h-[340px]">
             <div
               key={step}
               className="animate-[step-in_360ms_cubic-bezier(0.22,1,0.36,1)]"
