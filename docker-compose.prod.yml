@@ -1,14 +1,61 @@
+# Docker Compose - Production (single instance, published images)
+# Usage: docker-compose -f docker-compose.prod.yml up -d
+#
+# Pulls the prebuilt API + Client images from GHCR.
+# Set IMAGE_TAG to pull a specific release (default: latest).
+
 services:
-  atlas-manager:
-    image: ghcr.io/ameth1208/atlas-bucket-manager:latest
-    container_name: atlas-manager
-    ports:
-      - "3000:3000"
+  atlas-api:
+    image: ghcr.io/ameth1208/atlas-bucket-manager-api:${IMAGE_TAG:-latest}
+    container_name: atlas-api
+    expose:
+      - "3001"
     env_file:
       - .env
-    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_PATH=/app/apps/api/data
+    volumes:
+      - atlas_api_data:/app/apps/api/data
+      - atlas_api_uploads:/app/apps/api/uploads
+      - atlas_api_temp:/app/apps/api/temp
     networks:
       - atlas-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -f http://localhost:3001/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  atlas-web:
+    image: ghcr.io/ameth1208/atlas-bucket-manager-web:${IMAGE_TAG:-latest}
+    container_name: atlas-web
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - API_URL=http://atlas-api:3001
+    depends_on:
+      atlas-api:
+        condition: service_healthy
+    networks:
+      - atlas-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "curl -f http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  atlas_api_data:
+    driver: local
+  atlas_api_uploads:
+    driver: local
+  atlas_api_temp:
+    driver: local
 
 networks:
   atlas-net:

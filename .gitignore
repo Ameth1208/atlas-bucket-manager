@@ -1,16 +1,49 @@
-dist/*
-node_modules/*
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+dist
+dist-frontend
+.next
+.turbo
+out
+
+# Test coverage
+coverage
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Env files
 .env
 .env.local
+.env.*.local
 .env.production
-coverage/*
-temp/*
 
-*.map
-dist-frontend/*
-public/js/main.js
-public/css/*.css
-*.txt
+# OS
+.DS_Store
+Thumbs.db
 
-propuesta
-data/
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea
+
+# Tool configs (local-only)
+.opencode/
+.claude/
+
+# Atlas API runtime
+apps/api/data
+apps/api/uploads
+apps/api/temp
+apps/api/dist
+
+# TypeScript build info
+*.tsbuildinfo
+next-env.d.ts

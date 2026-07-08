@@ -1,124 +1,112 @@
 # 🪣 Atlas Bucket Manager
 
-> A high-performance, unified Multi-Cloud UI for managing S3-compatible storage (MinIO, AWS S3, R2, Spaces). Built with **Lit Web Components** and **Tailwind CSS** for blazing-fast performance and modern user experience.
-
-![Atlas Manager](public/atlas-portada.png)
+> A high-performance, unified Multi-Cloud UI for managing S3-compatible storage (MinIO, AWS S3, R2, Spaces). Built with **Next.js 16 + shadcn/ui** for the web and **NestJS 10 + Clean Architecture** for the API.
 
 Atlas is a lightweight, secure, and modern web interface designed to bridge the gap between local development and cloud production. Manage visibility, explore files, and perform global searches across all your storage providers in one unified place.
 
-**Tech Stack**: Lit v3.2.1 (Web Components) • Express.js • TypeScript • Tailwind CSS (~15KB) • WCAG 2.1 AA Accessibility
+**Tech Stack**: Next.js 16 (App Router) · shadcn/ui · Tailwind CSS 4 · NestJS 10 · TypeScript · Socket.io · better-sqlite3 · MinIO SDK
 
 ---
 
 ## ✨ Multi-Cloud Features
 
 - **🌐 Unified Dashboard**: View buckets from MinIO and AWS S3 in a single view with provider-specific badges.
-- **🔍 Global Search**: Search for any file across **all buckets and all providers** at the same time (includes mobile fullscreen mode).
-- **🛡️ Secure Preview Tunnel**: Preview private images, videos, audio (with integrated player), and PDFs through an internal proxy. No need to expose ports or deal with CORS.
-- **📤 Bulk Operations**: Support for multi-file upload and bulk deletion with checkbox selection.
-- **🔗 Smart Share Links**: Generate temporary download links with custom expiration (1min to 7 days).
+- **🔍 Global Search**: Search for any file across **all buckets and all providers** at the same time.
+- **🛡️ Secure Preview Tunnel**: Preview private images, videos, audio, and PDFs through an internal proxy. No CORS, no exposed ports.
+- **📤 Bulk Operations**: Multi-file upload and bulk deletion with checkbox selection.
+- **🔗 Smart Share Links**: Generate temporary download links with custom expiration (1 min → 7 days).
 - **📊 Storage Stats**: Instant calculation of total size and object count per bucket.
-- **🪣 Copy Bucket Engine**: Complete bucket backup between providers with real-time progress tracking via WebSocket. Features include:
-  - Stream-based copying (memory efficient)
-  - Progress tracking: files copied, bytes transferred, speed (MB/s), and ETA
-  - Automatic folder creation and recursive copying
-  - Skip existing / Overwrite options
-  - Cancel running jobs
-  - Auto-refresh bucket list after completion
-- **🗑️ Safe Deletion**: Delete buckets with automatic content cleanup. Requires typing the bucket name to confirm, preventing accidental deletions.
-- **🌍 Internationalization (i18n)**: Full support for 6 languages (EN, ES, PT, FR, JA, ZH) with persistent preference. Translation files are externalized for easy maintenance (`public/js/i18n/`).
-- **🎨 Modern UI Components**:
-  - Copy Bucket Modal: Search/filter existing buckets or create new ones
-  - Copy Progress Panel: Floating real-time progress with WebSocket updates
-  - Delete Confirmation Modal: Type bucket name to confirm
-- **🌍 Multi-language**: 🇺🇸 EN, 🇪🇸 ES, 🇧🇷 PT, 🇫🇷 FR, 🇯🇵 JP, 🇨🇳 ZH (persistent preference).
-- **🌗 Modern UI**: Fully persistent Dark/Light mode, mobile-responsive design, and WCAG 2.1 AA accessibility.
-- **⚡ Lightweight**: Only ~15KB minified CSS (99.5% smaller than CDN), 11 reusable Lit web components.
-- **♿ Accessible**: 25+ ARIA labels, keyboard navigation, screen reader support.
+- **🪣 Copy Bucket Engine**: Stream-based backup between providers with live progress over WebSocket (MB/s, ETA, cancel, skip/overwrite).
+- **🗑️ Safe Deletion**: Type the bucket name to confirm; automatic content cleanup.
+- **🔑 API Keys**: Scoped Bearer keys (`atl_…`) for programmatic access, with per-key bucket filters.
+- **👥 Multi-user, Multi-role**: Owner / admin / viewer with JWT cookies.
+- **🌍 Internationalization**: EN, ES, PT, FR, JA, ZH with persistent preference.
+- **♿ Accessible**: WCAG 2.1 AA, keyboard navigation, screen reader labels.
 
 ---
 
 ## 🔌 Supported Providers
 
-### Available Now (v1.0.0) ✅
+- **MinIO** (Amazon S3 compatible) ✅
+- **AWS S3** ✅
+- **Cloudflare R2** ✅
+- **DigitalOcean Spaces** ✅
+- **Wasabi Hot Cloud Storage** ✅
+- **Any S3-compatible API** ✅
 
-- **MinIO** (Amazon S3 compatible)
-- **AWS S3** (Amazon Web Services)
-- **Cloudflare R2**
-- **DigitalOcean Spaces**
-- **Wasabi Hot Cloud Storage**
-- **Any S3-Compatible API**
-
-### Coming Soon (Roadmap) 🚀
-
-- **Google Cloud Storage (GCS)**
-- **Azure Blob Storage**
-- **Backblaze B2**
-- **Oracle Cloud Storage**
+Roadmap: Google Cloud Storage, Azure Blob, Backblaze B2, Oracle Cloud.
 
 ---
 
-## 🚀 Quick Start (Production)
+## 🧱 Monorepo Layout
 
-### 1. Create a `docker-compose.yml`
+This is a **pnpm workspace** with two apps:
 
-```yaml
-version: "3.8"
-
-services:
-  atlas-manager:
-    image: ghcr.io/ameth1208/atlas-bucket-manager:latest
-    container_name: atlas-manager
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    restart: always
+```
+atlas-bucket-manager/
+├── apps/
+│   ├── api/      # @atlas/api — NestJS 10 + Clean Architecture
+│   └── client/   # @atlas/client — Next.js 16 + shadcn/ui + Tailwind 4
+├── docker-compose.yml
+├── pnpm-workspace.yaml
+├── package.json  # workspace root (dev/build/test scripts)
+└── .env / .env.example
 ```
 
-### 2. Configure Credentials (`.env`)
-
-```bash
-# App Credentials
-ADMIN_USER=admin
-ADMIN_PASS=password
-
-# Provider 1: MinIO
-MINIO_ENDPOINT=minio.example.com
-MINIO_PORT=9000
-MINIO_ACCESS_KEY=your_key
-MINIO_SECRET_KEY=your_secret
-
-# Provider 2: AWS S3 (Optional)
-AWS_ACCESS_KEY_ID=your_aws_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret
-AWS_REGION=us-east-1
-```
-
-### 3. Run
-
-```bash
-docker-compose up -d
-```
-
-Visit `http://localhost:3000`. 🎉
+The API is built with **NestJS** (`nest build`). The client is built with **Next.js**.
 
 ---
 
-## ☕ Support
+## 🚀 Quick Start (Docker)
 
-If you find this project useful, consider buying me a coffee!
+```bash
+cp .env.example .env
+docker compose up -d                 # API + Web
+docker compose --profile minio up -d # + local MinIO
+```
 
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/amethgmc)
+Visit `http://localhost:3000`. The API listens on `:3001` (internal). Configure providers either via the UI or via `.env`.
 
 ---
 
 ## 🛠️ Development
 
-1.  **Clone:** `git clone https://github.com/ameth1208/atlas-bucket-manager.git`
-2.  **Install:** `npm install`
-3.  **Build CSS:** `npm run build:css` (production) or `npm run build:css:watch` (development)
-4.  **Build & Run:** `npm run build && npm start` (or `npm run dev` for hot reload)
+```bash
+# 1. Install once at the root
+pnpm install
+
+# 2. Configure env
+cp .env.example .env
+# (edit .env — at minimum set JWT_SECRET and provider keys)
+
+# 3. Run both apps in parallel
+pnpm dev
+#   API    → http://localhost:3001/health
+#   Client → http://localhost:3000
+
+# Run a single app
+pnpm dev:api
+pnpm dev:client
+```
+
+---
+
+## 🧪 Testing
+
+```bash
+pnpm test          # all
+pnpm test:api      # API unit tests (Jest)
+```
+
+API tests live in `apps/api/test/` and mock the repository via `MockBucketRepository`.
+
+---
+
+## ☕ Support
+
+If you find this project useful:
+
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/amethgmc)
 
 ---
 

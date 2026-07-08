@@ -1,56 +1,39 @@
 services:
-  # ── API Backend (Express + SQLite) ──────────────────────────────
+  # ── API Backend (NestJS + SQLite) ─────────────────────────────
   atlas-api:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: api
+      dockerfile: apps/api/Dockerfile
     image: atlas-api:latest
     container_name: atlas-api
     expose:
       - "3001"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - JWT_SECRET=${JWT_SECRET:-atlas-secret-change-me}
-      - DB_PATH=/app/data
+      - DB_PATH=/app/apps/api/data
       - CORS_ORIGIN=http://atlas-web:3000
-      - SERVE_STATIC=false
-      # MinIO (optional — set if not using UI provider management)
-      - MINIO_ENDPOINT=${MINIO_ENDPOINT:-minio-server}
-      - MINIO_PORT=${MINIO_PORT:-9000}
-      - MINIO_USE_SSL=${MINIO_USE_SSL:-false}
-      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY:-}
-      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY:-}
-      - MINIO_REGION=${MINIO_REGION:-us-east-1}
-      # AWS S3 (optional)
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
-      - AWS_REGION=${AWS_REGION:-us-east-1}
-      - AWS_S3_ENDPOINT=${AWS_S3_ENDPOINT:-s3.amazonaws.com}
     volumes:
-      - atlas_data:/app/data
-      - atlas_uploads:/app/uploads
-      - atlas_temp:/app/temp
-    depends_on:
-      minio-server:
-        condition: service_healthy
-        required: false
+      - atlas_api_data:/app/apps/api/data
+      - atlas_api_uploads:/app/apps/api/uploads
+      - atlas_api_temp:/app/apps/api/temp
     networks:
       - atlas-net
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "sh", "-c", "curl -f http://localhost:3001/api/auth/status || exit 1"]
+      test: ["CMD", "sh", "-c", "curl -f http://localhost:3001/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
 
-  # ── Next.js Frontend ─────────────────────────────────────────────
+  # ── Next.js Frontend ───────────────────────────────────────────
   atlas-web:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/client/Dockerfile
     image: atlas-web:latest
     container_name: atlas-web
     ports:
@@ -70,7 +53,7 @@ services:
       timeout: 10s
       retries: 3
 
-  # ── MinIO (optional local S3) ────────────────────────────────────
+  # ── MinIO (optional local S3 for development) ──────────────────
   minio-server:
     image: minio/minio:latest
     container_name: minio-server
@@ -79,8 +62,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY:-minioadmin}
-      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY:-minioadmin}
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-minioadmin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD:-minioadmin}
     volumes:
       - minio_data:/data
     networks:
@@ -96,11 +79,11 @@ services:
       - minio
 
 volumes:
-  atlas_data:
+  atlas_api_data:
     driver: local
-  atlas_uploads:
+  atlas_api_uploads:
     driver: local
-  atlas_temp:
+  atlas_api_temp:
     driver: local
   minio_data:
     driver: local

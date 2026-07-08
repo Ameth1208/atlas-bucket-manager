@@ -1,9 +1,0 @@
-services:
-  atlas-manager:
-    image: ghcr.io/ameth1208/atlas-bucket-manager:latest
-    container_name: atlas-manager
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env
-    restart: always

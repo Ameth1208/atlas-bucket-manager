@@ -4,61 +4,56 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-**Package manager: pnpm**
+**Package manager: pnpm (workspaces)**
 
 ```bash
 # Development
-pnpm dev              # Build CSS + compile frontend/backend, then start server
-pnpm dev:watch        # Full watch mode (CSS, Lit components, backend)
-pnpm build            # Full production build (CSS → frontend → backend)
-pnpm start            # Run production server (requires build first)
+pnpm install                # install all workspace deps once at the root
+pnpm dev                    # run API + Client in parallel
+pnpm dev:api                # only the API (port 3001)
+pnpm dev:client             # only the client (port 3000, Next.js)
 
-# Individual builds
-pnpm build:css        # Compile Tailwind CSS (minified)
-pnpm build:css:watch  # Watch Tailwind CSS
-pnpm compile:lit      # Build frontend Lit components via esbuild
-pnpm compile:backend  # Build backend TypeScript via esbuild
+# Production build
+pnpm build                  # build both apps
+pnpm build:api              # build only the API
+pnpm build:client           # build only the client
+pnpm start                  # run API in production (requires build)
 
 # Testing
-pnpm test             # Run all tests with Jest
-pnpm test:watch       # Jest watch mode
-pnpm test:coverage    # Jest with coverage report
-pnpm test:unit        # Unit tests only (tests/unit/)
-pnpm test:integration # Integration tests only
-pnpm test:e2e         # E2E tests only
+pnpm test                   # run all tests
+pnpm test:api               # API tests only (Jest)
+pnpm test:client            # client tests (none yet)
 
 # Docker
-docker-compose up -d     # Start production stack
-docker-compose -f docker-compose.dev.yml up  # Dev stack (if present)
+docker compose up -d            # API + Web
+docker compose --profile minio up -d   # + local MinIO
 ```
 
 ## Architecture
 
-**Clean Architecture** with strict layer separation — dependencies flow inward:
+This is a **pnpm monorepo** with two apps:
 
-```
-Presentation → Application → Domain ← Infrastructure
-```
+- **`apps/api`** (`@atlas/api`) — **NestJS 10** + TypeScript. Module-per-feature: `auth`, `users`, `providers`, `buckets`, `objects`, `api-keys`, `activity`, `copy`, `health`. Bootstrapped at `apps/api/src/main.ts`; root module at `apps/api/src/app.module.ts`. Global `APP_GUARD` = `JwtAuthGuard` (cookie JWT or `Bearer atl_…` API key). Compiled with `nest build` → `apps/api/dist/`.
+- **`apps/client`** (`@atlas/client`) — Next.js 16 App Router + shadcn/ui + Tailwind 4. Talks to the API through Next.js rewrites (`/api/*` and `/socket.io/*` → `http://localhost:3001`).
 
-- **`src/domain/`** — Entities and repository interfaces. No framework dependencies.
-- **`src/application/use-cases/`** — Business logic organized by feature (`bucket/`, `object/`, `auth/`, `copy/`). Each use case takes repository interfaces (not implementations) via constructor injection.
-- **`src/infrastructure/`** — MinIO/S3 SDK implementation (`s3-bucket.repository.ts`), copy engine, WebSocket manager, and environment config.
-- **`src/presentation/`** — Express controllers, routes, and middleware. Controllers call use cases and handle HTTP request/response shaping.
-- **`src/server.ts`** — Manual dependency injection wiring. Creates the repository, instantiates all use cases, wires controllers, mounts routes, and starts Socket.io.
+**API layers (Clean Architecture, framework-aware):**
+- `domain/entities` — pure TypeScript types/interfaces, no Nest deps.
+- `domain/repositories` — interfaces + `Symbol` injection tokens (`USER_REPOSITORY`, `BUCKET_REPOSITORY`, `API_KEY_REPOSITORY`, `ACTIVITY_REPOSITORY`).
+- `infrastructure/database` — `DatabaseService` (better-sqlite3 + migrations) + 3 concrete repos bound to the tokens.
+- `infrastructure/s3` — `S3Service` (MinIO client cache) + `S3BucketRepository` (all S3 ops + provider CRUD in one place).
+- `modules/<feature>` — `*.module.ts` + `*.controller.ts` + `*.service.ts` + `dto/`. Services inject repos via `@Inject(TOKEN)`. DTOs use `class-validator` for input validation.
+- `common/` — `AllExceptionsFilter`, `JwtAuthGuard`, `RolesGuard`, `ScopesGuard`, decorators (`@Public`, `@Roles`, `@CurrentUser`).
 
-**Build pipeline**: TypeScript is compiled by **esbuild** (not `tsc`) via custom scripts (`build-backend.js`, `build-frontend.js`). The Vite config (`vite.config.ts`) is only used for `vite build` which produces `dist-frontend/` for HTML entry points.
+**Multi-cloud abstraction**: All S3 ops go through `IBucketRepository` (`apps/api/src/domain/repositories/bucket.repository.ts`). `S3Service` caches one MinIO client per provider; clients are invalidated when a provider is deleted.
 
-**Frontend**: Lit Web Components in `public/js/components-lit/`. State flows through `public/js/store.ts`; API calls go through `public/js/api.ts`. The i18n system uses `public/js/i18n/translations/*.json` and is bundled separately as `public/js/i18n.js`.
-
-**Multi-cloud abstraction**: All S3-compatible operations are behind `IBucketRepository` (`src/domain/repositories/bucket.repository.interface.ts`). Adding a new provider means implementing this interface — controllers and use cases require no changes.
-
-**Real-time copy progress**: `CopyManager` → `CopyExecutor` (stream-based) → `CopyJobStore` (in-memory) → `SocketManager` (Socket.io events to client).
+**Real-time copy progress**: `CopyService` (EventEmitter) → `CopyGateway` (`@WebSocketGateway`) → socket.io events `copy:progress|completed|failed|cancelled`.
 
 ## Key Conventions
 
-- **File naming**: kebab-case throughout (`create-bucket.use-case.ts`, `s3-bucket.repository.ts`)
-- **Tests**: Unit tests mock the repository via `tests/mocks/mock-bucket.repository.ts`. Use case tests follow the pattern: instantiate use case with mock repo, call `execute()`, assert.
-- **TypeScript output**: CommonJS modules (`"module": "commonjs"` in tsconfig). Strict mode is on.
-- **Auth**: JWT stored in HTTP-only cookies. `auth.middleware.ts` verifies the token on protected routes.
-- **Uploads/temp**: Multer writes to `/app/uploads` and `/app/temp` (auto-created on startup). These paths are relative to the running server.
-- **Environment**: Providers are configured via `.env`. See `.env.example` for all variables. MinIO is the primary provider; AWS S3, Cloudflare R2, DigitalOcean Spaces, and Wasabi are optional via additional env vars.
+- **File naming**: kebab-case throughout (`auth.service.ts`, `copy.gateway.ts`).
+- **Tests**: `*.spec.ts` next to source for unit tests; `test/*.e2e-spec.ts` for e2e. Use `@nestjs/testing` `Test.createTestingModule({...})`.
+- **TypeScript output**: CommonJS for the API, ESM via Next bundler for the client.
+- **Auth**: JWT in HTTP-only cookie (`auth_token`) OR `Authorization: Bearer atl_<key>` for API access. `apps/api/src/common/guards/jwt-auth.guard.ts` handles both. `apps/client/middleware.ts` redirects unauthenticated browser traffic to `/login`.
+- **Uploads/temp/data**: `apps/api/uploads`, `apps/api/temp`, `apps/api/data` (auto-created on `DatabaseService.onModuleInit`, relative to API cwd).
+- **Environment**: Single `.env` at repo root. `ConfigModule.forRoot` auto-discovers it. `CORS_ORIGIN` should match the client URL.
+- **Provider credentials**: NEVER in `.env`. They're managed through the web UI and stored in SQLite.
