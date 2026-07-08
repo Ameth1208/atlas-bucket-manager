@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { SetupCard } from './components';
+import { SetupHero } from './components/setup-hero';
 import { useI18n } from '@/lib/i18n';
 
 export default function SetupPage() {
@@ -28,7 +29,7 @@ export default function SetupPage() {
 
   return (
     <main
-      className="relative min-h-dvh w-dvw flex items-center justify-center overflow-x-hidden overflow-y-auto py-6 sm:py-8"
+      className="relative min-h-dvh w-dvw flex items-center justify-center overflow-x-hidden overflow-y-auto py-6 sm:py-8 lg:py-0"
       style={{
         background:
           'radial-gradient(ellipse 90% 70% at 50% -10%, #DBEAFE 0%, #EFF6FF 35%, #F8FAFC 70%, #F1F5F9 100%)',
@@ -52,11 +53,20 @@ export default function SetupPage() {
         />
       </div>
 
-      <div className="relative w-full px-4 sm:px-5 flex items-center justify-center">
+      <div className="relative w-full max-w-[1200px] mx-auto px-4 sm:px-5 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center min-h-[calc(100dvh-3rem)] lg:min-h-dvh">
         {checking ? (
-          <span className="w-7 h-7 border-2 border-[#0071E3] border-t-transparent rounded-full animate-spin" />
+          <div className="col-span-full flex items-center justify-center">
+            <span className="w-7 h-7 border-2 border-[#0071E3] border-t-transparent rounded-full animate-spin" />
+          </div>
         ) : (
-          <SetupCard />
+          <>
+            <div className="order-1 lg:order-1 flex justify-center lg:justify-end">
+              <SetupCard />
+            </div>
+            <div className="hidden lg:flex order-2 lg:order-2">
+              <SetupHero />
+            </div>
+          </>
         )}
       </div>
     </main>
