@@ -29,7 +29,16 @@ export function AccountStep() {
   const { admin, setAdmin, setStep, loading, setLoading } = useSetupStore();
   const { setUser } = useAppStore();
   const { t } = useI18n();
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
+
+  const errors = useMemo(() => {
+    const e: Record<string, string> = {};
+    if (touched.name && !admin.name.trim()) e.name = t.required;
+    if (touched.email && admin.email && !EMAIL_RE.test(admin.email)) e.email = t.invalidEmail;
+    if (touched.password && admin.password && admin.password.length < 8) e.password = t.passwordTooShort;
+    if (touched.confirm && admin.confirm && admin.confirm !== admin.password) e.confirm = t.passwordMismatch;
+    return e;
+  }, [admin, touched, t]);
 
   const pwdEval = useMemo(() => evaluatePassword(admin.password), [admin.password]);
   const strengthColor: Record<Strength, string> = {
@@ -44,6 +53,7 @@ export function AccountStep() {
   };
 
   const validate = () => {
+    setTouched({ name: true, email: true, password: true, confirm: true });
     const e: Record<string, string> = {};
     if (!admin.name.trim()) e.name = t.required;
     if (!admin.email.trim()) e.email = t.required;
@@ -52,7 +62,6 @@ export function AccountStep() {
     else if (admin.password.length < 8) e.password = t.passwordTooShort;
     if (!admin.confirm) e.confirm = t.required;
     else if (admin.password !== admin.confirm) e.confirm = t.passwordMismatch;
-    setErrors(e);
     return Object.keys(e).length === 0;
   };
 
@@ -85,99 +94,76 @@ export function AccountStep() {
         </p>
       </div>
 
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         <Input
           type="text"
           label={t.fieldName}
           value={admin.name}
-          onChange={(e) => {
-            setAdmin({ name: e.target.value });
-            if (errors.name) setErrors((p) => ({ ...p, name: '' }));
-          }}
+          onChange={(e) => setAdmin({ name: e.target.value })}
+          onBlur={() => setTouched((p) => ({ ...p, name: true }))}
           invalid={!!errors.name}
           valid={admin.name.trim().length >= 2}
           autoComplete="name"
           icon={User}
+          hint={errors.name}
         />
-        {errors.name && (
-          <p className="text-[11.5px] text-destructive mt-1 ml-1 flex items-center gap-1.5">
-            <span className="inline-block size-1 rounded-full bg-destructive" />
-            {errors.name}
-          </p>
-        )}
-
         <Input
           type="email"
           label={t.fieldEmail}
           value={admin.email}
-          onChange={(e) => {
-            setAdmin({ email: e.target.value });
-            if (errors.email) setErrors((p) => ({ ...p, email: '' }));
-          }}
+          onChange={(e) => setAdmin({ email: e.target.value })}
+          onBlur={() => setTouched((p) => ({ ...p, email: true }))}
           invalid={!!errors.email}
           valid={EMAIL_RE.test(admin.email)}
           autoComplete="email"
           icon={Mail}
+          hint={errors.email}
         />
-        {errors.email && (
-          <p className="text-[11.5px] text-destructive mt-1 ml-1 flex items-center gap-1.5">
-            <span className="inline-block size-1 rounded-full bg-destructive" />
-            {errors.email}
-          </p>
-        )}
-
-        <Input
-          type="password"
-          label={t.fieldPassword}
-          value={admin.password}
-          onChange={(e) => {
-            setAdmin({ password: e.target.value });
-            if (errors.password) setErrors((p) => ({ ...p, password: '' }));
-          }}
-          invalid={!!errors.password}
-          autoComplete="new-password"
-          icon={Lock}
-        />
-        {admin.password && !errors.password && (
-          <div className="mt-1.5 space-y-1">
-            <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className={`h-full transition-all duration-500 ${strengthColor[pwdEval.strength]} ${strengthWidth[pwdEval.strength]}`}
-              />
+        <div>
+          <Input
+            type="password"
+            label={t.fieldPassword}
+            value={admin.password}
+            onChange={(e) => setAdmin({ password: e.target.value })}
+            onBlur={() => setTouched((p) => ({ ...p, password: true }))}
+            invalid={!!errors.password}
+            autoComplete="new-password"
+            icon={Lock}
+            hint={errors.password}
+          />
+          {admin.password && !errors.password && (
+            <div className="mt-1.5 space-y-1">
+              <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className={`h-full transition-all duration-500 ${strengthColor[pwdEval.strength]} ${strengthWidth[pwdEval.strength]}`}
+                />
+              </div>
+              <p className="text-[10.5px] text-muted-foreground flex items-center gap-1.5">
+                <span>
+                  {pwdEval.strength === 'strong'
+                    ? t.passwordStrong
+                    : pwdEval.strength === 'ok'
+                      ? t.passwordOk
+                      : t.passwordWeak}
+                </span>
+                <span className="text-muted-foreground/60">·</span>
+                <span>{t.passwordHint}</span>
+              </p>
             </div>
-            <p className="text-[10.5px] text-muted-foreground flex items-center gap-1.5 ml-1">
-              <span>{pwdEval.strength === 'strong' ? t.passwordStrong : pwdEval.strength === 'ok' ? t.passwordOk : t.passwordWeak}</span>
-              <span className="text-muted-foreground/60">·</span>
-              <span>{t.passwordHint}</span>
-            </p>
-          </div>
-        )}
-        {errors.password && (
-          <p className="text-[11.5px] text-destructive mt-1 ml-1 flex items-center gap-1.5">
-            <span className="inline-block size-1 rounded-full bg-destructive" />
-            {errors.password}
-          </p>
-        )}
-
+          )}
+        </div>
         <Input
           type="password"
           label={t.fieldConfirm}
           value={admin.confirm}
-          onChange={(e) => {
-            setAdmin({ confirm: e.target.value });
-            if (errors.confirm) setErrors((p) => ({ ...p, confirm: '' }));
-          }}
+          onChange={(e) => setAdmin({ confirm: e.target.value })}
+          onBlur={() => setTouched((p) => ({ ...p, confirm: true }))}
           invalid={!!errors.confirm}
           valid={admin.confirm.length > 0 && admin.confirm === admin.password}
           autoComplete="new-password"
           icon={Lock}
+          hint={errors.confirm}
         />
-        {errors.confirm && (
-          <p className="text-[11.5px] text-destructive mt-1 ml-1 flex items-center gap-1.5">
-            <span className="inline-block size-1 rounded-full bg-destructive" />
-            {errors.confirm}
-          </p>
-        )}
       </div>
 
       <div className="flex gap-2 pt-2">
