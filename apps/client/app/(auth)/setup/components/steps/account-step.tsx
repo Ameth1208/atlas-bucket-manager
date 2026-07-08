@@ -3,36 +3,14 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ArrowRight, ArrowLeft, Loader2, Check, User, Mail, Lock, AlertCircle } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2, User, Mail, Lock } from 'lucide-react';
 import { useSetupStore } from '../../store';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
 import { toast } from 'sonner';
 import { useI18n } from '@/lib/i18n';
 
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string;
-  error?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="grid gap-1.5">
-      <Label className="text-[12.5px] text-[#3C3C43] font-medium tracking-tight">{label}</Label>
-      <div className="group">{children}</div>
-      {error && (
-        <p className="text-[11.5px] text-[#FF3B30] mt-0.5 flex items-center gap-1.5">
-          <AlertCircle size={11} strokeWidth={2} className="shrink-0" />
-          <span>{error}</span>
-        </p>
-      )}
-    </div>
-  );
-}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Strength = 'weak' | 'ok' | 'strong';
 
@@ -55,9 +33,9 @@ export function AccountStep() {
 
   const pwdEval = useMemo(() => evaluatePassword(admin.password), [admin.password]);
   const strengthColor: Record<Strength, string> = {
-    weak: 'bg-[#FF3B30]',
-    ok: 'bg-[#FF9500]',
-    strong: 'bg-[#34C759]',
+    weak: 'bg-destructive',
+    ok: 'bg-amber-500',
+    strong: 'bg-emerald-500',
   };
   const strengthWidth: Record<Strength, string> = {
     weak: 'w-1/3',
@@ -69,7 +47,7 @@ export function AccountStep() {
     const e: Record<string, string> = {};
     if (!admin.name.trim()) e.name = t.required;
     if (!admin.email.trim()) e.email = t.required;
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(admin.email)) e.email = t.invalidEmail;
+    else if (!EMAIL_RE.test(admin.email)) e.email = t.invalidEmail;
     if (!admin.password) e.password = t.required;
     else if (admin.password.length < 8) e.password = t.passwordTooShort;
     if (!admin.confirm) e.confirm = t.required;
@@ -97,139 +75,137 @@ export function AccountStep() {
   };
 
   return (
-    <div className="space-y-5 sm:space-y-6">
+    <div className="space-y-5">
       <div className="space-y-1">
-        <h2 className="text-[20px] sm:text-[22px] md:text-[24px] font-semibold tracking-tight text-[#1D1D1F] leading-[1.2]">
+        <h2 className="text-[20px] font-semibold tracking-tight text-foreground leading-[1.2]">
           {t.accountTitle}
         </h2>
-        <p className="text-[12.5px] sm:text-[13px] text-[#6E6E73] leading-[1.55]">
+        <p className="text-[12.5px] text-muted-foreground leading-[1.55]">
           {t.accountSubtitle}
         </p>
       </div>
 
-      <div className="space-y-3 sm:space-y-3.5">
-        <Field label={t.fieldName} error={errors.name}>
-          <Input
-            type="text"
-            value={admin.name}
-            onChange={(e) => {
-              setAdmin({ name: e.target.value });
-              if (errors.name) setErrors((p) => ({ ...p, name: '' }));
-            }}
-            placeholder={t.fieldNamePh}
-            aria-invalid={!!errors.name}
-            invalid={!!errors.name}
-            error={errors.name}
-            autoComplete="name"
-            icon={User}
-          />
-        </Field>
-        <Field label={t.fieldEmail} error={errors.email}>
-          <Input
-            type="email"
-            value={admin.email}
-            onChange={(e) => {
-              setAdmin({ email: e.target.value });
-              if (errors.email) setErrors((p) => ({ ...p, email: '' }));
-            }}
-            placeholder={t.fieldEmailPh}
-            aria-invalid={!!errors.email}
-            invalid={!!errors.email}
-            error={errors.email}
-            autoComplete="email"
-            icon={Mail}
-          />
-        </Field>
-        <Field label={t.fieldPassword} error={errors.password}>
-          <Input
-            type="password"
-            value={admin.password}
-            onChange={(e) => {
-              setAdmin({ password: e.target.value });
-              if (errors.password) setErrors((p) => ({ ...p, password: '' }));
-            }}
-            placeholder={t.fieldPasswordPh}
-            aria-invalid={!!errors.password}
-            invalid={!!errors.password}
-            error={errors.password}
-            autoComplete="new-password"
-            icon={Lock}
-          />
-          {admin.password && !errors.password && (
-            <div className="mt-1.5 space-y-1">
-              <div className="h-1 w-full rounded-full bg-black/[0.06] overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-300 ${strengthColor[pwdEval.strength]} ${strengthWidth[pwdEval.strength]}`}
-                />
-              </div>
-              <p className="text-[10.5px] text-[#86868B] flex items-center gap-1">
-                {pwdEval.strength === 'strong' && (
-                  <Check size={9} className="text-[#34C759]" strokeWidth={3} />
-                )}
-                {pwdEval.strength === 'strong'
-                  ? t.passwordStrong
-                  : pwdEval.strength === 'ok'
-                    ? t.passwordOk
-                    : t.passwordWeak}
-                <span className="text-[#AEAEB2]">·</span>
-                {t.passwordHint}
-              </p>
+      <div className="space-y-2.5">
+        <Input
+          type="text"
+          label={t.fieldName}
+          value={admin.name}
+          onChange={(e) => {
+            setAdmin({ name: e.target.value });
+            if (errors.name) setErrors((p) => ({ ...p, name: '' }));
+          }}
+          invalid={!!errors.name}
+          valid={admin.name.trim().length >= 2}
+          autoComplete="name"
+          icon={User}
+        />
+        {errors.name && (
+          <p className="text-[11.5px] text-destructive mt-1 ml-1 flex items-center gap-1.5">
+            <span className="inline-block size-1 rounded-full bg-destructive" />
+            {errors.name}
+          </p>
+        )}
+
+        <Input
+          type="email"
+          label={t.fieldEmail}
+          value={admin.email}
+          onChange={(e) => {
+            setAdmin({ email: e.target.value });
+            if (errors.email) setErrors((p) => ({ ...p, email: '' }));
+          }}
+          invalid={!!errors.email}
+          valid={EMAIL_RE.test(admin.email)}
+          autoComplete="email"
+          icon={Mail}
+        />
+        {errors.email && (
+          <p className="text-[11.5px] text-destructive mt-1 ml-1 flex items-center gap-1.5">
+            <span className="inline-block size-1 rounded-full bg-destructive" />
+            {errors.email}
+          </p>
+        )}
+
+        <Input
+          type="password"
+          label={t.fieldPassword}
+          value={admin.password}
+          onChange={(e) => {
+            setAdmin({ password: e.target.value });
+            if (errors.password) setErrors((p) => ({ ...p, password: '' }));
+          }}
+          invalid={!!errors.password}
+          autoComplete="new-password"
+          icon={Lock}
+        />
+        {admin.password && !errors.password && (
+          <div className="mt-1.5 space-y-1">
+            <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 ${strengthColor[pwdEval.strength]} ${strengthWidth[pwdEval.strength]}`}
+              />
             </div>
-          )}
-        </Field>
-        <Field label={t.fieldConfirm} error={errors.confirm}>
-          <Input
-            type="password"
-            value={admin.confirm}
-            onChange={(e) => {
-              setAdmin({ confirm: e.target.value });
-              if (errors.confirm) setErrors((p) => ({ ...p, confirm: '' }));
-            }}
-            placeholder={t.fieldConfirmPh}
-            aria-invalid={!!errors.confirm}
-            invalid={!!errors.confirm}
-            error={errors.confirm}
-            autoComplete="new-password"
-            icon={Lock}
-          />
-        </Field>
+            <p className="text-[10.5px] text-muted-foreground flex items-center gap-1.5 ml-1">
+              <span>{pwdEval.strength === 'strong' ? t.passwordStrong : pwdEval.strength === 'ok' ? t.passwordOk : t.passwordWeak}</span>
+              <span className="text-muted-foreground/60">·</span>
+              <span>{t.passwordHint}</span>
+            </p>
+          </div>
+        )}
+        {errors.password && (
+          <p className="text-[11.5px] text-destructive mt-1 ml-1 flex items-center gap-1.5">
+            <span className="inline-block size-1 rounded-full bg-destructive" />
+            {errors.password}
+          </p>
+        )}
+
+        <Input
+          type="password"
+          label={t.fieldConfirm}
+          value={admin.confirm}
+          onChange={(e) => {
+            setAdmin({ confirm: e.target.value });
+            if (errors.confirm) setErrors((p) => ({ ...p, confirm: '' }));
+          }}
+          invalid={!!errors.confirm}
+          valid={admin.confirm.length > 0 && admin.confirm === admin.password}
+          autoComplete="new-password"
+          icon={Lock}
+        />
+        {errors.confirm && (
+          <p className="text-[11.5px] text-destructive mt-1 ml-1 flex items-center gap-1.5">
+            <span className="inline-block size-1 rounded-full bg-destructive" />
+            {errors.confirm}
+          </p>
+        )}
       </div>
 
-      <div className="flex gap-2 sm:gap-2.5 pt-1.5">
+      <div className="flex gap-2 pt-2">
         <Button
           variant="outline"
           onClick={() => setStep(1)}
-          className="h-11 sm:h-12 flex-1 border-black/[0.08] hover:bg-black/[0.03] text-[13.5px] sm:text-[14.5px]"
+          className="h-10 flex-1"
         >
-          <ArrowLeft size={14} className="sm:hidden" />
-          <ArrowLeft size={15} className="hidden sm:block" />
+          <ArrowLeft size={15} />
           {t.back}
         </Button>
-        <button
-          type="button"
+        <Button
           onClick={handleSubmit}
           disabled={loading}
-          className="h-11 sm:h-12 flex-1 rounded-xl text-white text-[13.5px] sm:text-[14.5px] font-semibold inline-flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all duration-150 disabled:opacity-60"
-          style={{
-            background: 'linear-gradient(180deg, #0091FF 0%, #0066CC 100%)',
-            boxShadow:
-              '0 4px 14px -2px rgba(0, 113, 227, 0.4), 0 1px 2px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
-          }}
+          className="h-10 flex-1"
         >
           {loading ? (
             <>
-              <Loader2 size={14} className="animate-spin sm:hidden" />
-              <Loader2 size={15} className="animate-spin hidden sm:block" />
+              <Loader2 size={15} className="animate-spin" />
               {t.creating}
             </>
           ) : (
             <>
               {t.create}
-              <ArrowRight size={14} className="ml-0.5 sm:hidden" />
-              <ArrowRight size={15} className="ml-0.5 hidden sm:block" />
+              <ArrowRight size={15} className="ml-0.5" />
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );
