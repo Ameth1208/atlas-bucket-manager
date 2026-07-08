@@ -37,36 +37,37 @@ function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-[12.5px] font-medium text-foreground/80 mb-1.5"
+          className="block text-[13px] font-medium text-foreground mb-1.5"
         >
           {label}
         </label>
       )}
       <div
         className={cn(
-          'group relative w-full rounded-md bg-background',
-          'border border-input',
-          'transition-colors',
-          'hover:border-foreground/20',
-          'focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20',
-          'has-[input:invalid]:border-destructive has-[input:invalid]:focus-within:ring-destructive/20',
-          hasError && 'border-destructive focus-within:ring-destructive/20',
+          'group relative w-full rounded-lg bg-background',
+          'border border-foreground/15',
+          'transition-all duration-150',
+          'shadow-[0_1px_2px_rgba(0,0,0,0.02)]',
+          'hover:border-foreground/25',
+          'focus-within:border-foreground focus-within:ring-[3px] focus-within:ring-foreground/10',
+          'has-[input:invalid]:border-destructive has-[input:invalid]:focus-within:ring-destructive/15',
+          hasError && 'border-destructive focus-within:border-destructive focus-within:ring-destructive/15',
           className,
         )}
       >
-        <div className="relative flex items-center h-10">
+        <div className="relative flex items-center h-11">
           {Icon && (
             <div
               className={cn(
-                'shrink-0 ml-3 transition-colors',
+                'shrink-0 ml-3.5 transition-colors',
                 hasError
                   ? 'text-destructive'
                   : hasSuccess
                     ? 'text-emerald-600'
-                    : 'text-muted-foreground group-focus-within:text-foreground',
+                    : 'text-foreground/50 group-focus-within:text-foreground',
               )}
             >
-              <Icon size={15} strokeWidth={1.8} />
+              <Icon size={16} strokeWidth={1.8} />
             </div>
           )}
 
@@ -77,11 +78,11 @@ function Input({
             aria-invalid={hasError || undefined}
             className={cn(
               'w-full h-full bg-transparent outline-none',
-              'text-[14px] text-foreground',
-              'placeholder:text-muted-foreground',
+              'text-[15px] text-foreground',
+              'placeholder:text-foreground/35',
               'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
               Icon ? 'pl-2.5' : 'px-3.5',
-              isPassword || hasSuccess || hasError ? 'pr-9' : 'pr-3.5',
+              isPassword || hasSuccess || hasError ? 'pr-10' : 'pr-3.5',
             )}
             {...props}
           />
@@ -92,17 +93,17 @@ function Input({
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? 'Hide password' : 'Show password'}
               tabIndex={-1}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded text-foreground/50 hover:text-foreground transition-colors"
             >
-              {showPassword ? <EyeOff size={15} strokeWidth={1.8} /> : <Eye size={15} strokeWidth={1.8} />}
+              {showPassword ? <EyeOff size={16} strokeWidth={1.8} /> : <Eye size={16} strokeWidth={1.8} />}
             </button>
           ) : hasError ? (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-destructive">
-              <AlertCircle size={15} strokeWidth={2} />
+              <AlertCircle size={16} strokeWidth={2} />
             </div>
           ) : hasSuccess ? (
             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-600">
-              <Check size={15} strokeWidth={2.5} />
+              <Check size={16} strokeWidth={2.5} />
             </div>
           ) : null}
         </div>
@@ -110,8 +111,8 @@ function Input({
       {hint && (
         <p
           className={cn(
-            'text-[11.5px] mt-1.5 ml-1',
-            hasError ? 'text-destructive' : 'text-muted-foreground',
+            'text-[12px] mt-1.5 ml-1',
+            hasError ? 'text-destructive' : 'text-foreground/55',
           )}
         >
           {hint}
