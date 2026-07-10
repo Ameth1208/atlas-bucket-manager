@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import { CreateBucketModal } from '@/components/modals/create-bucket';
-import { ConnectProviderModal } from '@/components/modals/connect-provider';
+import { ConnectProviderModal, EditProviderModal } from '@/components/modals/connect-provider';
 import { CreateApiKeyModal } from '@/components/modals/create-api-key';
 import { CreateUserModal } from '@/components/modals/create-user';
 
@@ -36,6 +36,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         <CreateBucketModal />
         <ConnectProviderModal />
+        <EditProviderModal />
         <CreateApiKeyModal />
         <CreateUserModal />
       </SidebarProvider>

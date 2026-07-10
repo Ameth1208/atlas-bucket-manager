@@ -1,11 +1,10 @@
 'use client';
 import { Plus, Cloud, ChevronRight } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { MemojiAvatar } from '@/components/ui/memoji-avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
-import { initials } from '@/lib/utils';
 
 interface Crumb { label: string; href?: string; }
 interface ToolbarProps { crumbs?: Crumb[]; }
@@ -17,7 +16,7 @@ export function Toolbar({ crumbs = [] }: ToolbarProps) {
   return (
     <div className="flex items-center gap-2 px-4 h-12 border-b border-border bg-background/80 backdrop-blur shrink-0">
       {/* Breadcrumbs */}
-      <div className="flex items-center gap-1 flex-1 min-w-0 text-sm">
+      <div className="flex items-center gap-1 flex-1 min-w-0 text-[14px] tracking-[-0.224px]">
         {crumbs.map((c, i) => (
           <span key={i} className="flex items-center gap-1">
             {i > 0 && <ChevronRight size={12} className="text-muted-foreground/50" />}
@@ -43,15 +42,15 @@ export function Toolbar({ crumbs = [] }: ToolbarProps) {
           <Plus size={14} />
         </Button>
 
-        <Separator orientation="vertical" className="h-5 mx-1" />
+        <Separator orientation="vertical" className="h-5 mx-1 bg-border" />
 
         {user && (
           <button onClick={() => router.push('/settings')} className="rounded-full">
-            <Avatar size="sm">
-              <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                {initials(user.name)}
-              </AvatarFallback>
-            </Avatar>
+            <MemojiAvatar
+              name={user.avatarSeed || user.email || user.name}
+              size={28}
+              className="rounded-full w-7 h-7"
+            />
           </button>
         )}
       </div>

@@ -17,17 +17,17 @@ export function Modal({ open, onClose, title, description, width = '520px', chil
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent
-        className="gap-0 p-0"
+        className="gap-0 p-0 border border-border max-h-[90vh] overflow-y-auto"
         style={{ maxWidth: width }}
         showCloseButton={false}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div>
-            <DialogTitle className="text-base font-semibold text-foreground">
+            <DialogTitle className="text-[17px] font-semibold text-popover-foreground">
               {title}
             </DialogTitle>
             {description && (
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+              <DialogDescription className="text-[12px] text-muted-foreground mt-0.5">
                 {description}
               </DialogDescription>
             )}

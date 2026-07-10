@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -25,10 +26,7 @@ export function Logo({ size = 'md', showText = false, className }: LogoProps) {
           background: 'linear-gradient(145deg, #155BD0 0%, #0049BB 100%)',
         }}
       >
-        <svg width={s.icon} height={s.icon} viewBox="0 0 24 24" fill="none">
-          <path d="M12 3L20 19H4L12 3Z" fill="white" fillOpacity="0.95" />
-          <circle cx="12" cy="15" r="2.5" fill="white" />
-        </svg>
+        <Image alt='logo' src={'/logo.svg'} width={300} height={300} className='h-6' />
       </div>
       {showText && (
         <div>
