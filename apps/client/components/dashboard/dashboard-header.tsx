@@ -7,27 +7,32 @@ import { useAppStore } from '@/lib/store';
 interface DashboardHeaderProps {
   title: string;
   subtitle?: string;
+  children?: React.ReactNode;
 }
 
-export function DashboardHeader({ title, subtitle }: DashboardHeaderProps) {
+export function DashboardHeader({ title, subtitle, children }: DashboardHeaderProps) {
   const qc = useQueryClient();
   const { setCreateBucketOpen } = useAppStore();
 
   return (
-    <div className="flex items-end justify-between mb-6">
+    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6 sm:mb-8">
       <div>
-        {subtitle && <p className="text-sm text-muted-foreground mb-1">{subtitle}</p>}
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">{title}</h1>
+        {subtitle && <p className="text-[14px] text-muted-foreground mb-1 tracking-[-0.224px]">{subtitle}</p>}
+        <h1 className="text-[28px] sm:text-[34px] font-semibold text-foreground leading-[1.10] tracking-[-0.374px]">{title}</h1>
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={() => qc.invalidateQueries()}>
-          <RefreshCw size={14} />
-          Sync
-        </Button>
-        <Button size="sm" onClick={() => setCreateBucketOpen(true)}>
-          <Plus size={14} />
-          Nuevo bucket
-        </Button>
+        {children ? children : (
+          <>
+            <Button variant="outline" size="sm" onClick={() => qc.invalidateQueries()}>
+              <RefreshCw size={14} />
+              Sync
+            </Button>
+            <Button size="sm" onClick={() => setCreateBucketOpen(true)}>
+              <Plus size={14} />
+              Nuevo bucket
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

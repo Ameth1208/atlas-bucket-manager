@@ -73,8 +73,8 @@ export function CreateApiKeyModal() {
             </div>
           </div>
 
-          <div className="flex gap-2 pt-2">
-            <Button variant="outline" className="flex-1" onClick={handleClose}>Cancelar</Button>
+          <div className="flex gap-2 pt-4">
+            <Button variant="pearl" className="flex-1" onClick={handleClose}>Cancelar</Button>
             <Button
               className="flex-1"
               disabled={!name || scopes.length === 0 || createMutation.isPending}
@@ -89,8 +89,8 @@ export function CreateApiKeyModal() {
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="rounded-xl p-3 bg-green-500/10 border border-green-500/30">
-            <p className="text-sm font-medium text-green-600 dark:text-green-400">
+          <div className="rounded-xl p-3 bg-success/10 border border-success/30">
+            <p className="text-sm font-medium text-success">
               ¡Clave creada! Cópiala ahora — no podrás verla de nuevo.
             </p>
           </div>
@@ -102,7 +102,7 @@ export function CreateApiKeyModal() {
                 onClick={copy}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors shrink-0"
               >
-                {copied ? <Check size={13} className="text-green-500" /> : <Copy size={13} />}
+                {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
               </button>
             </div>
           </div>

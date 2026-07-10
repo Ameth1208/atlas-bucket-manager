@@ -3,24 +3,24 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Toolbar } from '@/components/layout/toolbar';
+import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { fmtDate, fmtRelative } from '@/lib/utils';
 import { Key, Eye, EyeOff, Copy, Plus, Trash2, Activity, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/store';
-import { cn } from '@/lib/utils';
+import { cn, fmtDate, fmtRelative } from '@/lib/utils';
 
 const SCOPE_VARIANT: Record<string, 'outline' | 'secondary' | 'destructive'> = {
   read: 'outline', write: 'secondary', delete: 'destructive',
 };
 
 const CURL_EXAMPLE = (prefix: string) =>
-`# Subir un archivo a tu bucket
-curl -X POST https://tu-atlas.app/api/v1/upload/mi-bucket \\
-  -H "Authorization: Bearer ${prefix}_••••••••••••••••" \\
+`# Subir un archivo a tu bucket\n\
+curl -X POST https://tu-atlas.app/api/v1/upload/mi-bucket \\\n\
+  -H "Authorization: Bearer ${prefix}_••••••••••••••••" \\\n\
   -F "file=@./archivo.png"`;
 
 export default function ApiKeysPage() {
@@ -46,34 +46,27 @@ export default function ApiKeysPage() {
   const toggleReveal = (id: string) => setRevealed(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden bg-background">
       <Toolbar crumbs={[{ label: 'Atlas', href: '/dashboard' }, { label: 'Claves de API' }]} />
 
-      <div className="flex-1 overflow-y-auto p-6">
-        {/* Header */}
-        <div className="flex items-end justify-between mb-6">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Herramientas</p>
-            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Claves de API</h1>
-            <p className="text-sm text-muted-foreground mt-1">Autentica tus apps con tokens de larga duración.</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm"><Key size={13} /> Política</Button>
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <div className="flex items-end justify-between mb-6 sm:mb-8">
+          <DashboardHeader title="Claves de API" subtitle="Herramientas">
+            <Button variant="pearl" size="sm"><Key size={13} /> Política</Button>
             <Button size="sm" onClick={() => setCreateKeyOpen(true)}><Plus size={13} /> Nueva clave</Button>
-          </div>
+          </DashboardHeader>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
           {[
-            { icon: Key, label: 'Claves activas', value: active.length, cls: 'text-primary' },
-            { icon: Eye, label: 'Con lectura', value: reads, cls: 'text-green-500' },
-            { icon: Upload, label: 'Con escritura', value: writes, cls: 'text-orange-500' },
-            { icon: Activity, label: 'Llamadas 30d', value: '—', cls: 'text-muted-foreground' },
+            { icon: Key, label: 'Claves activas', value: active.length },
+            { icon: Eye, label: 'Con lectura', value: reads },
+            { icon: Upload, label: 'Con escritura', value: writes },
+            { icon: Activity, label: 'Llamadas 30d', value: '—' },
           ].map(s => (
             <Card key={s.label}>
               <CardContent className="flex items-center gap-3 pt-4 pb-4">
-                <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-muted', s.cls)}>
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-muted text-muted-foreground">
                   <s.icon size={16} />
                 </div>
                 <div>
@@ -85,15 +78,14 @@ export default function ApiKeysPage() {
           ))}
         </div>
 
-        {/* Table */}
-        <Card className="overflow-hidden mb-6">
+        <Card className="overflow-hidden mb-6 border-border">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <h2 className="text-sm font-semibold text-foreground">Claves</h2>
             <input
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Filtrar…"
-              className="h-7 px-3 rounded-lg border border-border bg-muted/50 text-sm text-foreground placeholder:text-muted-foreground outline-none w-44 focus:border-primary transition-colors"
+              className="h-8 px-3 rounded-[11px] border border-border bg-muted text-sm text-foreground placeholder:text-muted-foreground outline-none w-44 focus:border-ring transition-colors"
             />
           </div>
 

@@ -68,7 +68,7 @@ export function CloneBucketDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpenChange(false)}>
+          <Button variant="pearl" onClick={() => handleOpenChange(false)}>
             Cancelar
           </Button>
           <Button 

@@ -44,13 +44,13 @@ export function ShareBucketDialog({
         </DialogHeader>
 
         <div className="grid gap-5 py-4">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+          <div className="flex items-center justify-between p-3 rounded-xl bg-secondary border border-border">
             <div className="flex items-center gap-2.5">
               {bucket.isPublic 
-                ? <Globe size={18} className="text-green-500" /> 
+                ? <Globe size={18} className="text-success" /> 
                 : <Lock size={18} className="text-muted-foreground" />}
               <div className="flex flex-col">
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium text-foreground">
                   {bucket.isPublic ? 'Público' : 'Privado'}
                 </span>
                 <span className="text-xs text-muted-foreground">
@@ -92,7 +92,7 @@ export function ShareBucketDialog({
             </div>
             {publicLink && (
               <Button
-                variant="ghost"
+                variant="pearl"
                 size="sm"
                 className="w-full h-9 text-xs"
                 onClick={() => navigator.clipboard.writeText(publicLink)}
@@ -104,7 +104,7 @@ export function ShareBucketDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cerrar</Button>
+          <Button variant="pearl" onClick={() => onOpenChange(false)}>Cerrar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
-import type { Bucket } from '@/lib/api';
+import type { Bucket, BucketsListResult, ProviderListError } from '@/lib/api';
 import { toast } from 'sonner';
 
 export function useBuckets() {
@@ -11,9 +11,9 @@ export function useBuckets() {
 
   const query = useQuery({
     queryKey: ['buckets'],
-    queryFn: async () => {
+    queryFn: async (): Promise<BucketsListResult> => {
       const data = await api.buckets.list();
-      setBuckets(data);
+      setBuckets(data.buckets);
       return data;
     },
   });
@@ -21,8 +21,7 @@ export function useBuckets() {
   const createMutation = useMutation({
     mutationFn: (body: { name: string; providerId: string }) => api.buckets.create(body),
     onSuccess: async (_result, vars) => {
-      const { data } = await query.refetch();
-      if (data) setBuckets(data);
+      await query.refetch();
       qc.invalidateQueries({ queryKey: ['activity'] });
       toast.success(`Bucket "${vars.name}" creado`);
     },
@@ -32,11 +31,8 @@ export function useBuckets() {
   const deleteMutation = useMutation({
     mutationFn: ({ name, providerId }: { name: string; providerId: string }) =>
       api.buckets.delete(name, providerId),
-    onSuccess: (_result, vars) => {
-      const prev = qc.getQueryData<Bucket[]>(['buckets']) ?? [];
-      const next = prev.filter(b => !(b.name === vars.name && b.providerId === vars.providerId));
-      qc.setQueryData(['buckets'], next);
-      setBuckets(next);
+    onSuccess: async (_result, vars) => {
+      await query.refetch();
       qc.invalidateQueries({ queryKey: ['activity'] });
       toast.success(`Bucket "${vars.name}" eliminado`);
     },
@@ -44,7 +40,8 @@ export function useBuckets() {
   });
 
   return {
-    buckets: query.data ?? [],
+    buckets: query.data?.buckets ?? [],
+    providerErrors: query.data?.providerErrors ?? [],
     isLoading: query.isLoading,
     refetch: query.refetch,
     createBucket: createMutation.mutate,

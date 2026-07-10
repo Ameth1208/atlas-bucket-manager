@@ -53,9 +53,25 @@ export const useActionsStore = create(() => ({
     const { selected } = useBrowserStore.getState();
     if (!selected.size) return;
     try {
-      await api.objects.delete(bucketName, providerId, [...selected]);
-      toast.success('Eliminados');
+      const keys = [...selected];
+      await api.objects.delete(bucketName, providerId, keys);
+      toast.success(`${keys.length} archivo(s) eliminado(s)`);
       useBrowserStore.getState().setSelected(new Set());
+      useBrowserStore.getState().fetchObjects();
+    } catch (e: any) {
+      toast.error(e.message);
+    }
+  },
+
+  handleDeleteOne: async (key: string) => {
+    const { bucketName, providerId } = useURLStore.getState();
+    try {
+      await api.objects.delete(bucketName, providerId, [key]);
+      // Update the local store immediately for snappy UI
+      useBrowserStore.getState().setObjects(
+        useBrowserStore.getState().objects.filter(o => o.key !== key)
+      );
+      // Then re-fetch to be sure
       useBrowserStore.getState().fetchObjects();
     } catch (e: any) {
       toast.error(e.message);

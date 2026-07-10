@@ -1,6 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { Key, Globe, Lock } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { PopoverContent, PopoverHeader, PopoverTitle, PopoverDescription } from '@/components/ui/popover';
@@ -66,27 +67,24 @@ export function BucketPermissions({
       </PopoverHeader>
 
       <div className="p-4 space-y-5">
-        <div className="flex items-center justify-between p-3 rounded-lg bg-muted/30">
+        <div className="flex items-center justify-between p-3 rounded-md bg-secondary border border-border">
           <div className="flex items-center gap-2.5">
-            {bucket.isPublic 
-              ? <Globe size={16} className="text-green-500" /> 
+            {bucket.isPublic
+              ? <Globe size={16} className="text-success" />
               : <Lock size={16} className="text-muted-foreground" />}
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Acceso</span>
+              <span className="text-sm font-medium text-foreground">Acceso</span>
               <span className="text-xs text-muted-foreground">
                 {bucket.isPublic ? 'Cualquiera puede acceder' : 'Solo tú puedes acceder'}
               </span>
             </div>
           </div>
-          <Button
-            variant={bucket.isPublic ? 'destructive' : 'default'}
-            size="sm"
-            onClick={() => onTogglePublic(!bucket.isPublic)}
+          <Switch
+            checked={bucket.isPublic}
+            onCheckedChange={(checked) => onTogglePublic(!!checked)}
             disabled={isTogglingPublic}
-            className="h-7 text-xs"
-          >
-            {bucket.isPublic ? 'Hacer privado' : 'Hacer público'}
-          </Button>
+            aria-label={bucket.isPublic ? 'Hacer privado' : 'Hacer público'}
+          />
         </div>
 
         <div className="space-y-4">
@@ -125,7 +123,7 @@ export function BucketPermissions({
         </div>
 
         <div className="flex justify-end gap-2 pt-3 border-t border-border">
-          <Button variant="outline" size="sm" className="h-8 text-xs">
+          <Button variant="pearl" size="sm" className="h-8 text-xs">
             Cancelar
           </Button>
           <Button 

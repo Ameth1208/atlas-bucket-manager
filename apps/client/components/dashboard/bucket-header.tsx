@@ -1,5 +1,4 @@
 'use client';
-import { useState } from 'react';
 import { useBucketStats } from '@/hooks/use-buckets';
 import { QuotaBar } from '@/components/ui/quota-bar';
 import { fmtBytes, fmtDate } from '@/lib/utils';
@@ -8,7 +7,9 @@ import type { Bucket } from '@/lib/api';
 import { Card } from '../ui/card';
 import { BucketActions } from './bucket-actions';
 import { UploadDialog } from './upload-dialog';
+import { NewFolderDialog } from '@/app/(app)/buckets/[name]/components/new-folder-dialog';
 import { useRouter } from 'next/navigation';
+import { useBucketUIStore } from '@/app/(app)/buckets/[name]/store/ui';
 
 interface BucketHeaderProps {
   bucket: Bucket;
@@ -17,7 +18,10 @@ interface BucketHeaderProps {
 export function BucketHeader({ bucket }: BucketHeaderProps) {
   const { data: stats } = useBucketStats(bucket.name, bucket.providerId);
   const router = useRouter();
-  const [uploadOpen, setUploadOpen] = useState(false);
+  const uploadOpen = useBucketUIStore(s => s.uploadOpen);
+  const setUploadOpen = useBucketUIStore(s => s.setUploadOpen);
+  const newFolderOpen = useBucketUIStore(s => s.newFolderOpen);
+  const setNewFolderOpen = useBucketUIStore(s => s.setNewFolderOpen);
 
   const statsData = [
     {
@@ -27,7 +31,7 @@ export function BucketHeader({ bucket }: BucketHeaderProps) {
     },
     {
       icon: Database,
-      label: 'Espacio',
+      label: 'Espacio usado',
       value: stats?.totalSize ? fmtBytes(stats.totalSize) : '—',
     },
     {
@@ -49,15 +53,15 @@ export function BucketHeader({ bucket }: BucketHeaderProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6 py-8">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-muted">
-            <Database size={20} className="text-primary" />
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-11 h-11 rounded-lg flex items-center justify-center bg-primary-soft text-primary shrink-0">
+            <Database size={20} strokeWidth={1.8} />
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold uppercase tracking-tight text-foreground">{bucket.name}</h1>
-            <p className="text-xs text-muted-foreground">{bucket.providerName}</p>
+          <div className="min-w-0">
+            <h1 className="text-[20px] font-semibold tracking-[-0.3px] text-foreground truncate">{bucket.name}</h1>
+            <p className="text-[12px] text-muted-foreground truncate">{bucket.providerName}</p>
           </div>
         </div>
 
@@ -66,27 +70,28 @@ export function BucketHeader({ bucket }: BucketHeaderProps) {
           onDeleted={() => router.push('/dashboard')}
           onCloned={handleCloned}
           onUpload={() => setUploadOpen(true)}
+          onNewFolder={() => setNewFolderOpen(true)}
         />
       </div>
 
-      <Card className="rounded-xl overflow-hidden shadow-none">
-        <div className="grid grid-cols-4">
+      <Card>
+        <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
           {statsData.map((stat) => (
             <div
               key={stat.label}
-              className="py-6 px-4 border-r border-border last:border-r-0"
+              className="px-5 py-4 first:pl-5 last:pr-5"
             >
-              <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground mb-1">
-                <stat.icon size={11} />
+              <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-muted-foreground font-medium mb-1.5">
+                <stat.icon size={11} strokeWidth={1.8} />
                 {stat.label}
               </div>
               {stat.progress ? (
                 <>
-                  <p className="text-sm font-medium mb-1.5">{stat.value}</p>
+                  <p className="text-[14px] font-semibold text-foreground tabular-nums mb-2">{stat.value}</p>
                   <QuotaBar used={stat.progress.used} limit={stat.progress.limit} />
                 </>
               ) : (
-                <p className="text-lg font-semibold">{stat.value}</p>
+                <p className="text-[15px] font-semibold text-foreground tabular-nums">{stat.value}</p>
               )}
             </div>
           ))}
@@ -94,6 +99,7 @@ export function BucketHeader({ bucket }: BucketHeaderProps) {
       </Card>
 
       <UploadDialog open={uploadOpen} onOpenChange={setUploadOpen} />
+      <NewFolderDialog open={newFolderOpen} onOpenChange={setNewFolderOpen} />
     </div>
   );
 }

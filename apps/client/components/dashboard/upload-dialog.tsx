@@ -103,10 +103,10 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
           onDrop={handleDrop}
           onClick={() => document.getElementById('upload-file-input')?.click()}
           className={cn(
-            'flex flex-col items-center justify-center gap-3 py-10 px-4 rounded-xl border-2 border-dashed transition-colors cursor-pointer',
-            isDragging 
-              ? 'border-primary bg-primary/5' 
-              : 'border-border hover:border-primary/50 hover:bg-muted/30'
+            'flex flex-col items-center justify-center gap-3 py-10 px-4 rounded-2xl border-2 border-dashed transition-colors cursor-pointer',
+            isDragging
+              ? 'border-foreground bg-muted'
+              : 'border-border hover:border-foreground/30 hover:bg-muted/30'
           )}
         >
           <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center">
@@ -138,10 +138,10 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
                   {(item.file.size / 1024).toFixed(1)} KB
                 </span>
                 {item.status === 'done' && (
-                  <CheckCircle2 size={14} className="text-green-500 shrink-0" />
+                  <CheckCircle2 size={14} className="text-success shrink-0" />
                 )}
                 {item.status === 'uploading' && (
-                  <Loader2 size={14} className="text-primary animate-spin shrink-0" />
+                  <Loader2 size={14} className="text-foreground animate-spin shrink-0" />
                 )}
                 {item.status === 'error' && (
                   <span className="text-[10px] text-destructive">Error</span>
@@ -160,11 +160,11 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="pearl" onClick={handleClose}>
             Cancelar
           </Button>
-          <Button 
-            onClick={handleUpload} 
+          <Button
+            onClick={handleUpload}
             disabled={files.length === 0 || uploadMutation.isPending}
           >
             {uploadMutation.isPending ? 'Subiendo...' : `Subir ${files.length > 0 ? `(${files.length})` : ''}`}

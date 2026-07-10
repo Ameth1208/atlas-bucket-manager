@@ -28,6 +28,8 @@ interface AppStore {
   setCreateBucketOpen: (open: boolean) => void;
   connectProviderOpen: boolean;
   setConnectProviderOpen: (open: boolean) => void;
+  editProviderId: string | null;
+  setEditProviderId: (id: string | null) => void;
   createKeyOpen: boolean;
   setCreateKeyOpen: (open: boolean) => void;
   createUserOpen: boolean;
@@ -61,6 +63,8 @@ export const useAppStore = create<AppStore>()(
       setCreateBucketOpen: (open) => set({ createBucketOpen: open }),
       connectProviderOpen: false,
       setConnectProviderOpen: (open) => set({ connectProviderOpen: open }),
+      editProviderId: null,
+      setEditProviderId: (id) => set({ editProviderId: id }),
       createKeyOpen: false,
       setCreateKeyOpen: (open) => set({ createKeyOpen: open }),
       createUserOpen: false,
