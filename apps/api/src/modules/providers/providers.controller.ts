@@ -7,12 +7,14 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { ProvidersService } from './providers.service';
 import { CreateProviderDto } from './dto/provider.dto';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
+import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('providers')
 @UseGuards(RolesGuard)
@@ -31,13 +33,18 @@ export class ProvidersController {
   }
 
   @Post()
-  create(@Body() dto: CreateProviderDto) {
-    return this.providers.create(dto);
+  async create(@Body() dto: CreateProviderDto, @CurrentUser() user: AuthUser) {
+    return this.providers.create(dto, user?.email);
+  }
+
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() dto: CreateProviderDto, @CurrentUser() user: AuthUser) {
+    return this.providers.update(id, dto, user?.email);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  remove(@Param('id') id: string) {
-    return this.providers.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: AuthUser) {
+    return this.providers.remove(id, user?.email);
   }
 }

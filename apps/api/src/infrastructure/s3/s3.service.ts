@@ -1,6 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Client as MinioClient } from 'minio';
+import * as http from 'http';
+import * as https from 'https';
 import { DatabaseService } from '../database/database.service';
 import { ProviderInfo } from '../../domain/entities/provider.entity';
 
@@ -23,6 +25,25 @@ export class S3Service implements OnModuleInit {
     }
   }
 
+  private buildAgent(useSSL: boolean): https.Agent | http.Agent {
+    const opts = {
+      keepAlive: true,
+      keepAliveMsecs: 30_000,
+      connectTimeout: 5_000,
+      timeout: 8_000,
+    };
+    return useSSL ? new https.Agent(opts) : new http.Agent(opts);
+  }
+
+  private getRetryOptions() {
+    return {
+      disableRetry: true,
+      maximumRetryCount: 0,
+      baseDelayMs: 0,
+      maximumDelayMs: 0,
+    };
+  }
+
   getClient(providerId: string): MinioClient {
     if (this.clients.has(providerId)) {
       return this.clients.get(providerId)!;
@@ -37,6 +58,8 @@ export class S3Service implements OnModuleInit {
       accessKey: provider.accessKey,
       secretKey: provider.secretKey,
       region: provider.region,
+      transportAgent: this.buildAgent(provider.useSSL) as any,
+      retryOptions: this.getRetryOptions(),
     });
     this.clients.set(providerId, client);
     return client;

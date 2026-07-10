@@ -1,4 +1,4 @@
-import { IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateBucketDto {
   @IsString()
@@ -32,5 +32,7 @@ export class CreateFolderBodyDto {
 }
 
 export class DeleteObjectsDto {
+  @IsArray()
+  @IsString({ each: true })
   keys!: string[];
 }

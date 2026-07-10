@@ -15,6 +15,10 @@ import {
   SetBucketLimitDto,
   UpdateBucketPolicyDto,
 } from './dto/bucket.dto';
+import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
+import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 
 @Controller('buckets')
 export class BucketsController {
@@ -26,34 +30,48 @@ export class BucketsController {
   }
 
   @Post()
-  create(@Body() dto: CreateBucketDto) {
-    return this.buckets.create(dto);
+  @UseGuards(RolesGuard)
+  @Roles('owner', 'admin')
+  create(@Body() dto: CreateBucketDto, @CurrentUser() user: AuthUser) {
+    return this.buckets.create(dto, user?.email);
   }
 
   @Delete(':providerId/:name')
   @HttpCode(HttpStatus.OK)
-  remove(@Param('providerId') providerId: string, @Param('name') name: string) {
-    return this.buckets.remove(providerId, name);
+  @UseGuards(RolesGuard)
+  @Roles('owner', 'admin')
+  remove(
+    @Param('providerId') providerId: string,
+    @Param('name') name: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.buckets.remove(providerId, name, user?.email);
   }
 
   @Put(':providerId/:name/policy')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RolesGuard)
+  @Roles('owner', 'admin')
   setPolicy(
     @Param('providerId') providerId: string,
     @Param('name') name: string,
     @Body() dto: UpdateBucketPolicyDto,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.buckets.setVisibility(providerId, name, dto.isPublic);
+    return this.buckets.setVisibility(providerId, name, dto.isPublic, user?.email);
   }
 
   @Put(':providerId/:name/limit')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RolesGuard)
+  @Roles('owner', 'admin')
   setLimit(
     @Param('providerId') providerId: string,
     @Param('name') name: string,
     @Body() dto: SetBucketLimitDto,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.buckets.setLimit(providerId, name, dto);
+    return this.buckets.setLimit(providerId, name, dto, user?.email);
   }
 
   @Get(':providerId/:name/stats')

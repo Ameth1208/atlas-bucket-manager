@@ -47,11 +47,12 @@ export class SqliteUserRepository implements IUserRepository {
     const id = crypto.randomUUID();
     const passwordHash = bcrypt.hashSync(input.password, 10);
     const role = input.role ?? 'viewer';
+    const avatarSeed = input.avatarSeed ?? null;
     this.database.db
       .prepare(
-        `INSERT INTO users (id, name, email, password_hash, role) VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO users (id, name, email, password_hash, role, avatar_seed) VALUES (?, ?, ?, ?, ?, ?)`,
       )
-      .run(id, input.name, input.email, passwordHash, role);
+      .run(id, input.name, input.email, passwordHash, role, avatarSeed);
     const row = this.database.db
       .prepare('SELECT * FROM users WHERE id = ?')
       .get(id) as any;
@@ -64,14 +65,15 @@ export class SqliteUserRepository implements IUserRepository {
     const name = data.name ?? current.name;
     const email = data.email ?? current.email;
     const role = data.role ?? current.role;
+    const avatarSeed = data.avatarSeed !== undefined ? data.avatarSeed : current.avatarSeed ?? null;
     const passwordHash = data.password
       ? bcrypt.hashSync(data.password, 10)
       : current.passwordHash;
     this.database.db
       .prepare(
-        `UPDATE users SET name = ?, email = ?, role = ?, password_hash = ? WHERE id = ?`,
+        `UPDATE users SET name = ?, email = ?, role = ?, password_hash = ?, avatar_seed = ? WHERE id = ?`,
       )
-      .run(name, email, role, passwordHash, id);
+      .run(name, email, role, passwordHash, avatarSeed, id);
     const row = this.database.db
       .prepare('SELECT * FROM users WHERE id = ?')
       .get(id) as any;
@@ -92,6 +94,7 @@ export class SqliteUserRepository implements IUserRepository {
       email: row.email,
       passwordHash: row.password_hash,
       role: row.role,
+      avatarSeed: row.avatar_seed ?? undefined,
       createdAt: row.created_at,
     };
   }
@@ -102,6 +105,7 @@ export class SqliteUserRepository implements IUserRepository {
       name: row.name,
       email: row.email,
       role: row.role,
+      avatarSeed: row.avatar_seed ?? undefined,
       createdAt: row.created_at,
     };
   }

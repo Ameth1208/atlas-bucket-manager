@@ -17,6 +17,10 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { ObjectsService } from './objects.service';
 import { CreateFolderBodyDto, DeleteObjectsDto } from '../buckets/dto/bucket.dto';
+import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
+import { UseGuards } from '@nestjs/common';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
 
 @Controller()
 export class ObjectsController {
@@ -38,6 +42,11 @@ export class ObjectsController {
     @Query('providerId') providerId: string,
   ) {
     return this.objects.search(bucket, providerId, q);
+  }
+
+  @Get('objects/types')
+  fileTypes() {
+    return this.objects.fileTypes();
   }
 
   @Get('buckets/:providerId/:bucket/objects/:key(*)/url')
@@ -62,33 +71,42 @@ export class ObjectsController {
 
   @Delete('buckets/:providerId/:bucket/objects')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RolesGuard)
+  @Roles('owner', 'admin', 'editor')
   remove(
     @Param('providerId') providerId: string,
     @Param('bucket') bucket: string,
     @Body() dto: DeleteObjectsDto,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.objects.delete(providerId, bucket, dto);
+    return this.objects.delete(providerId, bucket, dto, user?.email);
   }
 
   @Post('buckets/:providerId/:bucket/folder')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RolesGuard)
+  @Roles('owner', 'admin', 'editor')
   createFolder(
     @Param('providerId') providerId: string,
     @Param('bucket') bucket: string,
     @Body() dto: CreateFolderBodyDto,
+    @CurrentUser() user: AuthUser,
   ) {
-    return this.objects.createFolder(providerId, bucket, dto);
+    return this.objects.createFolder(providerId, bucket, dto, user?.email);
   }
 
   @Post('buckets/:providerId/:bucket/upload')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(RolesGuard)
+  @Roles('owner', 'admin', 'editor')
   @UseInterceptors(FileFieldsInterceptor([{ name: 'files', maxCount: 100 }]))
   upload(
     @Param('providerId') providerId: string,
     @Param('bucket') bucket: string,
     @UploadedFiles() files: { files?: Express.Multer.File[] },
     @Body('prefix') prefix?: string,
+    @CurrentUser() user?: AuthUser,
   ) {
-    return this.objects.upload(providerId, bucket, files.files ?? [], prefix ?? '');
+    return this.objects.upload(providerId, bucket, files.files ?? [], prefix ?? '', user?.email);
   }
 }

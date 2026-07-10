@@ -8,8 +8,8 @@ export interface Bucket {
 }
 
 export interface BucketStats {
-  size: number;
-  count: number;
+  totalSize: number;
+  totalObjects: number;
   limit?: number;
   providerId: string;
 }

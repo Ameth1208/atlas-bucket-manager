@@ -14,6 +14,7 @@ import {
 import { StorageObject, SearchResult } from '../../domain/entities/object.entity';
 import { CreateFolderBodyDto, DeleteObjectsDto } from '../buckets/dto/bucket.dto';
 import { ConfigService } from '@nestjs/config';
+import { ActivityService } from '../activity/activity.service';
 
 @Injectable()
 export class ObjectsService {
@@ -21,6 +22,7 @@ export class ObjectsService {
     @Inject(BUCKET_REPOSITORY)
     private readonly repo: IBucketRepository,
     private readonly config: ConfigService,
+    private readonly activity: ActivityService,
   ) {}
 
   list(providerId: string, bucket: string, prefix?: string): Promise<StorageObject[]> {
@@ -29,6 +31,10 @@ export class ObjectsService {
 
   search(bucket: string, providerId: string, query: string): Promise<SearchResult[]> {
     return this.repo.searchObjects(bucket, providerId, query);
+  }
+
+  fileTypes() {
+    return this.repo.getFileTypes();
   }
 
   presignedUrl(providerId: string, bucket: string, key: string): Promise<{ url: string }> {
@@ -43,11 +49,21 @@ export class ObjectsService {
     providerId: string,
     bucket: string,
     dto: DeleteObjectsDto,
+    actor?: string,
   ): Promise<{ success: boolean }> {
     if (!Array.isArray(dto.keys) || dto.keys.length === 0) {
       throw new BadRequestException('keys must be a non-empty array');
     }
     await this.repo.deleteObjects(providerId, bucket, dto.keys);
+    if (actor) {
+      this.activity.log({
+        actor,
+        action: 'delete',
+        target: dto.keys.slice(0, 3).join(', ') + (dto.keys.length > 3 ? ` +${dto.keys.length - 3}` : ''),
+        bucket,
+        provider: providerId,
+      });
+    }
     return { success: true };
   }
 
@@ -55,11 +71,21 @@ export class ObjectsService {
     providerId: string,
     bucket: string,
     dto: CreateFolderBodyDto,
+    actor?: string,
   ): Promise<{ success: boolean }> {
     if (!dto.folderName) {
       throw new BadRequestException('folderName is required');
     }
     await this.repo.createFolder(providerId, bucket, dto.folderName, dto.prefix ?? '');
+    if (actor) {
+      this.activity.log({
+        actor,
+        action: 'folder',
+        target: dto.folderName,
+        bucket,
+        provider: providerId,
+      });
+    }
     return { success: true };
   }
 
@@ -68,6 +94,7 @@ export class ObjectsService {
     bucket: string,
     files: Express.Multer.File[],
     prefix = '',
+    actor?: string,
   ): Promise<{ success: boolean; uploaded: string[] }> {
     if (!files || files.length === 0) {
       throw new BadRequestException('No files provided');
@@ -85,6 +112,15 @@ export class ObjectsService {
         : file.originalname;
       await this.repo.uploadFile(providerId, bucket, objectName, tempPath);
       uploaded.push(objectName);
+    }
+    if (actor) {
+      this.activity.log({
+        actor,
+        action: 'upload',
+        target: uploaded.slice(0, 3).join(', ') + (uploaded.length > 3 ? ` +${uploaded.length - 3}` : ''),
+        bucket,
+        provider: providerId,
+      });
     }
     return { success: true, uploaded };
   }

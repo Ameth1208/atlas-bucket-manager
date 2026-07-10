@@ -12,21 +12,38 @@ import {
 
 export const BUCKET_REPOSITORY = Symbol('BUCKET_REPOSITORY');
 
+export interface ProviderListError {
+  providerId: string;
+  providerName: string;
+  error: string;
+}
+
+export interface BucketListResult {
+  buckets: Bucket[];
+  providerErrors: ProviderListError[];
+}
+
 export interface IBucketRepository {
   // Providers
   listProviders(): ProviderInfo[];
   getProvider(id: string): ProviderInfo | null;
-  createProvider(input: CreateProviderInput): ProviderInfo;
+  createProvider(input: CreateProviderInput): Promise<ProviderInfo>;
+  updateProvider(id: string, input: Partial<CreateProviderInput>): Promise<ProviderInfo>;
   deleteProvider(id: string): boolean;
 
   // Buckets
-  listBuckets(): Promise<Bucket[]>;
+  listBuckets(): Promise<BucketListResult>;
   createBucket(input: CreateBucketInput): Promise<void>;
   deleteBucket(providerId: string, name: string): Promise<void>;
   setBucketVisibility(
     providerId: string,
     name: string,
     isPublic: boolean,
+  ): Promise<void>;
+  setBucketLimit(
+    providerId: string,
+    name: string,
+    maxSize: number,
   ): Promise<void>;
   getBucketStats(
     providerId: string,
@@ -61,6 +78,7 @@ export interface IBucketRepository {
     providerId: string,
     query: string,
   ): Promise<SearchResult[]>;
+  getFileTypes(): Promise<{ type: string; count: number; size: number }[]>;
 
   // Streaming
   getPresignedUrl(

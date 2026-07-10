@@ -40,6 +40,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         email TEXT NOT NULL UNIQUE,
         password_hash TEXT NOT NULL,
         role TEXT NOT NULL DEFAULT 'viewer',
+        avatar_seed TEXT,
         created_at INTEGER NOT NULL DEFAULT (unixepoch())
       );
 
@@ -93,6 +94,22 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         FOREIGN KEY (provider_id) REFERENCES provider_configs(id) ON DELETE CASCADE,
         UNIQUE(provider_id, name)
       );
+
+      CREATE TABLE IF NOT EXISTS invites (
+        id TEXT PRIMARY KEY,
+        token TEXT NOT NULL UNIQUE,
+        email TEXT,
+        role TEXT NOT NULL DEFAULT 'viewer',
+        created_by TEXT NOT NULL,
+        used_at INTEGER,
+        expires_at INTEGER,
+        created_at INTEGER NOT NULL DEFAULT (unixepoch())
+      );
     `);
+    try {
+      this._db.exec('ALTER TABLE users ADD COLUMN avatar_seed TEXT;');
+    } catch {
+      // Column already exists
+    }
   }
 }
