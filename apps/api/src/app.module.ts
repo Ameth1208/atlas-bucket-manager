@@ -12,6 +12,7 @@ import { BucketsModule } from './modules/buckets/buckets.module';
 import { ObjectsModule } from './modules/objects/objects.module';
 import { ApiKeysModule } from './modules/api-keys/api-keys.module';
 import { ActivityModule } from './modules/activity/activity.module';
+import { InvitesModule } from './modules/invites/invites.module';
 import { CopyModule } from './modules/copy/copy.module';
 import { HealthModule } from './modules/health/health.module';
 
@@ -41,6 +42,7 @@ function findEnvFile(): string | undefined {
     ObjectsModule,
     ApiKeysModule,
     ActivityModule,
+    InvitesModule,
     CopyModule,
     HealthModule,
   ],
