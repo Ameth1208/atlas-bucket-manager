@@ -20,6 +20,8 @@ import {
   type Locale,
 } from './types';
 
+export type { Locale } from './types';
+
 const STORAGE_KEY = 'atlas.locale';
 const DICTIONARIES: Record<Locale, Dictionary> = { en, es, pt };
 

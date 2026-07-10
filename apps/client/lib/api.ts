@@ -25,6 +25,8 @@ export const api = {
     login: (body: { email: string; password: string }) =>
       request<{ success: boolean; user: User }>('/auth/login', { method: 'POST', body: JSON.stringify(body) }),
     logout: () => request<{ success: boolean }>('/auth/logout', { method: 'POST' }),
+    changePassword: (body: { currentPassword: string; newPassword: string }) =>
+      request<{ success: boolean }>('/auth/change-password', { method: 'POST', body: JSON.stringify(body) }),
   },
 
   users: {
@@ -32,6 +34,8 @@ export const api = {
     create: (body: CreateUserBody) => request<User>('/users', { method: 'POST', body: JSON.stringify(body) }),
     update: (id: string, body: Partial<CreateUserBody>) =>
       request<User>(`/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+    resetPassword: (id: string) =>
+      request<{ temporaryPassword: string }>(`/users/${id}/reset-password`, { method: 'POST' }),
     delete: (id: string) => request<{ success: boolean }>(`/users/${id}`, { method: 'DELETE' }),
   },
 
@@ -42,12 +46,23 @@ export const api = {
     revoke: (id: string) => request<{ success: boolean }>(`/api-keys/${id}`, { method: 'DELETE' }),
   },
 
+  invites: {
+    create: (body: { email?: string; role?: User['role'] }) =>
+      request<{ invite: Invite; url: string }>('/invites', { method: 'POST', body: JSON.stringify(body) }),
+    list: () => request<Invite[]>('/invites'),
+    delete: (id: string) => request<{ success: boolean }>(`/invites/${id}`, { method: 'DELETE' }),
+    validate: (token: string) =>
+      request<{ valid: boolean; role: string; email?: string }>(`/invites/public/${token}/validate`, { method: 'POST' }),
+    accept: (token: string, body: { name: string; email: string; password: string }) =>
+      request<User>(`/invites/public/${token}/accept`, { method: 'POST', body: JSON.stringify(body) }),
+  },
+
   activity: {
     list: (limit = 50, offset = 0) => request<ActivityEntry[]>(`/activity?limit=${limit}&offset=${offset}`),
   },
 
   buckets: {
-    list: () => request<Bucket[]>('/buckets'),
+    list: () => request<BucketsListResult>('/buckets'),
     create: (body: { name: string; providerId: string; limit?: number }) =>
       request<{ success: boolean }>('/buckets', { method: 'POST', body: JSON.stringify(body) }),
     delete: (name: string, providerId: string) =>
@@ -57,10 +72,13 @@ export const api = {
     setLimit: (name: string, providerId: string, limit: number) =>
       request<{ success: boolean }>(`/buckets/${providerId}/${name}/limit`, { method: 'PUT', body: JSON.stringify({ limit }) }),
     setPublic: (name: string, providerId: string, isPublic: boolean) =>
-      request<{ success: boolean }>(`/buckets/${providerId}/${name}/policy`, { method: 'PUT', body: JSON.stringify({ public: isPublic }) }),
+      request<{ success: boolean }>(`/buckets/${providerId}/${name}/policy`, { method: 'PUT', body: JSON.stringify({ isPublic }) }),
     providers: () => request<Provider[]>('/providers'),
+    getProvider: (id: string) => request<Provider>(`/providers/${id}`),
     createProvider: (body: CreateProviderBody) =>
       request<Provider>('/providers', { method: 'POST', body: JSON.stringify(body) }),
+    updateProvider: (id: string, body: CreateProviderBody) =>
+      request<Provider>(`/providers/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   },
 
   objects: {
@@ -69,7 +87,8 @@ export const api = {
     search: (bucket: string, providerId: string, query: string) =>
       request<StorageObject[]>(`/search?q=${encodeURIComponent(query)}&bucket=${bucket}&providerId=${providerId}`),
     delete: (bucket: string, providerId: string, keys: string[]) =>
-      request<{ success: boolean }>(`/buckets/${providerId}/${bucket}/objects`, { method: 'DELETE', body: JSON.stringify({ objects: keys }) }),
+      request<{ success: boolean }>(`/buckets/${providerId}/${bucket}/objects`, { method: 'DELETE', body: JSON.stringify({ keys }) }),
+    fileTypes: () => request<FileTypeCount[]>('/objects/types'),
     presignedUrl: (bucket: string, key: string, providerId: string) =>
       request<{ url: string }>(`/buckets/${providerId}/${bucket}/objects/${encodeURIComponent(key)}/url`),
     createFolder: (bucket: string, providerId: string, folderName: string, prefix: string) =>
@@ -98,7 +117,19 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: 'owner' | 'admin' | 'editor' | 'viewer';
+  avatarSeed?: string;
+  createdAt: number;
+}
+
+export interface Invite {
+  id: string;
+  token: string;
+  email?: string;
+  role: 'owner' | 'admin' | 'editor' | 'viewer';
+  createdBy: string;
+  usedAt?: number;
+  expiresAt?: number;
   createdAt: number;
 }
 
@@ -106,7 +137,8 @@ export interface CreateUserBody {
   name: string;
   email: string;
   password: string;
-  role?: string;
+  role?: 'owner' | 'admin' | 'editor' | 'viewer';
+  avatarSeed?: string;
 }
 
 export interface ApiKeyInfo {
@@ -163,17 +195,36 @@ export interface BucketStats {
 export interface Provider {
   id: string;
   name: string;
+  kind?: string;
+  endPoint?: string;
+  port?: number;
+  useSSL?: boolean;
+  accessKey?: string;
+  secretKey?: string;
+  region?: string;
+  createdAt?: number;
 }
 
 export interface CreateProviderBody {
   name: string;
   kind: string;
-  endpoint: string;
+  endPoint: string;
   port: number;
-  ssl: boolean;
+  useSSL: boolean;
   accessKey: string;
   secretKey: string;
   region: string;
+}
+
+export interface ProviderListError {
+  providerId: string;
+  providerName: string;
+  error: string;
+}
+
+export interface BucketsListResult {
+  buckets: Bucket[];
+  providerErrors: ProviderListError[];
 }
 
 export interface StorageObject {
@@ -182,4 +233,10 @@ export interface StorageObject {
   lastModified?: string;
   etag?: string;
   isFolder?: boolean;
+}
+
+export interface FileTypeCount {
+  type: string;
+  count: number;
+  size: number;
 }
