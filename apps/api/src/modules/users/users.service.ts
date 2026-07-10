@@ -1,4 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import * as crypto from 'crypto';
+import * as bcrypt from 'bcryptjs';
 import {
   IUserRepository,
   USER_REPOSITORY,
@@ -35,6 +37,14 @@ export class UsersService {
 
   update(id: string, dto: UpdateUserDto): UserInfo {
     return this.users.update(id, dto);
+  }
+
+  resetPassword(id: string): { temporaryPassword: string } {
+    const user = this.users.findById(id);
+    if (!user) throw new NotFoundException('User not found');
+    const temporaryPassword = crypto.randomBytes(6).toString('hex');
+    this.users.update(id, { password: temporaryPassword });
+    return { temporaryPassword };
   }
 
   remove(id: string): { success: boolean } {

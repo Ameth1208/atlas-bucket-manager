@@ -13,8 +13,8 @@ export class CreateUserDto {
   password!: string;
 
   @IsOptional()
-  @IsIn(['owner', 'admin', 'viewer'])
-  role?: 'owner' | 'admin' | 'viewer';
+  @IsIn(['owner', 'admin', 'editor', 'viewer'])
+  role?: 'owner' | 'admin' | 'editor' | 'viewer';
 }
 
 export class UpdateUserDto {
@@ -32,6 +32,10 @@ export class UpdateUserDto {
   password?: string;
 
   @IsOptional()
-  @IsIn(['owner', 'admin', 'viewer'])
-  role?: 'owner' | 'admin' | 'viewer';
+  @IsIn(['owner', 'admin', 'editor', 'viewer'])
+  role?: 'owner' | 'admin' | 'editor' | 'viewer';
+
+  @IsOptional()
+  @IsString()
+  avatarSeed?: string;
 }

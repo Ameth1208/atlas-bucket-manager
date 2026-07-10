@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
-import { LoginDto, SetupDto } from './dto/auth.dto';
+import { LoginDto, SetupDto, ChangePasswordDto } from './dto/auth.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 
@@ -54,6 +54,12 @@ export class AuthController {
     const info = this.auth.me(user);
     if (!info) return { error: 'User not found' };
     return info;
+  }
+
+  @Post('change-password')
+  @HttpCode(HttpStatus.OK)
+  changePassword(@CurrentUser() user: AuthUser, @Body() dto: ChangePasswordDto) {
+    return this.auth.changePassword(user, dto);
   }
 
   private setAuthCookie(res: Response, token: string) {

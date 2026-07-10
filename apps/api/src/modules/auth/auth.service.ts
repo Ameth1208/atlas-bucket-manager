@@ -1,11 +1,11 @@
-import { Inject, Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, ConflictException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { IUserRepository, USER_REPOSITORY } from '../../domain/repositories/user.repository';
 import { UserInfo } from '../../domain/entities/user.entity';
 import { AuthUser } from '../../common/decorators/current-user.decorator';
-import { LoginDto, SetupDto } from './dto/auth.dto';
+import { LoginDto, SetupDto, ChangePasswordDto } from './dto/auth.dto';
 
 export interface AuthResult {
   token: string;
@@ -44,6 +44,7 @@ export class AuthService {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatarSeed: user.avatarSeed,
       createdAt: user.createdAt,
     };
     return this.buildResult(info);
@@ -57,8 +58,19 @@ export class AuthService {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatarSeed: user.avatarSeed,
       createdAt: user.createdAt,
     };
+  }
+
+  changePassword(payload: AuthUser, dto: ChangePasswordDto): { success: boolean } {
+    const user = this.users.findById(payload.userId);
+    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!bcrypt.compareSync(dto.currentPassword, user.passwordHash)) {
+      throw new ForbiddenException('Current password is incorrect');
+    }
+    this.users.update(user.id, { password: dto.newPassword });
+    return { success: true };
   }
 
   private async buildResult(user: UserInfo): Promise<AuthResult> {

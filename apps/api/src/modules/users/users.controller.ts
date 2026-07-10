@@ -34,6 +34,11 @@ export class UsersController {
     return this.users.update(id, dto);
   }
 
+  @Post(':id/reset-password')
+  resetPassword(@Param('id') id: string) {
+    return this.users.resetPassword(id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.users.remove(id);
