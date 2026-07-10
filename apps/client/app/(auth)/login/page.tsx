@@ -106,22 +106,22 @@ export default function LoginPage() {
 
   if (checking) {
     return (
-      <main className="h-dvh w-dvw flex items-center justify-center bg-secondary/30">
+      <main className="h-dvh w-dvw flex items-center justify-center bg-background">
         <span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="h-dvh w-dvw flex items-center justify-center bg-secondary/30">
+    <main className="h-dvh w-dvw flex items-center justify-center bg-background">
       <div className="w-full max-w-[380px]">
         <div className="flex justify-center mb-8">
           <Logo size="lg" showText />
         </div>
 
-        <Card>
+        <Card className="border-border">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Iniciar sesión</CardTitle>
+            <CardTitle className="text-lg text-foreground">Iniciar sesión</CardTitle>
             <CardDescription>Ingresa tus credenciales para continuar</CardDescription>
           </CardHeader>
           <CardContent className="pb-6">
@@ -132,7 +132,7 @@ export default function LoginPage() {
               </p>
               <Link
                 href="/setup"
-                className="w-full inline-flex items-center justify-center gap-1.5 h-7 px-2.5 rounded-md border border-input bg-background text-[0.8rem] font-medium hover:bg-accent hover:text-accent-foreground transition-colors"
+                className="w-full inline-flex items-center justify-center gap-1.5 h-9 px-2.5 rounded-[8px] border border-border bg-muted text-[13px] font-medium hover:bg-background transition-colors"
               >
                 <UserPlus size={15} /> Configurar cuenta de administrador
               </Link>

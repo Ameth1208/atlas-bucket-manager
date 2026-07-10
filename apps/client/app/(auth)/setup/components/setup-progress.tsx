@@ -15,7 +15,7 @@ export function SetupProgress() {
   const steps: SetupStep[] = [1, 2, 3];
 
   return (
-    <div className="flex items-center justify-center gap-0">
+    <div className="flex items-center justify-center">
       {steps.map((num, i) => {
         const done = num < step;
         const active = num === step;
@@ -23,36 +23,21 @@ export function SetupProgress() {
 
         return (
           <div key={num} className="flex items-center">
-            <div className="flex flex-col items-center gap-1.5 sm:gap-2 min-w-[58px] sm:min-w-[68px]">
-              <div className="relative">
-                {active && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute -inset-1.5 rounded-full bg-[#0071E3]/15 blur-md"
-                  />
-                )}
-                <div
-                  className={`relative size-6 sm:size-7 rounded-full flex items-center justify-center text-[11px] sm:text-[12px] font-semibold transition-all duration-300 ${
-                    done
-                      ? 'bg-gradient-to-br from-cyan-500 to-[#0071E3] text-white shadow-[0_2px_8px_rgba(0,113,227,0.4)]'
-                      : active
-                        ? 'bg-[#1D1D1F] text-white scale-110 shadow-[0_2px_10px_rgba(0,0,0,0.2)]'
-                        : 'bg-[#E8E8ED] text-[#86868B]'
-                  }`}
-                >
-                  {done ? (
-                    <Check size={11} strokeWidth={3} className="text-white sm:hidden" />
-                  ) : (
-                    <span>{num}</span>
-                  )}
-                  {done ? (
-                    <Check size={12} strokeWidth={3} className="text-white hidden sm:block" />
-                  ) : null}
-                </div>
+            <div className="flex flex-col items-center gap-2 min-w-[76px]">
+              <div
+                className={`size-8 rounded-full flex items-center justify-center text-[13px] font-semibold transition-colors duration-150 ${
+                  done
+                    ? 'bg-foreground text-background'
+                    : active
+                      ? 'bg-foreground text-background'
+                      : 'bg-card text-muted-foreground border border-border'
+                }`}
+              >
+                {done ? <Check size={14} strokeWidth={2.5} /> : num}
               </div>
               <span
-                className={`text-[10.5px] sm:text-[11px] font-medium tracking-tight transition-colors duration-200 ${
-                  active ? 'text-[#1D1D1F]' : done ? 'text-[#0071E3]' : 'text-[#86868B]'
+                className={`text-[11px] font-medium tracking-tight transition-colors duration-150 ${
+                  active ? 'text-foreground' : 'text-muted-foreground'
                 }`}
               >
                 {labels[num]}
@@ -60,10 +45,10 @@ export function SetupProgress() {
             </div>
 
             {!isLast && (
-              <div className="relative w-8 sm:w-12 h-0.5 mx-1 sm:mx-1.5 mb-5 sm:mb-6 rounded-full bg-[#E8E8ED] overflow-hidden">
+              <div className="relative w-10 h-px mx-2 mb-5 bg-border overflow-hidden">
                 <div
-                  className={`absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-cyan-500 to-[#0071E3] transition-all duration-500 ${
-                    done ? 'w-full' : 'w-0'
+                  className={`absolute inset-0 bg-foreground transition-transform duration-150 origin-left ${
+                    done ? 'scale-x-100' : 'scale-x-0'
                   }`}
                 />
               </div>

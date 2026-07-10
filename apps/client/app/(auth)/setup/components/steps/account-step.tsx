@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowRight, ArrowLeft, Loader2, User, Mail, Lock } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
 import { useSetupStore } from '../../store';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
@@ -14,15 +14,14 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type Strength = 'weak' | 'ok' | 'strong';
 
-function evaluatePassword(pwd: string): { strength: Strength; score: number; label: string } {
+function evaluatePassword(pwd: string): { strength: Strength } {
   let score = 0;
   if (pwd.length >= 8) score++;
   if (pwd.length >= 12) score++;
   if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
   if (/\d/.test(pwd)) score++;
   if (/[^A-Za-z0-9]/.test(pwd)) score++;
-  const strength: Strength = score <= 2 ? 'weak' : score <= 3 ? 'ok' : 'strong';
-  return { strength, score, label: strength };
+  return { strength: score <= 2 ? 'weak' : score <= 3 ? 'ok' : 'strong' };
 }
 
 export function AccountStep() {
@@ -41,12 +40,12 @@ export function AccountStep() {
   }, [admin, touched, t]);
 
   const pwdEval = useMemo(() => evaluatePassword(admin.password), [admin.password]);
-  const strengthColor: Record<Strength, string> = {
+  const strengthBarColor = {
     weak: 'bg-destructive',
-    ok: 'bg-amber-500',
-    strong: 'bg-emerald-500',
+    ok: 'bg-warning',
+    strong: 'bg-success',
   };
-  const strengthWidth: Record<Strength, string> = {
+  const strengthWidth = {
     weak: 'w-1/3',
     ok: 'w-2/3',
     strong: 'w-full',
@@ -54,15 +53,11 @@ export function AccountStep() {
 
   const validate = () => {
     setTouched({ name: true, email: true, password: true, confirm: true });
-    const e: Record<string, string> = {};
-    if (!admin.name.trim()) e.name = t.required;
-    if (!admin.email.trim()) e.email = t.required;
-    else if (!EMAIL_RE.test(admin.email)) e.email = t.invalidEmail;
-    if (!admin.password) e.password = t.required;
-    else if (admin.password.length < 8) e.password = t.passwordTooShort;
-    if (!admin.confirm) e.confirm = t.required;
-    else if (admin.password !== admin.confirm) e.confirm = t.passwordMismatch;
-    return Object.keys(e).length === 0;
+    if (!admin.name.trim() || !admin.email.trim() || !admin.password || !admin.confirm) return false;
+    if (!EMAIL_RE.test(admin.email)) return false;
+    if (admin.password.length < 8) return false;
+    if (admin.password !== admin.confirm) return false;
+    return true;
   };
 
   const handleSubmit = async () => {
@@ -76,69 +71,63 @@ export function AccountStep() {
       });
       setUser(user);
       setStep(3);
-    } catch (err: any) {
-      toast.error(err.message || 'Error');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="space-y-5">
-      <div className="space-y-1">
-        <h2 className="text-[20px] font-semibold tracking-tight text-foreground leading-[1.2]">
+    <div className="space-y-4 sm:space-y-5">
+      <div className="text-center space-y-1 sm:space-y-1.5">
+        <h2 className="text-[22px] sm:text-[28px] font-semibold text-foreground leading-[1.10] text-balance">
           {t.accountTitle}
         </h2>
-        <p className="text-[12.5px] text-muted-foreground leading-[1.55]">
+        <p className="text-[15px] sm:text-[17px] text-muted-foreground leading-[1.47] text-pretty">
           {t.accountSubtitle}
         </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         <Input
-          type="text"
           label={t.fieldName}
+          placeholder={t.fieldNamePh}
           value={admin.name}
           onChange={(e) => setAdmin({ name: e.target.value })}
           onBlur={() => setTouched((p) => ({ ...p, name: true }))}
           invalid={!!errors.name}
-          valid={admin.name.trim().length >= 2}
           autoComplete="name"
-          icon={User}
-          hint={errors.name}
         />
         <Input
           type="email"
           label={t.fieldEmail}
+          placeholder={t.fieldEmailPh}
           value={admin.email}
           onChange={(e) => setAdmin({ email: e.target.value })}
           onBlur={() => setTouched((p) => ({ ...p, email: true }))}
           invalid={!!errors.email}
-          valid={EMAIL_RE.test(admin.email)}
           autoComplete="email"
-          icon={Mail}
-          hint={errors.email}
         />
         <div>
           <Input
             type="password"
             label={t.fieldPassword}
+            placeholder={t.fieldPasswordPh}
             value={admin.password}
             onChange={(e) => setAdmin({ password: e.target.value })}
             onBlur={() => setTouched((p) => ({ ...p, password: true }))}
             invalid={!!errors.password}
             autoComplete="new-password"
-            icon={Lock}
-            hint={errors.password}
           />
           {admin.password && !errors.password && (
-            <div className="mt-1.5 space-y-1">
+            <div className="mt-2 space-y-1.5">
               <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-500 ${strengthColor[pwdEval.strength]} ${strengthWidth[pwdEval.strength]}`}
+                  className={`h-full ${strengthBarColor[pwdEval.strength]} ${strengthWidth[pwdEval.strength]}`}
                 />
               </div>
-              <p className="text-[10.5px] text-muted-foreground flex items-center gap-1.5">
+              <p className="text-[11px] sm:text-[12px] text-muted-foreground flex items-center gap-1.5">
                 <span>
                   {pwdEval.strength === 'strong'
                     ? t.passwordStrong
@@ -146,7 +135,7 @@ export function AccountStep() {
                       ? t.passwordOk
                       : t.passwordWeak}
                 </span>
-                <span className="text-muted-foreground/60">·</span>
+                <span className="text-border">·</span>
                 <span>{t.passwordHint}</span>
               </p>
             </div>
@@ -155,22 +144,26 @@ export function AccountStep() {
         <Input
           type="password"
           label={t.fieldConfirm}
+          placeholder={t.fieldConfirmPh}
           value={admin.confirm}
           onChange={(e) => setAdmin({ confirm: e.target.value })}
           onBlur={() => setTouched((p) => ({ ...p, confirm: true }))}
           invalid={!!errors.confirm}
-          valid={admin.confirm.length > 0 && admin.confirm === admin.password}
           autoComplete="new-password"
-          icon={Lock}
-          hint={errors.confirm}
         />
       </div>
 
-      <div className="flex gap-2 pt-2">
+      {Object.keys(errors).length > 0 && (
+        <p className="text-[13px] text-destructive text-center">
+          {Object.values(errors)[0]}
+        </p>
+      )}
+
+      <div className="flex gap-3">
         <Button
-          variant="outline"
+          variant="pearl"
           onClick={() => setStep(1)}
-          className="h-10 flex-1"
+          className="flex-1"
         >
           <ArrowLeft size={15} />
           {t.back}
@@ -178,7 +171,7 @@ export function AccountStep() {
         <Button
           onClick={handleSubmit}
           disabled={loading}
-          className="h-10 flex-1"
+          className="flex-1"
         >
           {loading ? (
             <>

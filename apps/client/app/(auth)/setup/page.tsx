@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { SetupCard } from './components';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { useI18n } from '@/lib/i18n';
 
 export default function SetupPage() {
@@ -27,22 +28,19 @@ export default function SetupPage() {
   }, [router]);
 
   return (
-    <main className="relative min-h-dvh w-dvw flex items-start sm:items-center justify-center overflow-x-hidden overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 100% 80% at 50% 0%, #E0F2FE 0%, #F0F9FF 30%, #F8FAFC 70%, #F1F5F9 100%)',
-        }}
-      />
+    <main className="light-setup relative min-h-dvh w-dvw overflow-x-hidden overflow-y-auto bg-background">
+      <div className="absolute top-4 right-4 sm:top-6 sm:right-8 z-20">
+        <LanguageSwitcher />
+      </div>
 
-      <div className="relative w-full max-w-[460px] sm:max-w-[480px] md:max-w-[520px] flex items-center justify-center">
-        {checking ? (
-          <span className="w-7 h-7 border-2 border-[#0071E3] border-t-transparent rounded-full animate-spin" />
-        ) : (
-          <SetupCard />
-        )}
+      <div className="min-h-dvh flex flex-col items-center justify-center px-4 py-6 sm:px-8 sm:py-10">
+        <div className="w-full max-w-[440px]">
+          {checking ? (
+            <span className="mx-auto block size-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <SetupCard />
+          )}
+        </div>
       </div>
     </main>
   );
