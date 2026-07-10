@@ -4,6 +4,15 @@ const API_URL = process.env.API_URL ?? 'http://localhost:3001';
 
 const nextConfig: NextConfig = {
   output: 'standalone',
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'tapback.co',
+        pathname: '/api/avatar/**',
+      },
+    ],
+  },
   async rewrites() {
     return [
       {

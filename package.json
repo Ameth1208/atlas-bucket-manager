@@ -30,7 +30,8 @@
     "test:client": "pnpm --filter @atlas/client run test",
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",
-    "clean": "pnpm -r exec rm -rf dist .next node_modules/.cache"
+    "clean": "pnpm -r exec rm -rf dist .next node_modules/.cache",
+    "doctor": "npx react-doctor@latest"
   },
   "keywords": [
     "s3",
