@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { useRouter } from 'next/navigation';
 import { CreateBucketModal } from '@/components/modals/create-bucket';
 import { ConnectProviderModal, EditProviderModal } from '@/components/modals/connect-provider';
 import { CreateApiKeyModal } from '@/components/modals/create-api-key';
@@ -13,9 +12,8 @@ import { CreateUserModal } from '@/components/modals/create-user';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { setUser } = useAppStore();
-  const router = useRouter();
 
-  const { data: me, error } = useQuery({
+  const { data: me } = useQuery({
     queryKey: ['me'],
     queryFn: api.auth.me,
     retry: false,
@@ -23,8 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (me) setUser(me);
-    if (error) router.push('/login');
-  }, [me, error]);
+  }, [me, setUser]);
 
   return (
     <div className="flex h-dvh overflow-hidden">

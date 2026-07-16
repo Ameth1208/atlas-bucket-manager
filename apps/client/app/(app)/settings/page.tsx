@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { User, Shield, Users, Plug } from 'lucide-react';
 import { Toolbar } from '@/components/layout/toolbar';
 import { useAppStore } from '@/lib/store';
@@ -13,6 +13,13 @@ import { IntegrationsSection } from './components/integrations-section';
 import { SecuritySection } from './components/security-section';
 import type { Section } from './lib/types';
 
+const DESCRIPTIONS: Record<Section, string> = {
+  account: 'Gestiona tu información personal y preferencias.',
+  team: 'Invita y controla el acceso de tu equipo.',
+  integrations: 'Conecta Atlas con servicios externos.',
+  security: 'Protege tu cuenta y datos.',
+};
+
 export default function SettingsPage() {
   const { t } = useI18n();
   const [section, setSection] = useState<Section>('account');
@@ -20,21 +27,17 @@ export default function SettingsPage() {
   const isOwner = user?.role === 'owner';
   const isAdmin = user?.role === 'admin' || isOwner;
 
-  const SECTIONS = [
-    { id: 'account' as Section, label: t.settingsProfile, icon: User },
-    { id: 'team' as Section, label: t.settingsTeam, icon: Users, hidden: !isAdmin },
-    { id: 'integrations' as Section, label: t.settingsIntegrations, icon: Plug, hidden: !isAdmin },
-    { id: 'security' as Section, label: t.settingsSecurity, icon: Shield },
-  ].filter((s) => !s.hidden);
+  const SECTIONS = useMemo(
+    () => [
+      { id: 'account' as Section, label: t.settingsProfile, icon: User },
+      { id: 'team' as Section, label: t.settingsTeam, icon: Users, hidden: !isAdmin },
+      { id: 'integrations' as Section, label: t.settingsIntegrations, icon: Plug, hidden: !isAdmin },
+      { id: 'security' as Section, label: t.settingsSecurity, icon: Shield },
+    ].filter((s) => !s.hidden),
+    [t, isAdmin]
+  );
 
   const SectionIcon = SECTIONS.find((s) => s.id === section)?.icon || User;
-
-  const descriptions: Record<Section, string> = {
-    account: 'Gestiona tu información personal y preferencias.',
-    team: 'Invita y controla el acceso de tu equipo.',
-    integrations: 'Conecta Atlas con servicios externos.',
-    security: 'Protege tu cuenta y datos.',
-  };
 
   const titles: Record<Section, string> = {
     account: t.settingsProfile,
@@ -59,7 +62,7 @@ export default function SettingsPage() {
 
         <div className="flex-1 overflow-y-auto p-5 lg:p-8">
           <div className="max-w-5xl mx-auto">
-            <SectionHeader icon={SectionIcon} title={titles[section]} description={descriptions[section]} />
+            <SectionHeader icon={SectionIcon} title={titles[section]} description={DESCRIPTIONS[section]} />
 
             {section === 'account' && <AccountSection />}
             {section === 'team' && <TeamSection />}

@@ -99,8 +99,10 @@ export function CloneBucketDialog({
           </div>
 
           <div className="grid gap-2.5">
-            <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Proveedor de destino</Label>
+            <Label htmlFor="dest-provider" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Proveedor de destino</Label>
             <select
+              id="dest-provider"
+              aria-label="Proveedor de destino"
               value={destProviderId}
               onChange={(e) => setDestProviderId(e.target.value)}
               disabled={isJobActive || isJobDone || isCloning}

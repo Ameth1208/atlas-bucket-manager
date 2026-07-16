@@ -12,15 +12,17 @@ export function PathBreadcrumb() {
     <nav className="flex items-center gap-1 py-3 text-[13px]">
       <Folder size={13} className="text-muted-foreground mr-1" />
       <button
+        type="button"
         onClick={() => back(0)}
         className="text-muted-foreground hover:text-foreground transition-colors"
       >
         {bucketName}
       </button>
       {path.map((seg, i) => (
-        <span key={i} className="flex items-center gap-1">
+        <span key={path.slice(0, i + 1).join('/')} className="flex items-center gap-1">
           <ChevronRight size={12} className="text-muted-foreground/60" />
           <button
+            type="button"
             onClick={() => back(i + 1)}
             className={
               i === path.length - 1

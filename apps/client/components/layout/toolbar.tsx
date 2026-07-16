@@ -18,9 +18,10 @@ export function Toolbar({ crumbs = [] }: ToolbarProps) {
       {/* Breadcrumbs */}
       <div className="flex items-center gap-1 flex-1 min-w-0 text-[14px] tracking-[-0.224px]">
         {crumbs.map((c, i) => (
-          <span key={i} className="flex items-center gap-1">
+          <span key={c.href + '-' + c.label} className="flex items-center gap-1">
             {i > 0 && <ChevronRight size={12} className="text-muted-foreground/50" />}
             <button
+              type="button"
               onClick={() => c.href && router.push(c.href)}
               className={i === crumbs.length - 1
                 ? 'font-medium text-foreground cursor-default'
@@ -35,17 +36,17 @@ export function Toolbar({ crumbs = [] }: ToolbarProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
-        <Button variant="ghost" size="icon-sm" onClick={() => setConnectProviderOpen(true)} title="Conectar proveedor">
+        <Button type="button" variant="ghost" size="icon-sm" onClick={() => setConnectProviderOpen(true)} title="Conectar proveedor" aria-label="Conectar proveedor">
           <Cloud size={14} />
         </Button>
-        <Button variant="ghost" size="icon-sm" onClick={() => setCreateBucketOpen(true)} title="Nuevo bucket">
+        <Button type="button" variant="ghost" size="icon-sm" onClick={() => setCreateBucketOpen(true)} title="Nuevo bucket" aria-label="Nuevo bucket">
           <Plus size={14} />
         </Button>
 
         <Separator orientation="vertical" className="h-5 mx-1 bg-border" />
 
         {user && (
-          <button onClick={() => router.push('/settings')} className="rounded-full">
+          <button type="button" onClick={() => router.push('/settings')} className="rounded-full" aria-label="Abrir configuración">
             <MemojiAvatar
               name={user.avatarSeed || user.email || user.name}
               size={28}

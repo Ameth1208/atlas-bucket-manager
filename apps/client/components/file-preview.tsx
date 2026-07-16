@@ -1,8 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X, Download, Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 interface FilePreviewProps {
   src: string;
@@ -16,18 +17,17 @@ const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
 const TEXT_EXTS = ['txt', 'md', 'json', 'xml', 'html', 'css', 'js', 'ts', 'tsx', 'jsx', 'py', 'go', 'rs', 'java', 'c', 'cpp', 'h', 'sh', 'yaml', 'yml', 'toml', 'ini', 'conf', 'log'];
 const PDF_EXT = ['pdf'];
 
-export function FilePreview({ src, fileName, fileType, fileSize, onClose }: FilePreviewProps) {
+export function FilePreview(props: FilePreviewProps) {
+  return <FilePreviewInner key={props.src} {...props} />;
+}
+
+function FilePreviewInner({ src, fileName, fileType, fileSize, onClose }: FilePreviewProps) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const ext = fileName.split('.').pop()?.toLowerCase() || '';
   const isImage = IMAGE_EXTS.includes(ext);
   const isText = TEXT_EXTS.includes(ext);
   const isPdf = PDF_EXT.includes(ext);
-
-  useEffect(() => {
-    setError(false);
-    setLoading(true);
-  }, [src]);
 
   const handleLoad = () => setLoading(false);
   const handleError = () => {
@@ -69,14 +69,16 @@ export function FilePreview({ src, fileName, fileType, fileSize, onClose }: File
             </div>
           ) : isImage ? (
             <div className="relative w-full h-full flex items-center justify-center p-4">
-              <img
+              <Image
                 src={src}
                 alt={fileName}
-                className="max-w-full max-h-full object-contain"
+                fill
+                unoptimized
+                priority
+                sizes="100vw"
+                className="object-contain"
                 onLoad={handleLoad}
                 onError={handleError}
-                loading="eager"
-                decoding="async"
               />
             </div>
           ) : isText || isPdf ? (
@@ -84,6 +86,7 @@ export function FilePreview({ src, fileName, fileType, fileSize, onClose }: File
               src={src}
               className="w-full h-full border-0"
               title={fileName}
+              sandbox="allow-scripts"
               onLoad={handleLoad}
               onError={handleError}
             />
@@ -107,5 +110,5 @@ function formatSize(bytes: number): string {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i])}`;
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }

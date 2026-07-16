@@ -32,6 +32,9 @@ export function ObjectList() {
         return (
           <div
             key={obj.key}
+            role="button"
+            tabIndex={0}
+            aria-label={`Seleccionar ${fileName}`}
             className={cn(
               'grid grid-cols-[40px_minmax(0,1fr)_100px_120px_120px_140px] gap-4 items-center px-5 py-3 cursor-pointer transition-colors text-sm group',
               i > 0 && 'border-t border-border',
@@ -43,6 +46,12 @@ export function ObjectList() {
             onDoubleClick={() => {
               if (obj.isFolder) { navigate(fileName); return; }
               handlePreview(obj.key);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                select(obj.key, { ctrl: false, shift: false });
+              }
             }}
           >
             <div className="flex items-center justify-center">
@@ -133,6 +142,7 @@ function ListAction({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
         'w-8 h-8 rounded-md flex items-center justify-center transition-colors',

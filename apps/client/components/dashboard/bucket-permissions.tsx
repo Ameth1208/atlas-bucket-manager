@@ -110,6 +110,7 @@ export function BucketPermissions({
           <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">
             {PRESETS.map((p, i) => (
               <button
+                type="button"
                 key={p.value}
                 onClick={() => onPresetClick(i)}
                 className={`hover:text-foreground transition-colors ${
@@ -122,19 +123,20 @@ export function BucketPermissions({
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 pt-3 border-t border-border">
-          <Button variant="pearl" size="sm" className="h-8 text-xs">
-            Cancelar
-          </Button>
-          <Button 
-            size="sm" 
-            onClick={() => onSetLimit(limitValue)}
-            disabled={limitValue === bucket.limit || isSavingLimit}
-            className="h-8 text-xs"
-          >
-            {isSavingLimit ? 'Guardando...' : 'Guardar'}
-          </Button>
-        </div>
+          <div className="flex justify-end gap-2 pt-3 border-t border-border">
+            <Button type="button" variant="pearl" size="sm" className="h-8 text-xs">
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => onSetLimit(limitValue)}
+              disabled={limitValue === bucket.limit || isSavingLimit}
+              className="h-8 text-xs"
+            >
+              {isSavingLimit ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </div>
       </div>
     </PopoverContent>
   );

@@ -28,6 +28,7 @@ export function BucketsPanel({ search, setSearch, bucketsCount }: BucketsPanelPr
           />
           {search && (
             <button
+              type="button"
               onClick={() => setSearch('')}
               className="absolute right-3 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
             >

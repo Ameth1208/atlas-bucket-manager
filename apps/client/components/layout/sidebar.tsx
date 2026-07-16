@@ -46,6 +46,10 @@ const TOOLS = [
   { id: 'settings', href: '/settings', icon: Settings, label: 'Ajustes' },
 ];
 
+const openProviderEdit = (id: string) => {
+  useAppStore.getState().setEditProviderId(id);
+};
+
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -70,10 +74,6 @@ export function AppSidebar() {
   };
 
   const toggleProvider = (id: string) => setProvidersOpen(s => ({ ...s, [id]: !s[id] }));
-
-  const handleEditProvider = (id: string) => {
-    useAppStore.getState().setEditProviderId(id);
-  };
 
   const [deleteProviderTarget, setDeleteProviderTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -170,7 +170,7 @@ export function AppSidebar() {
                         >
                           <MoreHorizontal size={13} />
                         </PopoverTrigger>
-                        <ProviderInfoContent provider={p} bucketCount={pBuckets.length} onEdit={() => handleEditProvider(p.id)} onDelete={() => handleDeleteProvider(p.id, p.name)} />
+                        <ProviderInfoContent provider={p} bucketCount={pBuckets.length} onEdit={() => openProviderEdit(p.id)} onDelete={() => handleDeleteProvider(p.id, p.name)} />
                       </Popover>
                     </div>
                     {isOpen && (
@@ -241,14 +241,16 @@ export function AppSidebar() {
             <p className="text-xs text-sidebar-foreground/60 truncate capitalize">{user?.role}</p>
           </div>
           <Button
+            type="button"
             variant="ghost"
             size="icon-sm"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             title="Cambiar tema"
+            aria-label="Cambiar tema"
           >
             {mounted ? (theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />) : <Moon size={13} />}
           </Button>
-          <Button variant="ghost" size="icon-sm" onClick={logout} title="Cerrar sesión">
+          <Button type="button" variant="ghost" size="icon-sm" onClick={logout} title="Cerrar sesión" aria-label="Cerrar sesión">
             <LogOut size={13} />
           </Button>
         </div>
@@ -313,12 +315,14 @@ function ProviderInfoContent({ provider, bucketCount, onEdit, onDelete }: Provid
 
       <div className="flex border-t border-border">
         <button
+          type="button"
           onClick={onEdit}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-medium text-popover-foreground hover:bg-muted transition-colors border-r border-border"
         >
           <Pencil size={12} /> Editar
         </button>
         <button
+          type="button"
           onClick={onDelete}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-medium text-destructive hover:bg-destructive-soft transition-colors"
         >
@@ -337,6 +341,7 @@ function Row({ label, value, mono, copyable, onCopy, copied }: { label: string; 
         <span className={cn('text-[12px] text-popover-foreground truncate', mono && 'font-mono')}>{value}</span>
         {copyable && onCopy && (
           <button
+            type="button"
             onClick={onCopy}
             className="shrink-0 w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted"
             aria-label="Copiar"

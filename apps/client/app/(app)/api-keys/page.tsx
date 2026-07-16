@@ -23,6 +23,11 @@ curl -X POST https://tu-atlas.app/api/v1/upload/mi-bucket \\\n\
   -H "Authorization: Bearer ${prefix}_••••••••••••••••" \\\n\
   -F "file=@./archivo.png"`;
 
+function copy(text: string) {
+  navigator.clipboard.writeText(text);
+  toast.success('Copiado');
+}
+
 export default function ApiKeysPage() {
   const qc = useQueryClient();
   const { setCreateKeyOpen } = useAppStore();
@@ -42,7 +47,6 @@ export default function ApiKeysPage() {
   const reads = active.filter(k => k.scopes.includes('read')).length;
   const writes = active.filter(k => k.scopes.includes('write')).length;
 
-  const copy = (text: string) => { navigator.clipboard.writeText(text); toast.success('Copiado'); };
   const toggleReveal = (id: string) => setRevealed(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
 
   return (
@@ -118,10 +122,10 @@ export default function ApiKeysPage() {
               </div>
               <div className="flex items-center gap-1">
                 <code className="font-mono text-xs text-muted-foreground">{k.prefix}_••••••••</code>
-                <button onClick={() => toggleReveal(k.id)} className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors">
+                <button type="button" onClick={() => toggleReveal(k.id)} aria-label={revealed.has(k.id) ? 'Ocultar token' : 'Mostrar token'} className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors">
                   {revealed.has(k.id) ? <EyeOff size={11} /> : <Eye size={11} />}
                 </button>
-                <button onClick={() => copy(k.prefix)} className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors">
+                <button type="button" onClick={() => copy(k.prefix)} aria-label="Copiar prefijo del token" className="w-6 h-6 rounded flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors">
                   <Copy size={11} />
                 </button>
               </div>
@@ -132,6 +136,7 @@ export default function ApiKeysPage() {
               </div>
               <p className="text-xs font-mono text-muted-foreground">{fmtRelative(k.lastUsed ?? undefined)}</p>
               <button
+                type="button"
                 disabled={!!k.revokedAt || revokeMutation.isPending}
                 onClick={() => revokeMutation.mutate(k.id)}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-muted transition-colors disabled:opacity-30"
@@ -149,7 +154,7 @@ export default function ApiKeysPage() {
             <h3 className="text-sm font-semibold text-foreground">Inicio rápido</h3>
             <div className="flex gap-1">
               {['cURL', 'Node.js', 'Python'].map((t, i) => (
-                <button key={t} className={cn('px-2.5 py-1 rounded-lg text-xs transition-colors', i === 0 ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted')}>
+                <button type="button" key={t} className={cn('px-2.5 py-1 rounded-lg text-xs transition-colors', i === 0 ? 'bg-muted text-foreground' : 'text-muted-foreground hover:bg-muted')}>
                   {t}
                 </button>
               ))}

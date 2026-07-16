@@ -19,21 +19,25 @@ export function LanguageSelect({ className }: { className?: string }) {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <div
-          role="button"
-          className={cn(
-            'flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-card hover:border-border-strong transition-colors w-full sm:w-56',
-            className
-          )}
-        >
-          <span className="w-5 h-3.5 rounded-[2px] overflow-hidden ring-1 ring-black/[0.08]">
-            <CurrentFlag className="w-full h-full" />
-          </span>
-          <span className="text-sm font-medium text-foreground">{LABELS[locale]}</span>
-          <ChevronDown size={14} className="text-muted-foreground ml-auto" />
-        </div>
-      </PopoverTrigger>
+      <PopoverTrigger
+        render={(props) => (
+          <button
+            {...props}
+            type="button"
+            aria-label="Seleccionar idioma"
+            className={cn(
+              'flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-card hover:border-border-strong transition-colors w-full sm:w-56',
+              className
+            )}
+          >
+            <span className="w-5 h-3.5 rounded-[2px] overflow-hidden ring-1 ring-black/[0.08]">
+              <CurrentFlag className="w-full h-full" />
+            </span>
+            <span className="text-sm font-medium text-foreground">{LABELS[locale]}</span>
+            <ChevronDown size={14} className="text-muted-foreground ml-auto" />
+          </button>
+        )}
+      />
       <PopoverContent className="w-56 p-1.5" align="start">
         <div className="space-y-0.5">
           {CODES.map(code => {
@@ -41,6 +45,7 @@ export function LanguageSelect({ className }: { className?: string }) {
             const active = code === locale;
             return (
               <button
+                type="button"
                 key={code}
                 onClick={() => { setLocale(code); setOpen(false); }}
                 className={cn(

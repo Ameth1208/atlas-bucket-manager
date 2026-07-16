@@ -14,11 +14,12 @@ import type { User } from '@/lib/api';
 
 const ROLES: User['role'][] = ['admin', 'editor', 'viewer'];
 
+const close = () => useAppStore.getState().setCreateUserOpen(false);
+
 export function CreateUserModal() {
   const { t } = useI18n();
   const qc = useQueryClient();
   const open = useAppStore(s => s.createUserOpen);
-  const close = () => useAppStore.getState().setCreateUserOpen(false);
 
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'viewer' as User['role'] });
 
@@ -64,6 +65,7 @@ export function CreateUserModal() {
           <div className="flex gap-2 mt-2">
             {ROLES.map(r => (
               <button
+                type="button"
                 key={r}
                 onClick={() => setForm(f => ({ ...f, role: r }))}
                 className={cn(
@@ -80,8 +82,9 @@ export function CreateUserModal() {
         </div>
 
         <div className="flex gap-2 pt-4">
-          <Button variant="outline" className="flex-1" onClick={close}>{t.cancel}</Button>
+          <Button type="button" variant="outline" className="flex-1" onClick={close}>{t.cancel}</Button>
           <Button
+            type="button"
             className="flex-1"
             disabled={!form.name || !form.email || !form.password || createMutation.isPending}
             onClick={() => createMutation.mutate()}

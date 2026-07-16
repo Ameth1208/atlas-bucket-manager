@@ -12,6 +12,18 @@ import { useI18n } from '@/lib/i18n';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const STRENGTH_BAR_COLOR: Record<Strength, string> = {
+  weak: 'bg-destructive',
+  ok: 'bg-warning',
+  strong: 'bg-success',
+};
+
+const STRENGTH_WIDTH: Record<Strength, string> = {
+  weak: 'w-1/3',
+  ok: 'w-2/3',
+  strong: 'w-full',
+};
+
 type Strength = 'weak' | 'ok' | 'strong';
 
 function evaluatePassword(pwd: string): { strength: Strength } {
@@ -40,16 +52,6 @@ export function AccountStep() {
   }, [admin, touched, t]);
 
   const pwdEval = useMemo(() => evaluatePassword(admin.password), [admin.password]);
-  const strengthBarColor = {
-    weak: 'bg-destructive',
-    ok: 'bg-warning',
-    strong: 'bg-success',
-  };
-  const strengthWidth = {
-    weak: 'w-1/3',
-    ok: 'w-2/3',
-    strong: 'w-full',
-  };
 
   const validate = () => {
     setTouched({ name: true, email: true, password: true, confirm: true });
@@ -124,7 +126,7 @@ export function AccountStep() {
             <div className="mt-2 space-y-1.5">
               <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
                 <div
-                  className={`h-full ${strengthBarColor[pwdEval.strength]} ${strengthWidth[pwdEval.strength]}`}
+                  className={`h-full ${STRENGTH_BAR_COLOR[pwdEval.strength]} ${STRENGTH_WIDTH[pwdEval.strength]}`}
                 />
               </div>
               <p className="text-[11px] sm:text-[12px] text-muted-foreground flex items-center gap-1.5">

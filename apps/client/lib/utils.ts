@@ -31,25 +31,3 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
-
-export const actionColors: Record<string, string> = {
-  upload: 'var(--green)',
-  delete: 'var(--red)',
-  clone: 'var(--accent)',
-  share: 'var(--accent)',
-  policy: 'var(--orange)',
-  login: 'var(--green)',
-  create_bucket: 'var(--accent)',
-  delete_bucket: 'var(--red)',
-};
-
-export const actionLabels: Record<string, string> = {
-  upload: 'subió',
-  delete: 'eliminó',
-  clone: 'clonó',
-  share: 'compartió',
-  policy: 'actualizó política en',
-  login: 'inició sesión',
-  create_bucket: 'creó bucket',
-  delete_bucket: 'eliminó bucket',
-};

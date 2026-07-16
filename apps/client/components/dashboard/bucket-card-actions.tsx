@@ -21,6 +21,8 @@ interface BucketCardActionsProps {
   onCloned?: (newBucket: Bucket) => void;
 }
 
+const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
+
 export function BucketCardActions({ bucket, onDeleted, onCloned }: BucketCardActionsProps) {
   const qc = useQueryClient();
   const { providers } = useProviders();
@@ -80,8 +82,6 @@ export function BucketCardActions({ bucket, onDeleted, onCloned }: BucketCardAct
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const stopPropagation = (e: React.MouseEvent) => e.stopPropagation();
-
   const handleOpenCloneChange = (open: boolean) => {
     setCloneOpen(open);
     if (!open) {
@@ -90,10 +90,10 @@ export function BucketCardActions({ bucket, onDeleted, onCloned }: BucketCardAct
   };
 
   return (
-    <div className="flex items-center gap-1.5" onClick={stopPropagation}>
+    <div role="group" aria-label="Acciones del bucket" className="flex items-center gap-1.5" onClick={stopPropagation}>
       <Popover open={permsOpen} onOpenChange={setPermsOpen}>
         <PopoverTrigger render={<div />} nativeButton={false}>
-          <Button variant="pearl" size="sm">
+          <Button type="button" variant="pearl" size="sm">
             <Settings size={13} />
             Permisos
           </Button>
@@ -108,6 +108,7 @@ export function BucketCardActions({ bucket, onDeleted, onCloned }: BucketCardAct
       </Popover>
 
       <Button
+        type="button"
         variant="pearl"
         size="sm"
         onClick={(e) => { stopPropagation(e); setCloneOpen(true); }}
@@ -117,6 +118,7 @@ export function BucketCardActions({ bucket, onDeleted, onCloned }: BucketCardAct
       </Button>
 
       <Button
+        type="button"
         variant="ghost"
         size="icon-sm"
         onClick={(e) => { stopPropagation(e); setDeleteOpen(true); }}

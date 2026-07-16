@@ -144,6 +144,7 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
             const Icon = PROVIDER_ICONS[p.id];
             return (
               <button
+                type="button"
                 key={p.id}
                 onClick={() => selectKind(p)}
                 className="flex flex-col items-center justify-center gap-2 p-3 rounded-xl border border-border bg-card hover:border-foreground/25 hover:bg-muted transition-all text-center"
@@ -160,6 +161,7 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
         <div className="flex flex-col gap-4">
           {mode === 'create' && (
             <button
+              type="button"
               onClick={() => setShowKindPicker(true)}
               className="inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors self-start"
             >
@@ -279,8 +281,9 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button variant="pearl" className="flex-1 h-10" onClick={onClose}>Cancelar</Button>
+            <Button type="button" variant="pearl" className="flex-1 h-10" onClick={onClose}>Cancelar</Button>
             <Button
+              type="button"
               className="flex-1 h-10"
               disabled={!canSubmit}
               onClick={submit}

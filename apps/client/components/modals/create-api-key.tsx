@@ -13,10 +13,11 @@ import { cn } from '@/lib/utils';
 
 const SCOPES = ['read', 'write', 'delete'];
 
+const close = () => useAppStore.getState().setCreateKeyOpen(false);
+
 export function CreateApiKeyModal() {
   const qc = useQueryClient();
   const open = useAppStore(s => s.createKeyOpen);
-  const close = () => useAppStore.getState().setCreateKeyOpen(false);
 
   const [name, setName] = useState('');
   const [scopes, setScopes] = useState<string[]>(['read']);
@@ -58,8 +59,10 @@ export function CreateApiKeyModal() {
             <div className="flex gap-2 mt-2">
               {SCOPES.map(s => (
                 <button
+                  type="button"
                   key={s}
                   onClick={() => toggleScope(s)}
+                  aria-pressed={scopes.includes(s)}
                   className={cn(
                     'px-3 py-1.5 rounded-lg text-sm font-medium capitalize transition-all border',
                     scopes.includes(s)
@@ -74,8 +77,9 @@ export function CreateApiKeyModal() {
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button variant="pearl" className="flex-1" onClick={handleClose}>Cancelar</Button>
+            <Button type="button" variant="pearl" className="flex-1" onClick={handleClose}>Cancelar</Button>
             <Button
+              type="button"
               className="flex-1"
               disabled={!name || scopes.length === 0 || createMutation.isPending}
               onClick={() => createMutation.mutate()}
@@ -99,14 +103,16 @@ export function CreateApiKeyModal() {
             <div className="flex items-center gap-2 p-3 rounded-xl border border-border bg-muted/50 mt-1.5">
               <code className="flex-1 font-mono text-xs text-foreground break-all">{created.fullKey}</code>
               <button
+                type="button"
                 onClick={copy}
+                aria-label={copied ? 'Copiado' : 'Copiar clave'}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors shrink-0"
               >
                 {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
               </button>
             </div>
           </div>
-          <Button onClick={handleClose}>Entendido, la guardé</Button>
+          <Button type="button" onClick={handleClose}>Entendido, la guardé</Button>
         </div>
       )}
     </Modal>

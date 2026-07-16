@@ -19,6 +19,9 @@ import { getRoleLabel, getRoleStyle } from '../lib/role-utils';
 import type { User } from '@/lib/api';
 import type { Dictionary } from '@/lib/i18n/types';
 
+const formatDate = (ts?: number) =>
+  ts ? new Date(ts).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '—';
+
 export function TeamSection() {
   const { t } = useI18n();
   const { user, isOwner, users, invites, deleteMutation, roleMutation, resetMutation } = useTeam();
@@ -48,8 +51,6 @@ export function TeamSection() {
     { id: 'invites' as const, label: 'Invitations', count: pendingInvites.length },
   ];
 
-  const formatDate = (ts?: number) => (ts ? new Date(ts).toLocaleDateString() : '—');
-
   return (
     <>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
@@ -65,7 +66,7 @@ export function TeamSection() {
             className="h-9 rounded-sm bg-muted/30 border-border/60 text-sm w-64"
           />
           {isOwner && (
-            <Button size="sm" onClick={() => setInviteOpen(!inviteOpen)} className="rounded-md">
+            <Button type="button" size="sm" onClick={() => setInviteOpen(!inviteOpen)} className="rounded-md">
               <Plus size={13} /> Invite
             </Button>
           )}
@@ -86,6 +87,7 @@ export function TeamSection() {
       <div className="flex gap-1 mb-4 border-b border-border">
         {tabs.map((tabItem) => (
           <button
+            type="button"
             key={tabItem.id}
             onClick={() => setTab(tabItem.id)}
             className={cn(
@@ -154,7 +156,12 @@ function InviteForm({
             <p className="text-sm font-semibold">Invite member</p>
             <p className="text-xs text-muted-foreground">Generate a link or send an invite by email.</p>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Cerrar invitación"
+            className="text-muted-foreground hover:text-foreground"
+          >
             <X size={16} />
           </button>
         </div>
@@ -178,6 +185,7 @@ function InviteForm({
             <div className="flex rounded-md border border-border overflow-hidden text-sm h-8">
               {(['admin', 'editor', 'viewer'] as User['role'][]).map((r) => (
                 <button
+                  type="button"
                   key={r}
                   onClick={() => setInviteForm((f) => ({ ...f, role: r }))}
                   className={cn(
@@ -213,9 +221,11 @@ function InviteForm({
                 className="h-9 rounded-sm text-sm font-mono"
               />
               <Button
+                type="button"
                 size="sm"
                 variant="secondary"
                 className="rounded-md shrink-0"
+                aria-label="Copiar enlace de invitación"
                 onClick={() => {
                   navigator.clipboard.writeText(`${origin}${inviteResult.url}`);
                   toast.success(t.settingsInviteCopied);
@@ -252,8 +262,6 @@ function MembersTab({
   deleteMutation,
   query,
 }: MembersTabProps) {
-  const formatDate = (ts?: number) => (ts ? new Date(ts).toLocaleDateString() : '—');
-
   return (
     <Card className="border-border/60 rounded-md">
       <CardContent className="p-0">
@@ -387,6 +395,7 @@ function InvitesTab({ t, pendingInvites, revokeInviteMutation, formatDate }: Inv
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end">
                         <button
+                          type="button"
                           onClick={() => revokeInviteMutation.mutate(inv.id)}
                           className="inline-flex items-center gap-1 text-xs text-destructive hover:bg-destructive/10 px-2 py-1.5 rounded-md transition-colors"
                         >

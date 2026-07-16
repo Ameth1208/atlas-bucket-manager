@@ -1,115 +1,28 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { api } from '@/lib/api';
-import { useAppStore } from '@/lib/store';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Logo } from '@/components/ui/logo';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { LogIn, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
+import { LoginForm } from './components/login-form';
 
-function LoginForm() {
-  const router = useRouter();
-  const { setUser } = useAppStore();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+const API_URL = process.env.API_URL ?? 'http://localhost:3001';
 
-  const validate = () => {
-    const newErrors: typeof errors = {};
-    if (!email) newErrors.email = 'Requerido';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) newErrors.email = 'Correo inválido';
-    if (!password) newErrors.password = 'Requerido';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+export const dynamic = 'force-dynamic';
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setLoading(true);
-    try {
-      const { user } = await api.auth.login({ email, password });
-      setUser(user);
-      toast.success('Bienvenido', { description: `Sesión iniciada como ${user.name}` });
-      router.push('/dashboard');
-    } catch (err: any) {
-      toast.error('Error de autenticación', { description: err.message || 'Credenciales inválidas' });
-    } finally {
-      setLoading(false);
+export default async function LoginPage() {
+  let isSetup = true;
+  try {
+    const res = await fetch(`${API_URL}/api/auth/status`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      isSetup = data.isSetup;
     }
-  };
+  } catch {
+    // If the status check fails, fall through to the login form.
+  }
 
-  return (
-    <form onSubmit={submit} className="space-y-4">
-      <div className="grid gap-1.5">
-        <Label htmlFor="email">Correo electrónico</Label>
-        <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={e => { setEmail(e.target.value); if (errors.email) setErrors(p => ({ ...p, email: '' })); }}
-          placeholder="admin@atlas.app"
-          aria-invalid={!!errors.email}
-        />
-        {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-      </div>
-
-      <div className="grid gap-1.5">
-        <Label htmlFor="password">Contraseña</Label>
-        <Input
-          id="password"
-          type="password"
-          value={password}
-          onChange={e => { setPassword(e.target.value); if (errors.password) setErrors(p => ({ ...p, password: '' })); }}
-          placeholder="••••••••"
-          aria-invalid={!!errors.password}
-        />
-        {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
-      </div>
-
-      <Button type="submit" disabled={loading} className="w-full mt-2">
-        {loading
-          ? <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          : <><LogIn size={15} /> Iniciar sesión</>
-        }
-      </Button>
-    </form>
-  );
-}
-
-export default function LoginPage() {
-  const router = useRouter();
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    api.auth.status()
-      .then(({ isSetup }) => {
-        if (cancelled) return;
-        if (!isSetup) {
-          router.replace('/setup');
-          return;
-        }
-        setChecking(false);
-      })
-      .catch(() => {
-        if (!cancelled) setChecking(false);
-      });
-    return () => { cancelled = true; };
-  }, [router]);
-
-  if (checking) {
-    return (
-      <main className="h-dvh w-dvw flex items-center justify-center bg-background">
-        <span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      </main>
-    );
+  if (!isSetup) {
+    redirect('/setup');
   }
 
   return (

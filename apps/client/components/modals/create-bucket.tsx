@@ -21,10 +21,11 @@ const LIMIT_PRESETS = [
   { label: '100 GB', value: '102400' },
 ];
 
+const close = () => useAppStore.getState().setCreateBucketOpen(false);
+
 export function CreateBucketModal() {
   const qc = useQueryClient();
   const open = useAppStore(s => s.createBucketOpen);
-  const close = () => useAppStore.getState().setCreateBucketOpen(false);
   const { providers } = useProviders();
   const { setBuckets } = useAppStore();
 

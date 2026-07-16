@@ -40,16 +40,16 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
     mutationFn: async (fileItems: FileItem[]) => {
       const pendingFiles = fileItems.filter(f => f.status === 'pending');
       const prefix = path.join('/') + (path.length > 0 ? '/' : '');
-      
-      for (const item of pendingFiles) {
-        setFiles(prev => prev.map(f => f.file === item.file ? { ...f, status: 'uploading' } : f));
+
+      setFiles(prev => prev.map(f => pendingFiles.some(p => p.file === f.file) ? { ...f, status: 'uploading' } : f));
+      await Promise.all(pendingFiles.map(async (item) => {
         try {
           await api.objects.upload(bucketName, providerId, [item.file], prefix);
           setFiles(prev => prev.map(f => f.file === item.file ? { ...f, status: 'done' } : f));
         } catch {
           setFiles(prev => prev.map(f => f.file === item.file ? { ...f, status: 'error' } : f));
         }
-      }
+      }));
     },
     onSuccess: () => {
       toast.success('Archivos subidos');
@@ -98,10 +98,19 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
         </DialogHeader>
 
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Seleccionar archivos para subir"
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           onClick={() => document.getElementById('upload-file-input')?.click()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              document.getElementById('upload-file-input')?.click();
+            }
+          }}
           className={cn(
             'flex flex-col items-center justify-center gap-3 py-10 px-4 rounded-2xl border-2 border-dashed transition-colors cursor-pointer',
             isDragging
@@ -120,6 +129,7 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
             id="upload-file-input" 
             type="file" 
             multiple 
+            aria-label="Archivos para subir"
             className="hidden" 
             onChange={handleFileSelect}
           />
@@ -148,6 +158,8 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
                 )}
                 {item.status === 'pending' && (
                   <button
+                    type="button"
+                    aria-label={`Eliminar ${item.file.name}`}
                     onClick={() => handleRemove(item.file)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
                   >

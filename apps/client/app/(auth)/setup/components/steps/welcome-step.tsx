@@ -33,9 +33,9 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
 
       <div className="w-full mb-4 sm:mb-6">
         <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
-          {features.map(({ icon: Icon, text }, i) => (
+          {features.map(({ icon: Icon, text }) => (
             <div
-              key={i}
+              key={text}
               className="flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-[11px] bg-muted border border-divider-soft"
             >
               <div className="shrink-0 size-7 sm:size-8 rounded-[8px] bg-muted text-muted-foreground flex items-center justify-center">

@@ -33,6 +33,7 @@ export function IntegrationsSection() {
       <div className="flex gap-1.5 p-1 rounded-md border border-border/60 bg-muted/20 w-fit mb-6">
         {tabs.map((item) => (
           <button
+            type="button"
             key={item.id}
             onClick={() => setTab(item.id)}
             className={cn(
@@ -208,9 +209,9 @@ function NotificationsTab({ t }: NotificationsTabProps) {
           {[
             { label: t.settingsNotifyOnUpload, checked: true },
             { label: t.settingsNotifyOnDelete, checked: false },
-          ].map((n, idx) => (
+          ].map((n) => (
             <div
-              key={idx}
+              key={n.label}
               className="flex items-center justify-between p-4 rounded-md border border-border/60 bg-muted/20"
             >
               <span className="text-sm font-medium">{n.label}</span>

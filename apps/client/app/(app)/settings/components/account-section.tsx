@@ -45,7 +45,7 @@ export function AccountSection() {
           <div className="flex items-center gap-3 mb-6">
             <Popover>
               <PopoverTrigger>
-                <button className="relative w-12 h-12 rounded-full overflow-hidden ring-1 ring-border bg-muted hover:ring-primary transition-colors">
+                <button type="button" aria-label="Cambiar avatar" className="relative w-12 h-12 rounded-full overflow-hidden ring-1 ring-border bg-muted hover:ring-primary transition-colors">
                   <MemojiAvatar name={avatarSeed} size={48} />
                 </button>
               </PopoverTrigger>
@@ -85,6 +85,7 @@ export function AccountSection() {
 
           <div className="mt-6 flex justify-end">
             <Button
+              type="button"
               size="sm"
               disabled={!dirty || updateMutation.isPending}
               onClick={() => updateMutation.mutate({ name, avatarSeed })}
@@ -112,6 +113,7 @@ export function AccountSection() {
             <div className="flex rounded-md border border-border/60 p-1 bg-muted/20 w-fit">
               {themeOptions.map((opt) => (
                 <button
+                  type="button"
                   key={opt.v}
                   onClick={() => setTheme(opt.v)}
                   className={cn(

@@ -33,6 +33,8 @@ export function Modal({ open, onClose, title, description, width = '520px', chil
             )}
           </div>
           <button
+            type="button"
+            aria-label="Cerrar"
             onClick={onClose}
             className="size-7 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"
           >

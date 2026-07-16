@@ -45,6 +45,7 @@ export function BucketToolbar() {
           />
           {search && (
             <button
+              type="button"
               onClick={() => setSearch('')}
               className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted z-10"
               aria-label="Limpiar búsqueda"
@@ -59,6 +60,7 @@ export function BucketToolbar() {
         <div className="hidden md:flex items-center gap-0.5 p-0.5 rounded-md bg-muted border border-border">
           {FILTERS.map(f => (
             <button
+              type="button"
               key={f.value}
               onClick={() => setFilter(f.value)}
               className={cn(
@@ -75,6 +77,7 @@ export function BucketToolbar() {
 
         <div className="flex items-center gap-0.5 p-0.5 rounded-md bg-muted border border-border">
           <button
+            type="button"
             onClick={() => setLayout('grid')}
             className={cn(
               'w-7 h-7 flex items-center justify-center rounded-md transition-colors',
@@ -87,6 +90,7 @@ export function BucketToolbar() {
             <Grid size={13} />
           </button>
           <button
+            type="button"
             onClick={() => setLayout('list')}
             className={cn(
               'w-7 h-7 flex items-center justify-center rounded-md transition-colors',

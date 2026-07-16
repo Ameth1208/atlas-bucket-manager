@@ -34,6 +34,7 @@ export function useTeam() {
   const resetMutation = useMutation({
     mutationFn: (id: string) => api.users.resetPassword(id),
     onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['users'] });
       navigator.clipboard.writeText(res.temporaryPassword);
       toast.success(`${t.settingsResetPasswordDone}: ${res.temporaryPassword}`);
     },

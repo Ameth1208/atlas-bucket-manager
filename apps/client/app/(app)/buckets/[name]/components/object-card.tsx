@@ -2,12 +2,13 @@
 import { Folder, File, Eye, Download, Film, Music, Code, Image, Trash2, FileText, Archive, FileCode, Clock } from 'lucide-react';
 import { cn, fmtBytes } from '@/lib/utils';
 import type { StorageObject } from '@/lib/api';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useActionsStore } from '../store/actions';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useI18n } from '@/lib/i18n';
+import NextImage from 'next/image';
 
 interface ObjectCardProps {
   obj: StorageObject;
@@ -72,6 +73,15 @@ export function ObjectCard({
   const { tx } = useI18n();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
+  const formattedDate = useMemo(() => {
+    if (!obj.lastModified) return '';
+    return new Date(obj.lastModified).toLocaleDateString('es', {
+      day: '2-digit',
+      month: 'short',
+      timeZone: 'UTC',
+    });
+  }, [obj.lastModified]);
+
   const onDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
     setConfirmOpen(true);
@@ -92,6 +102,9 @@ export function ObjectCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={obj.isFolder ? `Abrir carpeta ${fileName}` : `Seleccionar ${fileName}`}
       className={cn(
         'group relative flex flex-col bg-card border border-border rounded-md overflow-hidden cursor-pointer select-none transition-all duration-150',
         isSelected
@@ -104,6 +117,12 @@ export function ObjectCard({
       onDoubleClick={() => {
         if (obj.isFolder) { onNavigate(fileName); return; }
         onPreview(obj.key);
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(obj.key, { ctrl: false, shift: false });
+        }
       }}
     >
       <div className="absolute top-2.5 left-2.5 z-20">
@@ -145,12 +164,13 @@ export function ObjectCard({
             <Folder size={28} className="text-file-image" strokeWidth={1.6} />
           </div>
         ) : isImage && thumbnail ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <NextImage
             src={thumbnail}
             alt={fileName}
-            className="w-full h-full object-cover"
-            loading="lazy"
+            fill
+            unoptimized
+            className="object-cover"
+            sizes="(max-width: 768px) 50vw, 25vw"
             onError={() => onClearThumbnail(obj.key)}
           />
         ) : (
@@ -181,7 +201,7 @@ export function ObjectCard({
           {obj.lastModified && (
             <span className="flex items-center gap-1 tabular-nums">
               <Clock size={10} strokeWidth={1.8} />
-              {new Date(obj.lastModified).toLocaleDateString('es', { day: '2-digit', month: 'short' })}
+              {formattedDate}
             </span>
           )}
         </div>
@@ -213,6 +233,7 @@ function ActionButton({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={cn(
         'w-7 h-7 rounded bg-card/95 backdrop-blur-sm border border-border/60 flex items-center justify-center shadow-sm transition-colors',

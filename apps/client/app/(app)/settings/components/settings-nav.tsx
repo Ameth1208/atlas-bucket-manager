@@ -15,7 +15,9 @@ export function SettingsNav({ sections, active, onSelect }: SettingsNavProps) {
     <nav className="flex flex-col gap-1">
       {sections.map((s) => (
         <button
+          type="button"
           key={s.id}
+          aria-current={active === s.id ? 'page' : undefined}
           onClick={() => onSelect(s.id)}
           className={cn(
             'group relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200',
