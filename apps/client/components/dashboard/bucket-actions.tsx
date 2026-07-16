@@ -8,6 +8,9 @@ import { useState } from 'react';
 import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import type { Bucket } from '@/lib/api';
 
+import { useProviders } from '@/hooks/use-providers';
+import { useCopyJob } from '@/hooks/use-copy-job';
+
 import { BucketPermissions } from './bucket-permissions';
 import { ShareBucketDialog } from './share-bucket-dialog';
 import { CloneBucketDialog } from './clone-bucket-dialog';
@@ -23,12 +26,16 @@ interface BucketActionsProps {
 
 export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFolder }: BucketActionsProps) {
   const qc = useQueryClient();
+  const { providers } = useProviders();
   const [shareOpen, setShareOpen] = useState(false);
   const [cloneOpen, setCloneOpen] = useState(false);
   const [permsOpen, setPermsOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [publicLink, setPublicLink] = useState('');
   const [generatingLink, setGeneratingLink] = useState(false);
+  const [cloneJobId, setCloneJobId] = useState<string | null>(null);
+
+  const { data: cloneJob } = useCopyJob(cloneJobId);
 
   const togglePolicy = useMutation({
     mutationFn: (isPublic: boolean) =>
@@ -52,16 +59,18 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
   });
 
   const cloneBucket = useMutation({
-    mutationFn: (name: string) => api.buckets.create({
-      name,
-      providerId: bucket.providerId,
-      limit: bucket.limit,
-    }),
-    onSuccess: async (_result, name) => {
+    mutationFn: ({ destProviderId, destBucketName }: { destProviderId: string; destBucketName: string }) =>
+      api.copy.start({
+        sourceProviderId: bucket.providerId,
+        sourceBucket: bucket.name,
+        destProviderId,
+        destBucket: destBucketName,
+      }),
+    onSuccess: async (job) => {
+      setCloneJobId(job.id);
+      toast.success(`Clonado iniciado: ${job.destBucket}`);
       await qc.invalidateQueries({ queryKey: ['buckets'] });
-      toast.success(`Bucket clonado como "${name}"`);
-      setCloneOpen(false);
-      onCloned?.({ ...bucket, name, creationDate: undefined });
+      onCloned?.({ ...bucket, name: job.destBucket, providerId: job.destProviderId, creationDate: undefined });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -90,6 +99,13 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
       toast.error('Error generando enlace');
     } finally {
       setGeneratingLink(false);
+    }
+  };
+
+  const handleOpenCloneChange = (open: boolean) => {
+    setCloneOpen(open);
+    if (!open) {
+      setCloneJobId(null);
     }
   };
 
@@ -153,9 +169,11 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
 
       <CloneBucketDialog
         bucket={bucket}
+        providers={providers}
         open={cloneOpen}
-        onOpenChange={setCloneOpen}
-        onClone={(name) => cloneBucket.mutate(name)}
+        onOpenChange={handleOpenCloneChange}
+        onClone={(input) => cloneBucket.mutate(input)}
+        job={cloneJob}
         isCloning={cloneBucket.isPending}
       />
 

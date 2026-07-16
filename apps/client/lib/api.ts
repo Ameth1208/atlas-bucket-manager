@@ -81,6 +81,14 @@ export const api = {
       request<Provider>(`/providers/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   },
 
+  copy: {
+    list: () => request<CopyJob[]>('/copy/jobs'),
+    get: (id: string) => request<CopyJob>(`/copy/jobs/${id}`),
+    start: (body: StartCopyBody) => request<CopyJob>('/copy/start', { method: 'POST', body: JSON.stringify(body) }),
+    cancel: (id: string) => request<CopyJob>(`/copy/jobs/${id}/cancel`, { method: 'POST' }),
+    delete: (id: string) => request<{ success: boolean }>(`/copy/jobs/${id}`, { method: 'DELETE' }),
+  },
+
   objects: {
     list: (bucket: string, providerId: string, prefix = '') =>
       request<StorageObject[]>(`/buckets/${providerId}/${bucket}/objects?prefix=${encodeURIComponent(prefix)}`),
@@ -239,4 +247,33 @@ export interface FileTypeCount {
   type: string;
   count: number;
   size: number;
+}
+
+export type CopyJobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface CopyJob {
+  id: string;
+  sourceProviderId: string;
+  sourceBucket: string;
+  destProviderId: string;
+  destBucket: string;
+  prefix?: string;
+  overwrite: boolean;
+  status: CopyJobStatus;
+  totalObjects: number;
+  copiedObjects: number;
+  totalBytes: number;
+  copiedBytes: number;
+  errors: { key: string; message: string }[];
+  startedAt: number;
+  finishedAt?: number;
+}
+
+export interface StartCopyBody {
+  sourceProviderId: string;
+  sourceBucket: string;
+  destProviderId: string;
+  destBucket: string;
+  prefix?: string;
+  overwrite?: boolean;
 }
