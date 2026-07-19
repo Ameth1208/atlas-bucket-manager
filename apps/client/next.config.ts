@@ -20,8 +20,6 @@ const nextConfig: NextConfig = {
         destination: `${API_URL}/api/:path*`,
       },
       {
-        // Reserved for real-time copy-job progress streaming.
-        // The socket.io-client dep will be added when the client subscribes.
         source: '/socket.io/:path*',
         destination: `${API_URL}/socket.io/:path*`,
       },

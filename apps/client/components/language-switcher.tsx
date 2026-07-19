@@ -5,7 +5,7 @@ import { Check, ChevronDown } from 'lucide-react';
 import US from 'country-flag-icons/react/3x2/US';
 import ES from 'country-flag-icons/react/3x2/ES';
 import BR from 'country-flag-icons/react/3x2/BR';
-import { LOCALES, type Locale } from '@/lib/i18n/types';
+import { LOCALES, LOCALE_META, type Locale } from '@/lib/i18n/types';
 import { useI18n } from '@/lib/i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -23,7 +23,6 @@ function Flag({ code, style, className }: { code: string; style?: CSSProperties;
 export function LanguageSwitcher({ className = '' }: { className?: string }) {
   const { locale, setLocale, t } = useI18n();
   const [open, setOpen] = useState(false);
-  const current = useI18n().meta;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -37,7 +36,7 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
         >
           <span className="inline-block w-5 h-3.5 rounded-[2px] overflow-hidden ring-1 ring-black/[0.08]">
             <Flag
-              code={current.flagCode}
+              code={LOCALE_META[locale].flagCode}
               style={{ width: '100%', height: '100%', display: 'block' }}
             />
           </span>

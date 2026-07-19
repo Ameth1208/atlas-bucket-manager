@@ -75,8 +75,36 @@ export const pt: Dictionary = {
   confirmDeleteBucketDescription: 'Isso excluirá o bucket "{name}" e todos os seus objetos. Esta ação é permanente e irreversível.',
   confirmDeleteBucketConfirm: 'Excluir definitivamente',
   confirmDeleteProviderTitle: 'Excluir provedor',
-  confirmDeleteProviderDescription: 'Isso removerá o provedor "{name}" e desconectará todos os seus buckets. Esta ação é permanente.',
+  confirmDeleteProviderDescription: 'Isso removerá o provedor e todos os seus buckets do Atlas.',
   confirmDeleteProviderConfirm: 'Excluir provedor',
+  confirmDeleteType: 'Digite',
+  confirmDemoteLastOwnerTitle: 'Último proprietário',
+  confirmDemoteLastOwnerDesc: 'Promova outro membro a proprietário antes de rebaixar o único.',
+
+  // Bucket permissions popover
+  bucketPermissionsTitle: 'Permissões do bucket',
+  bucketPermissionsDesc: 'Configure o acesso e o limite de armazenamento.',
+  bucketAccess: 'Acesso',
+  bucketAccessPublicHint: 'Qualquer pessoa pode ler',
+  bucketAccessPrivateHint: 'Apenas você pode acessar',
+  bucketMakePublic: 'Tornar público',
+  bucketMakePrivate: 'Tornar privado',
+  bucketLimit: 'Limite',
+  bucketLimitNoLimit: 'Sem limite',
+  permissionsUpdated: 'Permissões atualizadas',
+
+  // New folder dialog
+  folderNewTitle: 'Nova pasta',
+  folderNewDescription: 'Crie uma pasta dentro de {path}.',
+  folderNewDescriptionRoot: 'Crie uma pasta na raiz do bucket.',
+  folderNewName: 'Nome',
+  folderNewNamePh: 'minha-pasta',
+  folderNewInvalid: 'Apenas letras, números, espaços, pontos, traços e sublinhados (1-255 caracteres).',
+  folderNewCreated: 'Pasta "{name}" criada',
+  folderCreate: 'Criar pasta',
+
+  // Toasts
+  cloneStarted: 'Clonagem iniciada: {dest}',
 
   // Bucket
   bucketObjects: 'Objetos',
@@ -101,6 +129,7 @@ export const pt: Dictionary = {
   bucketActionsClone: 'Clonar',
   bucketActionsShare: 'Compartilhar',
   bucketActionsPermissions: 'Permissões',
+  cloneDialogTitle: 'Clonar bucket',
   bucketSearch: 'Buscar arquivos...',
 
   // Provider
@@ -324,4 +353,158 @@ export const pt: Dictionary = {
   settingsCancel: 'Cancelar',
   settingsLoading: 'Carregando...',
   settingsEmpty: 'Vazio',
+
+  // Autenticação (login + setup)
+  authLoginTitle: 'Entrar',
+  authLoginDescription: 'Digite suas credenciais para continuar',
+  authLoginEmail: 'E-mail',
+  authLoginPassword: 'Senha',
+  authLoginSubmit: 'Entrar',
+  authLoginNoAccount: 'Primeira vez no Atlas?',
+  authLoginSetupCta: 'Configurar conta de administrador',
+  authLoginError: 'Falha na autenticação',
+  authLoginWelcome: 'Bem-vindo de volta',
+  authLoginWelcomeDesc: 'Sessão iniciada como {name}',
+  authSetupUnavailable: 'O Atlas já tem uma conta de administrador. Entre em vez disso.',
+
+  // Página de aceitar convite
+  inviteTitle: 'Entrar no Atlas',
+  inviteValidating: 'Validando convite…',
+  inviteInvalid: 'Este convite não é mais válido.',
+  inviteRole: 'Você entrará como',
+  inviteName: 'Nome completo',
+  inviteNamePh: 'Seu nome',
+  inviteEmail: 'E-mail',
+  inviteEmailPh: 'voce@empresa.com',
+  invitePassword: 'Senha',
+  invitePasswordPh: 'Pelo menos 8 caracteres',
+  inviteConfirm: 'Confirmar senha',
+  inviteConfirmPh: 'Repita a senha',
+  inviteSubmit: 'Aceitar convite',
+  inviteAccepted: 'Bem-vindo a bordo!',
+  inviteAlreadyUsed: 'Este convite já foi utilizado.',
+  invitePasswordMismatch: 'As senhas não coincidem',
+  invitePasswordTooShort: 'A senha deve ter pelo menos 8 caracteres',
+
+  // Página de redefinir senha
+  resetTitle: 'Defina uma nova senha',
+  resetDescription: 'Escolha uma nova senha para sua conta.',
+  resetNewPassword: 'Nova senha',
+  resetConfirm: 'Confirme a nova senha',
+  resetSubmit: 'Atualizar senha',
+  resetDone: 'Senha atualizada. Você já pode entrar.',
+  resetInvalidToken: 'Este link de redefinição não é mais válido.',
+
+  // Favoritos
+  favoritesTitle: 'Favoritos',
+  favoritesEmpty: 'Nenhum bucket favorito ainda',
+  favoritesSubtitle: 'Acesso rápido ao que importa',
+  favoritesAddHint: 'Toque na estrela de um bucket para adicioná-lo aqui.',
+  favoritesAdd: 'Adicionar aos favoritos',
+  favoritesRemove: 'Remover dos favoritos',
+
+  // Card do bucket
+  bucketBadgePublic: 'Público',
+  bucketBadgePrivate: 'Privado',
+  bucketObjectsLabel: '{count} objetos',
+  bucketPctUsed: '{pct}% usado',
+
+  // Painel de buckets do dashboard
+  dashboardBucketsTitle: 'Buckets',
+  dashboardBucketsSubtitle: '{count} buckets conectados',
+  dashboardBucketsSearchPh: 'Buscar buckets…',
+  dashboardBucketsClear: 'Limpar',
+  dashboardBucketsEmpty: 'Nenhum bucket corresponde à sua busca.',
+
+  // Diálogo de compartilhamento
+  shareTitle: 'Compartilhar "{name}"',
+  shareDescription: 'Configure as permissões e links de acesso.',
+  sharePublic: 'Público',
+  sharePublicHint: 'Qualquer pessoa com o link pode ler',
+  sharePrivate: 'Privado',
+  sharePrivateHint: 'Apenas você pode acessar',
+  shareMakePublic: 'Tornar público',
+  shareMakePrivate: 'Tornar privado',
+  shareLink: 'Link público',
+  shareLinkPlaceholder: 'Gere um link para compartilhar',
+  shareCopyLink: 'Copiar link',
+  shareClose: 'Fechar',
+
+  // Seção de equipe
+  teamTabMembers: 'Membros',
+  teamTabInvitations: 'Convites',
+  teamSearchPh: 'Buscar membros…',
+  teamInviteButton: 'Convidar',
+  teamInviteMember: 'Convidar membro',
+  teamInviteDescription: 'Gere um link ou envie o convite por e-mail.',
+  teamInviteGenerate: 'Gerar convite',
+  teamAnyoneWithLink: 'Qualquer pessoa com o link',
+  teamToken: 'Token',
+  teamStatusActive: 'Ativo',
+  teamStatusColumn: 'Status',
+  teamJoinedColumn: 'Entrou em',
+  teamNoMembers: 'Nenhum membro encontrado',
+  teamRemoveConfirm: 'Remover {name} da equipe?',
+  teamInvitePasswordRequired: 'Defina uma senha para enviar o convite.',
+  teamActionLabel: 'Ações do usuário',
+
+  // Webhooks
+  webhookUrlPh: 'https://exemplo.com/webhook',
+  webhookEventsLabel: 'Eventos',
+  webhookEventUpload: 'upload',
+  webhookEventDelete: 'exclusão',
+  webhookEventBucketCreate: 'bucket.criado',
+  webhookEventBucketDelete: 'bucket.excluído',
+  webhookEventClone: 'clone',
+  webhookSaved: 'Webhook salvo',
+  webhookSave: 'Salvar webhook',
+  webhookTestSent: 'Evento de teste enviado',
+  webhookTestFailed: 'Falha no teste: {error}',
+  webhookTest: 'Testar',
+
+  // Preferências de notificação
+  notifyEmailLabel: 'Notificações por e-mail',
+  notifyEmailDesc: 'Receba um e-mail quando ocorrerem eventos importantes.',
+  notifyOnUploadLabel: 'Quando um arquivo for enviado',
+  notifyOnUploadDesc: 'Aplica-se a todos os seus buckets.',
+  notifyOnDeleteLabel: 'Quando um arquivo for excluído',
+  notifyOnDeleteDesc: 'Inclui exclusões em massa.',
+  notifySaved: 'Preferências salvas',
+
+  // Conta / perigo
+  accountDeleteHint: 'Excluir permanentemente esta instância do Atlas. Esta ação não pode ser desfeita.',
+  accountDeleteConfirmTitle: 'Excluir conta',
+  accountDeleteConfirmDescription: 'Digite {email} para confirmar. Isso exclui a instância, todos os provedores e cada objeto enviado.',
+  accountDeleteConfirmInput: 'Digite seu e-mail para confirmar',
+  accountDeleted: 'Exclusão solicitada. Contate o administrador para confirmar.',
+
+  // Buckets list empty / error states
+  bucketEmptyNoBuckets: 'Nenhum bucket configurado',
+  bucketEmptyCreateFirst: 'Criar primeiro bucket',
+  providerConnectFirst: 'Conecte seu primeiro provedor para começar',
+  providerErrorSingle: 'provedor não responde',
+  providerErrorPlural: 'provedores não respondem',
+  providerErrorsTitle: 'Não foi possível listar os buckets dos provedores configurados',
+  providerErrorsHint: 'Verifique as credenciais, o endpoint ou a porta. Se você acabou de conectar um provedor, edite-o para corrigir os dados.',
+
+  // File type chart
+  fileTypeTitle: 'Armazenamento por peso',
+  fileTypeSummary: '{size} · {count} arquivos',
+  fileTypeEmpty: 'Nenhum arquivo ainda',
+  fileTypeEmptyHint: 'Envie arquivos para ver a distribuição',
+  fileTypeFileCount: '{count} arquivos',
+  fileTypeImage: 'Imagens',
+  fileTypeVideo: 'Vídeos',
+  fileTypeAudio: 'Áudio',
+  fileTypeCode: 'Código',
+  fileTypeDoc: 'Documentos',
+  fileTypeArchive: 'Arquivos',
+  fileTypeOther: 'Outros',
+
+  // Upload dialog
+  uploadDialogTitle: 'Enviar arquivos',
+  uploadDialogDescription: 'Arraste arquivos aqui ou clique para selecionar',
+  uploadDragHint: 'Arraste arquivos aqui',
+  uploadClickHint: 'ou clique para procurar',
+  uploadError: 'Erro',
 };

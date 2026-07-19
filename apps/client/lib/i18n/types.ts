@@ -82,6 +82,64 @@ export interface Dictionary {
   confirmDeleteProviderTitle: string;
   confirmDeleteProviderDescription: string;
   confirmDeleteProviderConfirm: string;
+  confirmDeleteType: string;
+  confirmDemoteLastOwnerTitle: string;
+  confirmDemoteLastOwnerDesc: string;
+
+  // Bucket permissions popover
+  bucketPermissionsTitle: string;
+  bucketPermissionsDesc: string;
+  bucketAccess: string;
+  bucketAccessPublicHint: string;
+  bucketAccessPrivateHint: string;
+  bucketMakePublic: string;
+  bucketMakePrivate: string;
+  bucketLimit: string;
+  bucketLimitNoLimit: string;
+  permissionsUpdated: string;
+
+  // New folder dialog
+  folderNewTitle: string;
+  folderNewDescription: string;
+  folderNewDescriptionRoot: string;
+  folderNewName: string;
+  folderNewNamePh: string;
+  folderNewInvalid: string;
+  folderNewCreated: string;
+  folderCreate: string;
+
+  // Misc toasts
+  cloneStarted: string;
+
+  // File type chart
+  fileTypeTitle: string;
+  fileTypeSummary: string;
+  fileTypeEmpty: string;
+  fileTypeEmptyHint: string;
+  fileTypeFileCount: string;
+  fileTypeImage: string;
+  fileTypeVideo: string;
+  fileTypeAudio: string;
+  fileTypeCode: string;
+  fileTypeDoc: string;
+  fileTypeArchive: string;
+  fileTypeOther: string;
+
+  // Upload dialog
+  uploadDialogTitle: string;
+  uploadDialogDescription: string;
+  uploadDragHint: string;
+  uploadClickHint: string;
+  uploadError: string;
+
+  // Buckets list empty / error states
+  bucketEmptyNoBuckets: string;
+  bucketEmptyCreateFirst: string;
+  providerConnectFirst: string;
+  providerErrorSingle: string;
+  providerErrorPlural: string;
+  providerErrorsTitle: string;
+  providerErrorsHint: string;
 
   // Bucket
   bucketObjects: string;
@@ -106,6 +164,7 @@ export interface Dictionary {
   bucketActionsClone: string;
   bucketActionsShare: string;
   bucketActionsPermissions: string;
+  cloneDialogTitle: string;
   bucketSearch: string;
 
   // Provider
@@ -323,4 +382,128 @@ export interface Dictionary {
   settingsCancel: string;
   settingsLoading: string;
   settingsEmpty: string;
+
+  // Auth (login + setup gate)
+  authLoginTitle: string;
+  authLoginDescription: string;
+  authLoginEmail: string;
+  authLoginPassword: string;
+  authLoginSubmit: string;
+  authLoginNoAccount: string;
+  authLoginSetupCta: string;
+  authLoginError: string;
+  authLoginWelcome: string;
+  authLoginWelcomeDesc: string;
+  authSetupUnavailable: string;
+
+  // Invite accept page
+  inviteTitle: string;
+  inviteValidating: string;
+  inviteInvalid: string;
+  inviteRole: string;
+  inviteName: string;
+  inviteNamePh: string;
+  inviteEmail: string;
+  inviteEmailPh: string;
+  invitePassword: string;
+  invitePasswordPh: string;
+  inviteConfirm: string;
+  inviteConfirmPh: string;
+  inviteSubmit: string;
+  inviteAccepted: string;
+  inviteAlreadyUsed: string;
+  invitePasswordMismatch: string;
+  invitePasswordTooShort: string;
+
+  // Reset password page
+  resetTitle: string;
+  resetDescription: string;
+  resetNewPassword: string;
+  resetConfirm: string;
+  resetSubmit: string;
+  resetDone: string;
+  resetInvalidToken: string;
+
+  // Favorites
+  favoritesTitle: string;
+  favoritesEmpty: string;
+  favoritesSubtitle: string;
+  favoritesAddHint: string;
+  favoritesAdd: string;
+  favoritesRemove: string;
+
+  // Bucket card
+  bucketBadgePublic: string;
+  bucketBadgePrivate: string;
+  bucketObjectsLabel: string;
+  bucketPctUsed: string;
+
+  // Dashboard buckets panel
+  dashboardBucketsTitle: string;
+  dashboardBucketsSubtitle: string;
+  dashboardBucketsSearchPh: string;
+  dashboardBucketsClear: string;
+  dashboardBucketsEmpty: string;
+
+  // Share dialog
+  shareTitle: string;
+  shareDescription: string;
+  sharePublic: string;
+  sharePublicHint: string;
+  sharePrivate: string;
+  sharePrivateHint: string;
+  shareMakePublic: string;
+  shareMakePrivate: string;
+  shareLink: string;
+  shareLinkPlaceholder: string;
+  shareCopyLink: string;
+  shareClose: string;
+
+  // Team section
+  teamTabMembers: string;
+  teamTabInvitations: string;
+  teamSearchPh: string;
+  teamInviteButton: string;
+  teamInviteMember: string;
+  teamInviteDescription: string;
+  teamInviteGenerate: string;
+  teamAnyoneWithLink: string;
+  teamToken: string;
+  teamStatusActive: string;
+  teamStatusColumn: string;
+  teamJoinedColumn: string;
+  teamNoMembers: string;
+  teamRemoveConfirm: string;
+  teamInvitePasswordRequired: string;
+  teamActionLabel: string;
+
+  // Webhooks
+  webhookUrlPh: string;
+  webhookEventsLabel: string;
+  webhookEventUpload: string;
+  webhookEventDelete: string;
+  webhookEventBucketCreate: string;
+  webhookEventBucketDelete: string;
+  webhookEventClone: string;
+  webhookSaved: string;
+  webhookSave: string;
+  webhookTestSent: string;
+  webhookTestFailed: string;
+  webhookTest: string;
+
+  // Notification prefs
+  notifyEmailLabel: string;
+  notifyEmailDesc: string;
+  notifyOnUploadLabel: string;
+  notifyOnUploadDesc: string;
+  notifyOnDeleteLabel: string;
+  notifyOnDeleteDesc: string;
+  notifySaved: string;
+
+  // Account / danger
+  accountDeleteHint: string;
+  accountDeleteConfirmTitle: string;
+  accountDeleteConfirmDescription: string;
+  accountDeleteConfirmInput: string;
+  accountDeleted: string;
 }

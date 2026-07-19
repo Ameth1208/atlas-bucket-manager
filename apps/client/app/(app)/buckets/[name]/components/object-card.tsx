@@ -90,7 +90,8 @@ export function ObjectCard({
   const onConfirmDelete = async () => {
     await handleDeleteOne(obj.key);
     qc.invalidateQueries({ queryKey: ['buckets'] });
-    qc.invalidateQueries({ queryKey: ['bucket-stats'] });
+    qc.invalidateQueries({ queryKey: ['buckets-stats'] });
+    qc.invalidateQueries({ queryKey: ['file-types'] });
     setConfirmOpen(false);
   };
 

@@ -5,6 +5,15 @@ import {
 } from '../../domain/repositories/activity.repository';
 import { ActivityEntry } from '../../domain/entities/activity.entity';
 
+export interface ActivityFilters {
+  action?: string;
+  actor?: string;
+  bucket?: string;
+  provider?: string;
+  from?: number;
+  to?: number;
+}
+
 @Injectable()
 export class ActivityService {
   constructor(
@@ -12,8 +21,8 @@ export class ActivityService {
     private readonly repo: IActivityRepository,
   ) {}
 
-  list(limit: number, offset: number): ActivityEntry[] {
-    return this.repo.list(limit, offset);
+  list(limit: number, offset: number, filters: ActivityFilters = {}): ActivityEntry[] {
+    return this.repo.list(limit, offset, filters);
   }
 
   log(entry: Omit<ActivityEntry, 'id' | 'createdAt'>) {

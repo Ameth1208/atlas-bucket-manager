@@ -6,22 +6,10 @@ import type { Bucket } from '@/lib/api';
 
 export function useDashboardStats(buckets: Bucket[]) {
   const { data: statsMap = {} } = useQuery({
-    queryKey: ['buckets-stats', buckets.map((b) => `${b.providerId}:${b.name}`).join(',')],
-    queryFn: async () => {
-      const map: Record<string, { totalSize: number; totalObjects: number }> = {};
-      await Promise.allSettled(
-        buckets.map(async (b) => {
-          try {
-            const stats = await api.buckets.stats(b.name, b.providerId);
-            map[`${b.providerId}:${b.name}`] = stats;
-          } catch {
-            map[`${b.providerId}:${b.name}`] = { totalSize: 0, totalObjects: 0 };
-          }
-        })
-      );
-      return map;
-    },
+    queryKey: ['buckets-stats', buckets.map((b) => `${b.providerId}:${b.name}`).sort().join(',')],
+    queryFn: () => api.buckets.statsMany().then((res) => res.stats),
     enabled: buckets.length > 0,
+    staleTime: 30_000,
   });
 
   const totalSize = buckets.reduce((sum, b) => {

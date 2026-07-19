@@ -48,7 +48,8 @@ export function DeleteBucketDialog({ bucket, open, onOpenChange, onConfirm, isDe
 
         <div className="grid gap-1.5">
           <Label className="text-[12px]">
-            Type <span className="font-mono font-semibold text-foreground">{bucket.name}</span> to confirm
+            {t.confirmDeleteType}{' '}
+            <span className="font-mono font-semibold text-foreground">{bucket.name}</span>
           </Label>
           <Input
             value={typed}

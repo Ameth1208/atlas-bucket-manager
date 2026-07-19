@@ -11,6 +11,7 @@ import {
   CreateBucketInput,
 } from '../../domain/entities/bucket.entity';
 import { StorageObject, SearchResult } from '../../domain/entities/object.entity';
+import { createTtlCache } from '../cache/ttl-cache';
 import {
   CreateProviderInput,
   ProviderCredentials,
@@ -22,6 +23,11 @@ import { Client as MinioClient } from 'minio';
 @Injectable()
 export class S3BucketRepository implements IBucketRepository {
   private readonly logger = new Logger(S3BucketRepository.name);
+  // Cache the file-type breakdown for 60s. The walk is expensive on large buckets
+  // and the dashboard polls this endpoint on mount.
+  private readonly fileTypesCache = createTtlCache<{ type: string; count: number; size: number }[]>(60_000);
+  // Cache the per-bucket stats for 30s. Invalidated on upload/delete.
+  private readonly statsCache = createTtlCache<{ totalSize: number; totalObjects: number; limit?: number }>(30_000);
 
   constructor(
     private readonly s3: S3Service,
@@ -35,15 +41,6 @@ export class S3BucketRepository implements IBucketRepository {
       timeout: 8_000,
     };
     return useSSL ? new https.Agent(opts) : new http.Agent(opts);
-  }
-
-  private getRetryOptions() {
-    return {
-      disableRetry: true,
-      maximumRetryCount: 0,
-      baseDelayMs: 0,
-      maximumDelayMs: 0,
-    };
   }
 
   // ── Providers ──────────────────────────────────────────────────
@@ -66,7 +63,6 @@ export class S3BucketRepository implements IBucketRepository {
       secretKey: input.secretKey,
       region: input.region ?? 'us-east-1',
       transportAgent: this.buildTestAgent(input.useSSL ?? false),
-      retryOptions: this.getRetryOptions(),
     });
 
     try {
@@ -171,7 +167,6 @@ export class S3BucketRepository implements IBucketRepository {
         secretKey: merged.secretKey,
         region: merged.region,
         transportAgent: this.buildTestAgent(merged.useSSL),
-        retryOptions: this.getRetryOptions(),
       });
       try {
         await this.withTimeout(testClient.listBuckets(), 6000, 'listBuckets');
@@ -285,6 +280,7 @@ export class S3BucketRepository implements IBucketRepository {
         `INSERT OR IGNORE INTO bucket_configs (id, provider_id, name) VALUES (?, ?, ?)`,
       )
       .run(crypto.randomUUID(), input.providerId, input.name);
+    this.fileTypesCache.clear();
   }
 
   async deleteBucket(providerId: string, name: string): Promise<void> {
@@ -304,6 +300,7 @@ export class S3BucketRepository implements IBucketRepository {
     this.database.db
       .prepare('DELETE FROM bucket_configs WHERE provider_id = ? AND name = ?')
       .run(providerId, name);
+    this.fileTypesCache.clear();
   }
 
   async setBucketVisibility(
@@ -336,12 +333,99 @@ export class S3BucketRepository implements IBucketRepository {
         `UPDATE bucket_configs SET max_size = ? WHERE provider_id = ? AND name = ?`,
       )
       .run(maxSize, providerId, name);
+    this.statsCache.delete(`${providerId}:${name}`);
+  }
+
+  async getPublicEndpoint(providerId: string, name: string): Promise<string | null> {
+    const config = this.database.db
+      .prepare(
+        'SELECT is_public FROM bucket_configs WHERE provider_id = ? AND name = ?',
+      )
+      .get(providerId, name) as { is_public: number } | undefined;
+    if (!config || config.is_public !== 1) return null;
+    const provider = this.s3.findProvider(providerId);
+    if (!provider) return null;
+    const proto = provider.useSSL ? 'https' : 'http';
+    const portSegment =
+      (provider.useSSL && provider.port === 443) || (!provider.useSSL && provider.port === 80)
+        ? ''
+        : `:${provider.port}`;
+    return `${proto}://${provider.endPoint}${portSegment}/${name}`;
+  }
+
+  getBucketLimit(providerId: string, name: string): number | null {
+    const row = this.database.db
+      .prepare('SELECT max_size FROM bucket_configs WHERE provider_id = ? AND name = ?')
+      .get(providerId, name) as { max_size: number | null } | undefined;
+    return row?.max_size ?? null;
+  }
+
+  async getBucketUsage(providerId: string, name: string): Promise<number> {
+    const client = this.s3.getClient(providerId);
+    const stream = client.listObjectsV2(name, '', true);
+    let size = 0;
+    for await (const obj of stream) {
+      if (obj.name && !obj.name.endsWith('/')) {
+        size += obj.size ?? 0;
+      }
+    }
+    return size;
   }
 
   async getBucketStats(
     providerId: string,
     name: string,
   ): Promise<BucketStats> {
+    const cacheKey = `${providerId}:${name}`;
+    const cached = this.statsCache.get(cacheKey);
+    if (cached) return { ...cached, providerId };
+
+    const stats = await this.walkBucketStats(providerId, name);
+    this.statsCache.set(cacheKey, stats);
+    return { ...stats, providerId };
+  }
+
+  async getBucketStatsMany(
+    buckets: { providerId: string; name: string }[],
+  ): Promise<Record<string, { totalSize: number; totalObjects: number; limit?: number }>> {
+    const result: Record<string, { totalSize: number; totalObjects: number; limit?: number }> = {};
+    const toFetch: { providerId: string; name: string }[] = [];
+
+    for (const b of buckets) {
+      const key = `${b.providerId}:${b.name}`;
+      const cached = this.statsCache.get(key);
+      if (cached) {
+        result[key] = cached;
+      } else {
+        toFetch.push(b);
+      }
+    }
+
+    if (toFetch.length === 0) return result;
+
+    const allSettled = await Promise.allSettled(
+      toFetch.map(async (b) => {
+        const stats = await this.walkBucketStats(b.providerId, b.name);
+        return { key: `${b.providerId}:${b.name}`, stats };
+      }),
+    );
+
+    for (const r of allSettled) {
+      if (r.status === 'fulfilled') {
+        this.statsCache.set(r.value.key, r.value.stats);
+        result[r.value.key] = r.value.stats;
+      } else {
+        const key = (r.reason as { key?: string })?.key;
+        if (key) result[key] = { totalSize: 0, totalObjects: 0 };
+      }
+    }
+    return result;
+  }
+
+  private async walkBucketStats(
+    providerId: string,
+    name: string,
+  ): Promise<{ totalSize: number; totalObjects: number; limit?: number }> {
     const client = this.s3.getClient(providerId);
     const stream = client.listObjectsV2(name, '', true);
     let count = 0;
@@ -354,13 +438,11 @@ export class S3BucketRepository implements IBucketRepository {
     }
     const config = this.database.db
       .prepare('SELECT max_size FROM bucket_configs WHERE provider_id = ? AND name = ?')
-      .get(providerId, name) as any;
-
+      .get(providerId, name) as { max_size: number | null } | undefined;
     return {
-      totalObjects: count,
       totalSize: size,
+      totalObjects: count,
       limit: config?.max_size ?? undefined,
-      providerId,
     };
   }
 
@@ -406,6 +488,8 @@ export class S3BucketRepository implements IBucketRepository {
     } catch {
       /* ignore */
     }
+    this.fileTypesCache.clear();
+    this.statsCache.delete(`${providerId}:${bucket}`);
   }
 
   async deleteObjects(
@@ -429,6 +513,8 @@ export class S3BucketRepository implements IBucketRepository {
     }
 
     await client.removeObjects(bucket, [...toDelete]);
+    this.fileTypesCache.clear();
+    this.statsCache.delete(`${providerId}:${bucket}`);
   }
 
   async createFolder(
@@ -463,6 +549,9 @@ export class S3BucketRepository implements IBucketRepository {
   }
 
   async getFileTypes(): Promise<{ type: string; count: number; size: number }[]> {
+    const cached = this.fileTypesCache.get('all');
+    if (cached) return cached;
+
     const { buckets } = await this.listBuckets();
     const totals: Record<string, { count: number; size: number }> = {};
 
@@ -481,9 +570,11 @@ export class S3BucketRepository implements IBucketRepository {
       }
     }
 
-    return Object.entries(totals)
+    const result = Object.entries(totals)
       .map(([type, { count, size }]) => ({ type, count, size }))
-      .sort((a, b) => b.count - a.count);
+      .sort((a, b) => b.size - a.size);
+    this.fileTypesCache.set('all', result);
+    return result;
   }
 
   private classifyFileType(ext: string): string {

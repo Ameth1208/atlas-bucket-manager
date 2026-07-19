@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type Dispatch, type SetStateAction } from 'react';
+import { useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 import { toast } from 'sonner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ import { useInvite } from '../hooks/use-invite';
 import { RoleDropdown } from './role-dropdown';
 import { UserActionsMenu } from './user-actions-menu';
 import { Spinner } from './spinner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { getRoleLabel, getRoleStyle } from '../lib/role-utils';
 import type { User } from '@/lib/api';
 import type { Dictionary } from '@/lib/i18n/types';
@@ -23,7 +24,7 @@ const formatDate = (ts?: number) =>
   ts ? new Date(ts).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '—';
 
 export function TeamSection() {
-  const { t } = useI18n();
+  const { t, tx } = useI18n();
   const { user, isOwner, users, invites, deleteMutation, roleMutation, resetMutation } = useTeam();
   const {
     inviteOpen,
@@ -37,6 +38,10 @@ export function TeamSection() {
 
   const [tab, setTab] = useState<'members' | 'invites'>('members');
   const [query, setQuery] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<User | null>(null);
+  const [pendingDemote, setPendingDemote] = useState<{ user: User; nextRole: User['role'] } | null>(null);
+
+  const ownerCount = useMemo(() => users.filter((u) => u.role === 'owner').length, [users]);
 
   const filtered = users.filter(
     (u) =>
@@ -47,8 +52,8 @@ export function TeamSection() {
   const pendingInvites = invites.filter((i) => !i.usedAt);
 
   const tabs = [
-    { id: 'members' as const, label: 'Members', count: users.length },
-    { id: 'invites' as const, label: 'Invitations', count: pendingInvites.length },
+    { id: 'members' as const, label: t.teamTabMembers, count: users.length },
+    { id: 'invites' as const, label: t.teamTabInvitations, count: pendingInvites.length },
   ];
 
   return (
@@ -56,18 +61,18 @@ export function TeamSection() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h2 className="text-lg font-semibold tracking-tight">{t.settingsTeam}</h2>
-          <p className="text-sm text-muted-foreground">Manage your team members and invitations.</p>
+          <p className="text-sm text-muted-foreground">{t.settingsTeamDesc}</p>
         </div>
         <div className="flex items-center gap-2">
           <Input
-            placeholder="Search members..."
+            placeholder={t.teamSearchPh}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="h-9 rounded-sm bg-muted/30 border-border/60 text-sm w-64"
           />
           {isOwner && (
             <Button type="button" size="sm" onClick={() => setInviteOpen(!inviteOpen)} className="rounded-md">
-              <Plus size={13} /> Invite
+              <Plus size={13} /> {t.teamInviteButton}
             </Button>
           )}
         </div>
@@ -109,10 +114,12 @@ export function TeamSection() {
           t={t}
           user={user}
           isOwner={isOwner}
+          ownerCount={ownerCount}
           filtered={filtered}
           roleMutation={roleMutation}
           resetMutation={resetMutation}
-          deleteMutation={deleteMutation}
+          onRequestDelete={setPendingDelete}
+          onRequestDemote={(u, nextRole) => setPendingDemote({ user: u, nextRole })}
           query={query}
         />
       )}
@@ -125,6 +132,29 @@ export function TeamSection() {
           formatDate={formatDate}
         />
       )}
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        onOpenChange={(o) => !o && setPendingDelete(null)}
+        title={tx('teamRemoveConfirm', { name: pendingDelete?.name ?? '' })}
+        description={t.settingsTeamDeleted}
+        confirmKey="delete"
+        onConfirm={() => {
+          if (pendingDelete) deleteMutation.mutate(pendingDelete.id);
+          setPendingDelete(null);
+        }}
+        variant="destructive"
+      />
+      <ConfirmDialog
+        open={!!pendingDemote}
+        onOpenChange={(o) => !o && setPendingDemote(null)}
+        title={t.confirmDemoteLastOwnerTitle}
+        description={t.confirmDemoteLastOwnerDesc}
+        confirmLabel="OK"
+        onConfirm={() => setPendingDemote(null)}
+        variant="default"
+        icon="warning"
+      />
     </>
   );
 }
@@ -153,8 +183,8 @@ function InviteForm({
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <p className="text-sm font-semibold">Invite member</p>
-            <p className="text-xs text-muted-foreground">Generate a link or send an invite by email.</p>
+            <p className="text-sm font-semibold">{t.teamInviteMember}</p>
+            <p className="text-xs text-muted-foreground">{t.teamInviteDescription}</p>
           </div>
           <button
             type="button"
@@ -206,7 +236,7 @@ function InviteForm({
               onClick={() => createInviteMutation.mutate()}
             >
               {createInviteMutation.isPending ? <Spinner /> : <Mail size={13} />}
-              Generate invite
+              {t.teamInviteGenerate}
             </Button>
           </div>
         </div>
@@ -225,7 +255,7 @@ function InviteForm({
                 size="sm"
                 variant="secondary"
                 className="rounded-md shrink-0"
-                aria-label="Copiar enlace de invitación"
+                aria-label={t.settingsInviteCopy}
                 onClick={() => {
                   navigator.clipboard.writeText(`${origin}${inviteResult.url}`);
                   toast.success(t.settingsInviteCopied);
@@ -245,10 +275,12 @@ interface MembersTabProps {
   t: Dictionary;
   user: User | null;
   isOwner: boolean;
+  ownerCount: number;
   filtered: User[];
   roleMutation: { mutate: (payload: { id: string; role: User['role'] }) => void };
   resetMutation: { mutate: (id: string) => void };
-  deleteMutation: { mutate: (id: string) => void };
+  onRequestDelete: (user: User) => void;
+  onRequestDemote: (user: User, nextRole: User['role']) => void;
   query: string;
 }
 
@@ -256,10 +288,12 @@ function MembersTab({
   t,
   user,
   isOwner,
+  ownerCount,
   filtered,
   roleMutation,
   resetMutation,
-  deleteMutation,
+  onRequestDelete,
+  onRequestDemote,
   query,
 }: MembersTabProps) {
   return (
@@ -267,7 +301,7 @@ function MembersTab({
       <CardContent className="p-0">
         {filtered.length === 0 ? (
           <div className="py-12 text-center">
-            <p className="text-sm text-muted-foreground">{query ? 'No members found' : t.settingsTeamTableNoUsers}</p>
+            <p className="text-sm text-muted-foreground">{query ? t.teamNoMembers : t.settingsTeamTableNoUsers}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -276,68 +310,82 @@ function MembersTab({
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
                   <th className="px-4 py-2.5 font-medium w-full">{t.settingsTeamTableUser}</th>
                   <th className="px-4 py-2.5 font-medium whitespace-nowrap">{t.settingsTeamTableRole}</th>
-                  <th className="px-4 py-2.5 font-medium whitespace-nowrap">Status</th>
-                  <th className="px-4 py-2.5 font-medium whitespace-nowrap">Joined</th>
+                  <th className="px-4 py-2.5 font-medium whitespace-nowrap">{t.teamStatusColumn}</th>
+                  <th className="px-4 py-2.5 font-medium whitespace-nowrap">{t.teamJoinedColumn}</th>
                   <th className="px-4 py-2.5 font-medium text-right whitespace-nowrap">{t.settingsTeamTableActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filtered.map((u) => (
-                  <tr key={u.id} className="group hover:bg-muted/20">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-border shrink-0">
-                          <MemojiAvatar name={u.avatarSeed || u.email || u.name} size={32} />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-foreground truncate">{u.name}</p>
-                            {u.id === user?.id && (
-                              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-                                You
-                              </span>
-                            )}
+                {filtered.map((u) => {
+                  const isLastOwner = u.role === 'owner' && ownerCount <= 1;
+                  return (
+                    <tr key={u.id} className="group hover:bg-muted/20">
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-border shrink-0">
+                            <MemojiAvatar name={u.avatarSeed || u.email || u.name} size={32} />
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-foreground truncate">{u.name}</p>
+                              {u.id === user?.id && (
+                                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                                  You
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      {isOwner && u.id !== user?.id ? (
-                        <RoleDropdown
-                          current={u.role}
-                          onSelect={(role) => roleMutation.mutate({ id: u.id, role })}
-                          t={t}
-                        />
-                      ) : (
-                        <span className={getRoleStyle(u.role)}>{getRoleLabel(t, u.role)}</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Active
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
-                      {formatDate(u.createdAt)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end">
+                      </td>
+                      <td className="px-4 py-3">
                         {isOwner && u.id !== user?.id ? (
-                          <UserActionsMenu
-                            onReset={() => resetMutation.mutate(u.id)}
-                            onDelete={() => {
-                              if (window.confirm(`Remove ${u.name} from the team?`)) deleteMutation.mutate(u.id);
+                          <RoleDropdown
+                            current={u.role}
+                            isLastOwner={isLastOwner}
+                            onSelect={(role) => {
+                              if (isLastOwner && role !== 'owner') {
+                                onRequestDemote(u, role);
+                                return;
+                              }
+                              roleMutation.mutate({ id: u.id, role });
                             }}
                             t={t}
                           />
                         ) : (
-                          <span className="text-xs text-muted-foreground">{t.settingsTeamOwner}</span>
+                          <span className={getRoleStyle(u.role)}>{getRoleLabel(t, u.role)}</span>
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-1 text-xs text-emerald-600">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> {t.teamStatusActive}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
+                        {formatDate(u.createdAt)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end">
+                          {isOwner && u.id !== user?.id ? (
+                            <UserActionsMenu
+                              onReset={() => resetMutation.mutate(u.id)}
+                              onDelete={() => {
+                                if (isLastOwner) {
+                                  onRequestDemote(u, 'admin');
+                                } else {
+                                  onRequestDelete(u);
+                                }
+                              }}
+                              t={t}
+                            />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">{t.settingsTeamOwner}</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -379,8 +427,10 @@ function InvitesTab({ t, pendingInvites, revokeInviteMutation, formatDate }: Inv
                   <tr key={inv.id} className="hover:bg-muted/20">
                     <td className="px-4 py-3">
                       <div className="min-w-0">
-                        <p className="font-medium text-foreground truncate">{inv.email || 'Anyone with the link'}</p>
-                        <p className="text-xs text-muted-foreground truncate">Token: {inv.token.slice(0, 8)}…</p>
+                        <p className="font-medium text-foreground truncate">{inv.email || t.teamAnyoneWithLink}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {t.teamToken}: {inv.token.slice(0, 8)}…
+                        </p>
                       </div>
                     </td>
                     <td className="px-4 py-3">

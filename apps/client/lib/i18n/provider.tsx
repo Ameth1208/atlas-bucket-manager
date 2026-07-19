@@ -2,8 +2,9 @@
 
 import {
   useCallback,
+  useEffect,
   useMemo,
-  useSyncExternalStore,
+  useState,
   type ReactNode,
 } from 'react';
 import { en } from './dictionaries/en';
@@ -21,36 +22,18 @@ import { I18nContext, type I18nContextValue } from './context';
 const STORAGE_KEY = 'atlas.locale';
 const DICTIONARIES: Record<Locale, Dictionary> = { en, es, pt };
 
-let currentLocale: Locale = DEFAULT_LOCALE;
-const listeners = new Set<() => void>();
+function isValidLocale(value: string | null | undefined): value is Locale {
+  return !!value && (LOCALES as string[]).includes(value);
+}
 
-function detectInitialLocale(): Locale {
+function readStoredLocale(): Locale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE;
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored && (LOCALES as string[]).includes(stored)) {
-      return stored as Locale;
-    }
+    if (isValidLocale(stored)) return stored;
   } catch {
     /* ignore */
   }
-  const nav = window.navigator?.language?.toLowerCase() ?? '';
-  if (nav.startsWith('es')) return 'es';
-  if (nav.startsWith('pt')) return 'pt';
-  if (nav.startsWith('en')) return 'en';
-  return DEFAULT_LOCALE;
-}
-
-function subscribe(callback: () => void) {
-  listeners.add(callback);
-  return () => listeners.delete(callback);
-}
-
-function getSnapshot(): Locale {
-  return currentLocale;
-}
-
-function getServerSnapshot(): Locale {
   return DEFAULT_LOCALE;
 }
 
@@ -59,10 +42,22 @@ function interpolate(template: string, vars: Record<string, string | number>): s
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const locale = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  // SSR + first client render: always default locale (no hydration mismatch).
+  // The first time the user interacts with <LanguageSwitcher>, the stored
+  // preference (or browser preference) is applied. We keep the <html lang>
+  // attribute in sync via a one-time effect that doesn't touch React state.
+  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+
+  useEffect(() => {
+    const stored = readStoredLocale();
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = LOCALE_META[stored].htmlLang;
+    }
+  }, []);
 
   const setLocale = useCallback((next: Locale) => {
-    currentLocale = next;
+    if (!isValidLocale(next)) return;
+    setLocaleState(next);
     try {
       window.localStorage.setItem(STORAGE_KEY, next);
     } catch {
@@ -71,7 +66,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     if (typeof document !== 'undefined') {
       document.documentElement.lang = LOCALE_META[next].htmlLang;
     }
-    listeners.forEach((l) => l());
   }, []);
 
   const value = useMemo<I18nContextValue>(

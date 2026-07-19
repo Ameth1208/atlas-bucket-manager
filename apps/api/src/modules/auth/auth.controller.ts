@@ -9,6 +9,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { LoginDto, SetupDto, ChangePasswordDto } from './dto/auth.dto';
 import { Public } from '../../common/decorators/public.decorator';
@@ -16,7 +17,10 @@ import { CurrentUser, AuthUser } from '../../common/decorators/current-user.deco
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly auth: AuthService) {}
+  constructor(
+    private readonly auth: AuthService,
+    private readonly config: ConfigService,
+  ) {}
 
   @Public()
   @Get('status')
@@ -45,7 +49,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('auth_token');
+    res.clearCookie('auth_token', { path: '/' });
     return { success: true };
   }
 
@@ -63,10 +67,12 @@ export class AuthController {
   }
 
   private setAuthCookie(res: Response, token: string) {
+    const isProd = this.config.get<string>('nodeEnv') === 'production';
     res.cookie('auth_token', token, {
       httpOnly: true,
-      secure: false,
+      secure: isProd,
       sameSite: 'lax',
+      path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }

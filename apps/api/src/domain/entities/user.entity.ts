@@ -5,6 +5,8 @@ export interface User {
   passwordHash: string;
   role: 'owner' | 'admin' | 'editor' | 'viewer';
   avatarSeed?: string;
+  passwordResetToken?: string;
+  passwordResetExpiresAt?: number;
   createdAt: number;
 }
 

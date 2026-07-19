@@ -9,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { AlertTriangle, Database, Plug } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18n';
 
 interface BucketsListProps {
   search?: string;
@@ -18,24 +19,13 @@ export function BucketsList({ search = '' }: BucketsListProps) {
   const { buckets, providerErrors, isLoading } = useBuckets();
   const { providers } = useProviders();
   const { setCreateBucketOpen, setEditProviderId, setConnectProviderOpen } = useAppStore();
+  const { t, tx } = useI18n();
 
   const { data: statsMap = {}, isLoading: statsLoading } = useQuery({
-    queryKey: ['buckets-stats', buckets.map(b => `${b.providerId}:${b.name}`).join(',')],
-    queryFn: async () => {
-      const map: Record<string, { totalSize: number; totalObjects: number }> = {};
-      await Promise.allSettled(
-        buckets.map(async b => {
-          try {
-            const stats = await api.buckets.stats(b.name, b.providerId);
-            map[`${b.providerId}:${b.name}`] = stats;
-          } catch {
-            map[`${b.providerId}:${b.name}`] = { totalSize: 0, totalObjects: 0 };
-          }
-        })
-      );
-      return map;
-    },
+    queryKey: ['buckets-stats', buckets.map(b => `${b.providerId}:${b.name}`).sort().join(',')],
+    queryFn: () => api.buckets.statsMany().then((res) => res.stats),
     enabled: buckets.length > 0,
+    staleTime: 30_000,
   });
 
   const filteredBuckets = search.trim()
@@ -57,7 +47,7 @@ export function BucketsList({ search = '' }: BucketsListProps) {
           <CardContent className="flex flex-col items-center justify-center py-10 sm:py-12 text-center px-4">
             <Database size={36} className="mb-3 text-muted-foreground" strokeWidth={1.5} />
             <p className="text-[14px] sm:text-[15px] text-foreground mb-4 tracking-[-0.224px]">
-              No se encontraron buckets para &ldquo;{search.trim()}&rdquo;
+              {tx('dashboardBucketsEmpty', { name: search.trim() })}
             </p>
           </CardContent>
         </Card>
@@ -65,17 +55,18 @@ export function BucketsList({ search = '' }: BucketsListProps) {
     }
 
     if (providerErrors.length > 0) {
+      const single = providerErrors.length === 1;
       return (
         <Card className="border-destructive/30 bg-destructive/5">
           <CardContent className="flex flex-col gap-3 py-6 px-5">
             <div className="flex items-center gap-2 text-destructive">
               <AlertTriangle size={18} strokeWidth={1.75} />
               <p className="text-[14px] font-semibold tracking-[-0.224px]">
-                No se pudieron listar los buckets de {providerErrors.length === 1 ? 'este proveedor' : `${providerErrors.length} proveedores`}
+                {tx('providerErrorsTitle', { count: providerErrors.length, single: String(single) })}
               </p>
             </div>
             <p className="text-[12px] text-muted-foreground">
-              Revisa las credenciales, el endpoint o el puerto. Si acabas de conectar un proveedor, edítalo para corregir los datos.
+              {t.providerErrorsHint}
             </p>
             <div className="flex flex-col gap-2 mt-1">
               {providerErrors.map(err => (
@@ -92,7 +83,7 @@ export function BucketsList({ search = '' }: BucketsListProps) {
                     variant="pearl"
                     onClick={() => setEditProviderId(err.providerId)}
                   >
-                    <Plug size={12} /> Editar
+                    <Plug size={12} /> {t.edit}
                   </Button>
                 </div>
               ))}
@@ -108,9 +99,9 @@ export function BucketsList({ search = '' }: BucketsListProps) {
           <CardContent className="flex flex-col items-center justify-center py-10 sm:py-12 text-center px-4">
             <Database size={36} className="mb-3 text-muted-foreground" strokeWidth={1.5} />
             <p className="text-[14px] sm:text-[15px] text-foreground mb-4 tracking-[-0.224px]">
-              Conecta tu primer proveedor para empezar
+              {t.providerConnectFirst}
             </p>
-            <Button onClick={() => setConnectProviderOpen(true)}>Conectar proveedor</Button>
+            <Button onClick={() => setConnectProviderOpen(true)}>{t.providerConnect}</Button>
           </CardContent>
         </Card>
       );
@@ -120,8 +111,8 @@ export function BucketsList({ search = '' }: BucketsListProps) {
       <Card className="border-dashed border-border bg-muted">
         <CardContent className="flex flex-col items-center justify-center py-10 sm:py-12 text-center px-4">
           <Database size={36} className="mb-3 text-muted-foreground" strokeWidth={1.5} />
-          <p className="text-[14px] sm:text-[15px] text-foreground mb-4 tracking-[-0.224px]">No hay buckets configurados</p>
-          <Button onClick={() => setCreateBucketOpen(true)}>Crear primer bucket</Button>
+          <p className="text-[14px] sm:text-[15px] text-foreground mb-4 tracking-[-0.224px]">{t.bucketEmptyNoBuckets}</p>
+          <Button onClick={() => setCreateBucketOpen(true)}>{t.bucketEmptyCreateFirst}</Button>
         </CardContent>
       </Card>
     );
@@ -135,7 +126,8 @@ export function BucketsList({ search = '' }: BucketsListProps) {
             <div className="flex items-center gap-2 text-destructive">
               <AlertTriangle size={15} strokeWidth={1.75} />
               <p className="text-[12px] font-semibold tracking-[-0.224px]">
-                {providerErrors.length} {providerErrors.length === 1 ? 'proveedor no responde' : 'proveedores no responden'}
+                {providerErrors.length}{' '}
+                {providerErrors.length === 1 ? t.providerErrorSingle : t.providerErrorPlural}
               </p>
             </div>
             <div className="flex flex-col gap-1.5 mt-1">
@@ -149,7 +141,7 @@ export function BucketsList({ search = '' }: BucketsListProps) {
                     <p className="text-[11px] text-muted-foreground truncate">{err.error}</p>
                   </div>
                   <Button size="sm" variant="pearl" onClick={() => setEditProviderId(err.providerId)}>
-                    <Plug size={11} /> Editar
+                    <Plug size={11} /> {t.edit}
                   </Button>
                 </div>
               ))}

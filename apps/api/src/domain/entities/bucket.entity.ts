@@ -5,6 +5,7 @@ export interface Bucket {
   creationDate: Date;
   isPublic: boolean;
   limit?: number;
+  isFavorite?: boolean;
 }
 
 export interface BucketStats {

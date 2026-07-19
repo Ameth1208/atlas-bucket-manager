@@ -35,7 +35,13 @@ export function CreateBucketModal() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const createMutation = useMutation({
-    mutationFn: () => api.buckets.create({ name, providerId, limit: limit ? parseInt(limit) : undefined }),
+    mutationFn: () =>
+      api.buckets.create({
+        name,
+        providerId,
+        limit: limit ? parseInt(limit) : undefined,
+        limitUnit: 'MB',
+      }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ['buckets'] });
       const next = qc.getQueryData<Bucket[]>(['buckets']);

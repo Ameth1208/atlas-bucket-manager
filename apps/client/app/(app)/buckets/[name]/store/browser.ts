@@ -5,6 +5,25 @@ import { useURLStore } from './url';
 type Layout = 'grid' | 'list';
 type Filter = 'all' | 'image' | 'video' | 'audio' | 'code' | 'doc' | 'archive';
 
+function readPathFromUrl(): string[] {
+  if (typeof window === 'undefined') return [];
+  const sp = new URL(window.location.href).searchParams;
+  const raw = sp.get('path');
+  if (!raw) return [];
+  return raw.split('/').filter(Boolean);
+}
+
+function syncPathToUrl(path: string[]) {
+  if (typeof window === 'undefined') return;
+  const url = new URL(window.location.href);
+  if (path.length === 0) {
+    url.searchParams.delete('path');
+  } else {
+    url.searchParams.set('path', path.join('/'));
+  }
+  window.history.replaceState({}, '', url.toString());
+}
+
 interface BrowserStore {
   objects: StorageObject[];
   isLoading: boolean;
@@ -35,7 +54,7 @@ interface BrowserStore {
 export const useBrowserStore = create<BrowserStore>((set, get) => ({
   objects: [],
   isLoading: false,
-  path: [],
+  path: readPathFromUrl(),
   layout: 'grid',
   filter: 'all',
   search: '',
@@ -50,6 +69,7 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
       selected: new Set(),
       lastSelected: null,
     }));
+    syncPathToUrl(get().path);
     get().fetchObjects();
   },
   back: (idx) => {
@@ -58,12 +78,17 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
       selected: new Set(),
       lastSelected: null,
     }));
+    syncPathToUrl(get().path);
     get().fetchObjects();
   },
   setLayout: (layout) => set({ layout }),
   setFilter: (filter) => set({ filter }),
   setSearch: (search) => set({ search }),
-  reset: () => set({ path: [], selected: new Set(), lastSelected: null, search: '' }),
+  reset: () => {
+    const fromUrl = readPathFromUrl();
+    set({ path: fromUrl, selected: new Set(), lastSelected: null, search: '' });
+    if (fromUrl.length === 0) syncPathToUrl([]);
+  },
   setSelected: (selected) => set({ selected }),
   toggleSelect: (key) => set(state => {
     const n = new Set(state.selected);

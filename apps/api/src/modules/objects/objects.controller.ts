@@ -99,7 +99,11 @@ export class ObjectsController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(RolesGuard)
   @Roles('owner', 'admin', 'editor')
-  @UseInterceptors(FileFieldsInterceptor([{ name: 'files', maxCount: 100 }]))
+  @UseInterceptors(
+    FileFieldsInterceptor([{ name: 'files', maxCount: 100 }], {
+      limits: { fileSize: 500 * 1024 * 1024, files: 100 },
+    }),
+  )
   upload(
     @Param('providerId') providerId: string,
     @Param('bucket') bucket: string,

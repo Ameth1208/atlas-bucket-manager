@@ -39,3 +39,13 @@ export class UpdateUserDto {
   @IsString()
   avatarSeed?: string;
 }
+
+export class AcceptPasswordResetDto {
+  @IsString()
+  @MinLength(1)
+  token!: string;
+
+  @IsString()
+  @MinLength(6)
+  password!: string;
+}

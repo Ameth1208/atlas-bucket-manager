@@ -26,12 +26,47 @@ export class SqliteActivityRepository implements IActivityRepository {
       );
   }
 
-  list(limit: number, offset: number): ActivityEntry[] {
-    const rows = this.database.db
-      .prepare(
-        `SELECT * FROM activity_log ORDER BY created_at DESC LIMIT ? OFFSET ?`,
-      )
-      .all(limit, offset) as any[];
+  list(
+    limit: number,
+    offset: number,
+    filters: {
+      action?: string;
+      actor?: string;
+      bucket?: string;
+      provider?: string;
+      from?: number;
+      to?: number;
+    } = {},
+  ): ActivityEntry[] {
+    const where: string[] = [];
+    const params: any[] = [];
+    if (filters.action) {
+      where.push('action = ?');
+      params.push(filters.action);
+    }
+    if (filters.actor) {
+      where.push('actor LIKE ?');
+      params.push(`%${filters.actor}%`);
+    }
+    if (filters.bucket) {
+      where.push('bucket = ?');
+      params.push(filters.bucket);
+    }
+    if (filters.provider) {
+      where.push('provider = ?');
+      params.push(filters.provider);
+    }
+    if (typeof filters.from === 'number') {
+      where.push('created_at >= ?');
+      params.push(filters.from);
+    }
+    if (typeof filters.to === 'number') {
+      where.push('created_at <= ?');
+      params.push(filters.to);
+    }
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+    const sql = `SELECT * FROM activity_log ${whereSql} ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+    const rows = this.database.db.prepare(sql).all(...params, limit, offset) as any[];
     return rows.map((r) => ({
       id: r.id,
       userId: r.user_id,

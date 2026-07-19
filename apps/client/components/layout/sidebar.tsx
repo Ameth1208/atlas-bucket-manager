@@ -35,6 +35,7 @@ import { useEffect, useState } from 'react';
 import { cn, initials } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 import { useI18n } from '@/lib/i18n';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 const NAV = [
   { id: 'dashboard', href: '/dashboard', icon: Home, label: 'Todos los buckets' },
@@ -136,7 +137,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">Proveedores</SidebarGroupLabel>
           <SidebarGroupAction
-            title="Conectar proveedor"
+            title={t.providerConnect}
             onClick={() => useAppStore.getState().setConnectProviderOpen(true)}
           >
             <Plus />
@@ -230,7 +231,7 @@ export function AppSidebar() {
       <SidebarSeparator />
 
       <SidebarFooter className="p-3">
-        <div className="flex items-center gap-2.5 p-2 rounded-xl bg-secondary border border-border">
+        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-secondary border border-border">
           <MemojiAvatar
             name={user?.avatarSeed || user?.email || user?.name || 'user'}
             size={32}
@@ -240,17 +241,18 @@ export function AppSidebar() {
             <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || '—'}</p>
             <p className="text-xs text-sidebar-foreground/60 truncate capitalize">{user?.role}</p>
           </div>
+          <LanguageSwitcher />
           <Button
             type="button"
             variant="ghost"
             size="icon-sm"
             onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            title="Cambiar tema"
-            aria-label="Cambiar tema"
+            title={t.sidebarToggleTheme}
+            aria-label={t.sidebarToggleTheme}
           >
             {mounted ? (theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />) : <Moon size={13} />}
           </Button>
-          <Button type="button" variant="ghost" size="icon-sm" onClick={logout} title="Cerrar sesión" aria-label="Cerrar sesión">
+          <Button type="button" variant="ghost" size="icon-sm" onClick={logout} title={t.sidebarLogout} aria-label={t.sidebarLogout}>
             <LogOut size={13} />
           </Button>
         </div>

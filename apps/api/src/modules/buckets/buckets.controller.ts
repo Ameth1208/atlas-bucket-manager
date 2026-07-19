@@ -25,8 +25,13 @@ export class BucketsController {
   constructor(private readonly buckets: BucketsService) {}
 
   @Get()
-  list() {
-    return this.buckets.list();
+  list(@CurrentUser() user: AuthUser) {
+    return this.buckets.list(user);
+  }
+
+  @Get('stats')
+  async statsAll(@CurrentUser() user: AuthUser) {
+    return this.buckets.statsMany(user);
   }
 
   @Post()
@@ -80,5 +85,14 @@ export class BucketsController {
     @Param('name') name: string,
   ) {
     return this.buckets.stats(providerId, name);
+  }
+
+  @Get(':providerId/:name/public-endpoint')
+  async publicEndpoint(
+    @Param('providerId') providerId: string,
+    @Param('name') name: string,
+  ) {
+    const url = await this.buckets.publicEndpoint(providerId, name);
+    return { url };
   }
 }

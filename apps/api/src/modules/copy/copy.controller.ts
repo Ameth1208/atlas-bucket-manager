@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { CopyService } from './copy.service';
 import { StartCopyDto } from './dto/copy.dto';
+import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
 
 @Controller('copy')
 export class CopyController {
@@ -27,19 +28,19 @@ export class CopyController {
 
   @Post('start')
   @HttpCode(HttpStatus.OK)
-  start(@Body() dto: StartCopyDto) {
-    return this.copy.start(dto);
+  start(@Body() dto: StartCopyDto, @CurrentUser() user: AuthUser) {
+    return this.copy.start(dto, user?.email);
   }
 
   @Post('jobs/:id/cancel')
   @HttpCode(HttpStatus.OK)
-  cancel(@Param('id') id: string) {
+  async cancel(@Param('id') id: string) {
     return this.copy.cancel(id);
   }
 
   @Delete('jobs/:id')
   @HttpCode(HttpStatus.OK)
-  remove(@Param('id') id: string) {
+  async remove(@Param('id') id: string) {
     return this.copy.delete(id);
   }
 }

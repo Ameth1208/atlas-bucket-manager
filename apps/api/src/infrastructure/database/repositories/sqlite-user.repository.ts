@@ -29,6 +29,29 @@ export class SqliteUserRepository implements IUserRepository {
     return row ? this.map(row) : null;
   }
 
+  findByResetToken(token: string): User | null {
+    const row = this.database.db
+      .prepare('SELECT * FROM users WHERE password_reset_token = ?')
+      .get(token) as any;
+    return row ? this.map(row) : null;
+  }
+
+  setPasswordResetToken(id: string, token: string, expiresAt: number): void {
+    this.database.db
+      .prepare(
+        'UPDATE users SET password_reset_token = ?, password_reset_expires_at = ? WHERE id = ?',
+      )
+      .run(token, expiresAt, id);
+  }
+
+  clearPasswordResetToken(id: string): void {
+    this.database.db
+      .prepare(
+        'UPDATE users SET password_reset_token = NULL, password_reset_expires_at = NULL WHERE id = ?',
+      )
+      .run(id);
+  }
+
   list(): UserInfo[] {
     const rows = this.database.db
       .prepare('SELECT * FROM users ORDER BY created_at DESC')
@@ -95,6 +118,8 @@ export class SqliteUserRepository implements IUserRepository {
       passwordHash: row.password_hash,
       role: row.role,
       avatarSeed: row.avatar_seed ?? undefined,
+      passwordResetToken: row.password_reset_token ?? undefined,
+      passwordResetExpiresAt: row.password_reset_expires_at ?? undefined,
       createdAt: row.created_at,
     };
   }

@@ -45,10 +45,22 @@ export interface IBucketRepository {
     name: string,
     maxSize: number,
   ): Promise<void>;
+  getPublicEndpoint(
+    providerId: string,
+    name: string,
+  ): Promise<string | null>;
+  getBucketLimit(
+    providerId: string,
+    name: string,
+  ): number | null;
+  getBucketUsage(providerId: string, name: string): Promise<number>;
   getBucketStats(
     providerId: string,
     name: string,
   ): Promise<BucketStats>;
+  getBucketStatsMany(
+    buckets: { providerId: string; name: string }[],
+  ): Promise<Record<string, { totalSize: number; totalObjects: number; limit?: number }>>;
 
   // Objects
   listObjects(

@@ -9,7 +9,8 @@ import { Popover, PopoverTrigger } from '@/components/ui/popover';
 import type { Bucket } from '@/lib/api';
 
 import { useProviders } from '@/hooks/use-providers';
-import { useCopyJob } from '@/hooks/use-copy-job';
+import { useCopyJobsStore } from '@/lib/copy-jobs-store';
+import { useI18n } from '@/lib/i18n';
 
 import { BucketPermissions } from './bucket-permissions';
 import { ShareBucketDialog } from './share-bucket-dialog';
@@ -27,22 +28,19 @@ interface BucketActionsProps {
 export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFolder }: BucketActionsProps) {
   const qc = useQueryClient();
   const { providers } = useProviders();
+  const { t, tx } = useI18n();
+  const addCloneJob = useCopyJobsStore((s) => s.addJob);
   const [shareOpen, setShareOpen] = useState(false);
   const [cloneOpen, setCloneOpen] = useState(false);
   const [permsOpen, setPermsOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [publicLink, setPublicLink] = useState('');
-  const [generatingLink, setGeneratingLink] = useState(false);
-  const [cloneJobId, setCloneJobId] = useState<string | null>(null);
-
-  const { data: cloneJob } = useCopyJob(cloneJobId);
 
   const togglePolicy = useMutation({
     mutationFn: (isPublic: boolean) =>
       api.buckets.setPublic(bucket.name, bucket.providerId, isPublic),
     onSuccess: async (_, isPublic) => {
       await qc.invalidateQueries({ queryKey: ['buckets'] });
-      toast.success(isPublic ? 'Bucket público' : 'Bucket privado');
+      toast.success(isPublic ? t.bucketBadgePublic : t.bucketBadgePrivate);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -51,7 +49,7 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
     mutationFn: () => api.buckets.delete(bucket.name, bucket.providerId),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ['buckets'] });
-      toast.success(`Bucket "${bucket.name}" eliminado`);
+      toast.success(tx('bucketDeleteSuccess', { name: bucket.name }));
       setDeleteOpen(false);
       onDeleted?.();
     },
@@ -67,8 +65,16 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
         destBucket: destBucketName,
       }),
     onSuccess: async (job) => {
-      setCloneJobId(job.id);
-      toast.success(`Clonado iniciado: ${job.destBucket}`);
+      addCloneJob({
+        jobId: job.id,
+        sourceBucket: bucket.name,
+        sourceProviderId: bucket.providerId,
+        destBucket: job.destBucket,
+        destProviderId: job.destProviderId,
+        startedAt: Date.now(),
+      });
+      toast.success(tx('cloneStarted', { dest: job.destBucket }));
+      setCloneOpen(false);
       await qc.invalidateQueries({ queryKey: ['buckets'] });
       onCloned?.({ ...bucket, name: job.destBucket, providerId: job.destProviderId, creationDate: undefined });
     },
@@ -77,36 +83,18 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
 
   const setLimit = useMutation({
     mutationFn: (limit: number) =>
-      api.buckets.setLimit(bucket.name, bucket.providerId, limit),
+      api.buckets.setLimit(bucket.name, bucket.providerId, limit, 'B'),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ['buckets'] });
-      toast.success('Permisos actualizados');
+      await qc.invalidateQueries({ queryKey: ['buckets-stats'] });
+      toast.success(t.permissionsUpdated);
       setPermsOpen(false);
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const generateLink = async () => {
-    setGeneratingLink(true);
-    try {
-      const { url } = await api.objects.presignedUrl(
-        bucket.name,
-        '',
-        bucket.providerId
-      );
-      setPublicLink(url.split('?')[0]);
-    } catch {
-      toast.error('Error generando enlace');
-    } finally {
-      setGeneratingLink(false);
-    }
-  };
-
   const handleOpenCloneChange = (open: boolean) => {
     setCloneOpen(open);
-    if (!open) {
-      setCloneJobId(null);
-    }
   };
 
   return (
@@ -114,27 +102,27 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
       <div className="flex items-center gap-1.5">
         <Button variant="default" size="sm" onClick={onUpload}>
           <Upload size={13} />
-          Subir
+          {t.bucketActionsUpload}
         </Button>
         {onNewFolder && (
           <Button variant="pearl" size="sm" onClick={onNewFolder}>
             <FolderPlus size={13} />
-            Carpeta
+            {t.bucketActionsNewFolder}
           </Button>
         )}
         <Button variant="pearl" size="sm" onClick={() => setCloneOpen(true)}>
           <Copy size={13} />
-          Clonar
+          {t.bucketActionsClone}
         </Button>
         <Button variant="pearl" size="sm" onClick={() => setShareOpen(true)}>
           <Share2 size={13} />
-          Compartir
+          {t.bucketActionsShare}
         </Button>
         <Popover open={permsOpen} onOpenChange={setPermsOpen}>
           <PopoverTrigger render={<div />} nativeButton={false}>
           <Button variant="pearl" size="sm">
             <Settings size={13} />
-            Permisos
+            {t.bucketActionsPermissions}
           </Button>
           </PopoverTrigger>
           <BucketPermissions
@@ -150,7 +138,7 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
           size="icon-sm"
           onClick={() => setDeleteOpen(true)}
           className="text-muted-foreground hover:text-destructive hover:bg-destructive-soft"
-          aria-label="Eliminar bucket"
+          aria-label={t.delete}
         >
           <Trash2 size={13} />
         </Button>
@@ -161,10 +149,7 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
         open={shareOpen}
         onOpenChange={setShareOpen}
         onTogglePublic={(isPublic) => togglePolicy.mutate(isPublic)}
-        onGenerateLink={generateLink}
         isTogglingPublic={togglePolicy.isPending}
-        isGeneratingLink={generatingLink}
-        publicLink={publicLink}
       />
 
       <CloneBucketDialog
@@ -173,7 +158,6 @@ export function BucketActions({ bucket, onDeleted, onCloned, onUpload, onNewFold
         open={cloneOpen}
         onOpenChange={handleOpenCloneChange}
         onClone={(input) => cloneBucket.mutate(input)}
-        job={cloneJob}
         isCloning={cloneBucket.isPending}
       />
 

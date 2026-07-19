@@ -75,8 +75,36 @@ export const en: Dictionary = {
   confirmDeleteBucketDescription: 'This will delete the "{name}" bucket and all its objects. This action is permanent and irreversible.',
   confirmDeleteBucketConfirm: 'Delete permanently',
   confirmDeleteProviderTitle: 'Delete provider',
-  confirmDeleteProviderDescription: 'This will remove the "{name}" provider and disconnect all its buckets. This action is permanent.',
+  confirmDeleteProviderDescription: 'This will remove the provider and all its buckets from Atlas.',
   confirmDeleteProviderConfirm: 'Delete provider',
+  confirmDeleteType: 'Type',
+  confirmDemoteLastOwnerTitle: 'Last owner',
+  confirmDemoteLastOwnerDesc: 'Promote another member to owner before demoting the only owner.',
+
+  // Bucket permissions popover
+  bucketPermissionsTitle: 'Bucket permissions',
+  bucketPermissionsDesc: 'Configure access and storage limits.',
+  bucketAccess: 'Access',
+  bucketAccessPublicHint: 'Anyone can read',
+  bucketAccessPrivateHint: 'Only you can access',
+  bucketMakePublic: 'Make public',
+  bucketMakePrivate: 'Make private',
+  bucketLimit: 'Limit',
+  bucketLimitNoLimit: 'No limit',
+  permissionsUpdated: 'Permissions updated',
+
+  // New folder dialog
+  folderNewTitle: 'New folder',
+  folderNewDescription: 'Create a folder inside {path}.',
+  folderNewDescriptionRoot: 'Create a folder at the root of the bucket.',
+  folderNewName: 'Name',
+  folderNewNamePh: 'my-folder',
+  folderNewInvalid: 'Only letters, numbers, spaces, dots, dashes and underscores (1-255 characters).',
+  folderNewCreated: 'Folder "{name}" created',
+  folderCreate: 'Create folder',
+
+  // Misc toasts
+  cloneStarted: 'Cloning started: {dest}',
 
   // Bucket
   bucketObjects: 'Objects',
@@ -101,6 +129,7 @@ export const en: Dictionary = {
   bucketActionsClone: 'Clone',
   bucketActionsShare: 'Share',
   bucketActionsPermissions: 'Permissions',
+  cloneDialogTitle: 'Clone bucket',
   bucketSearch: 'Search files...',
 
   // Provider
@@ -324,4 +353,158 @@ export const en: Dictionary = {
   settingsCancel: 'Cancel',
   settingsLoading: 'Loading...',
   settingsEmpty: 'Empty',
+
+  // Auth (login + setup gate)
+  authLoginTitle: 'Sign in',
+  authLoginDescription: 'Enter your credentials to continue',
+  authLoginEmail: 'Email',
+  authLoginPassword: 'Password',
+  authLoginSubmit: 'Sign in',
+  authLoginNoAccount: 'First time on Atlas?',
+  authLoginSetupCta: 'Set up the admin account',
+  authLoginError: 'Authentication failed',
+  authLoginWelcome: 'Welcome back',
+  authLoginWelcomeDesc: 'Signed in as {name}',
+  authSetupUnavailable: 'Atlas already has an admin account. Sign in instead.',
+
+  // Invite accept page
+  inviteTitle: 'Join Atlas',
+  inviteValidating: 'Validating invitation…',
+  inviteInvalid: 'This invitation is no longer valid.',
+  inviteRole: 'You will join as',
+  inviteName: 'Full name',
+  inviteNamePh: 'Your name',
+  inviteEmail: 'Email',
+  inviteEmailPh: 'you@company.com',
+  invitePassword: 'Password',
+  invitePasswordPh: 'At least 8 characters',
+  inviteConfirm: 'Confirm password',
+  inviteConfirmPh: 'Repeat the password',
+  inviteSubmit: 'Accept invitation',
+  inviteAccepted: 'Welcome aboard!',
+  inviteAlreadyUsed: 'This invitation has already been used.',
+  invitePasswordMismatch: 'Passwords do not match',
+  invitePasswordTooShort: 'Password must be at least 8 characters',
+
+  // Reset password page
+  resetTitle: 'Set a new password',
+  resetDescription: 'Choose a new password for your account.',
+  resetNewPassword: 'New password',
+  resetConfirm: 'Confirm new password',
+  resetSubmit: 'Update password',
+  resetDone: 'Password updated. You can now sign in.',
+  resetInvalidToken: 'This reset link is no longer valid.',
+
+  // Favorites
+  favoritesTitle: 'Favorites',
+  favoritesEmpty: 'No favorite buckets yet',
+  favoritesSubtitle: 'Quick access to what matters most',
+  favoritesAddHint: 'Tap the star on a bucket card to add it here.',
+  favoritesAdd: 'Add to favorites',
+  favoritesRemove: 'Remove from favorites',
+
+  // Bucket card
+  bucketBadgePublic: 'Public',
+  bucketBadgePrivate: 'Private',
+  bucketObjectsLabel: '{count} objects',
+  bucketPctUsed: '{pct}% used',
+
+  // Dashboard buckets panel
+  dashboardBucketsTitle: 'Buckets',
+  dashboardBucketsSubtitle: '{count} connected buckets',
+  dashboardBucketsSearchPh: 'Search buckets…',
+  dashboardBucketsClear: 'Clear',
+  dashboardBucketsEmpty: 'No buckets match your search.',
+
+  // Share dialog
+  shareTitle: 'Share "{name}"',
+  shareDescription: 'Configure access and sharing links.',
+  sharePublic: 'Public',
+  sharePublicHint: 'Anyone with the link can read',
+  sharePrivate: 'Private',
+  sharePrivateHint: 'Only you can access',
+  shareMakePublic: 'Make public',
+  shareMakePrivate: 'Make private',
+  shareLink: 'Public link',
+  shareLinkPlaceholder: 'Generate a link to share',
+  shareCopyLink: 'Copy link',
+  shareClose: 'Close',
+
+  // Team section
+  teamTabMembers: 'Members',
+  teamTabInvitations: 'Invitations',
+  teamSearchPh: 'Search members…',
+  teamInviteButton: 'Invite',
+  teamInviteMember: 'Invite member',
+  teamInviteDescription: 'Generate a link or send an invite by email.',
+  teamInviteGenerate: 'Generate invite',
+  teamAnyoneWithLink: 'Anyone with the link',
+  teamToken: 'Token',
+  teamStatusActive: 'Active',
+  teamStatusColumn: 'Status',
+  teamJoinedColumn: 'Joined',
+  teamNoMembers: 'No members found',
+  teamRemoveConfirm: 'Remove {name} from the team?',
+  teamInvitePasswordRequired: 'Set a password to send the invite.',
+  teamActionLabel: 'User actions',
+
+  // Webhooks
+  webhookUrlPh: 'https://example.com/webhook',
+  webhookEventsLabel: 'Events',
+  webhookEventUpload: 'upload',
+  webhookEventDelete: 'delete',
+  webhookEventBucketCreate: 'bucket.create',
+  webhookEventBucketDelete: 'bucket.delete',
+  webhookEventClone: 'clone',
+  webhookSaved: 'Webhook saved',
+  webhookSave: 'Save webhook',
+  webhookTestSent: 'Test event sent',
+  webhookTestFailed: 'Test failed: {error}',
+  webhookTest: 'Test',
+
+  // Notification prefs
+  notifyEmailLabel: 'Email notifications',
+  notifyEmailDesc: 'Get an email when important events happen.',
+  notifyOnUploadLabel: 'When a file is uploaded',
+  notifyOnUploadDesc: 'Affects all your buckets.',
+  notifyOnDeleteLabel: 'When a file is deleted',
+  notifyOnDeleteDesc: 'Including bulk deletions.',
+  notifySaved: 'Preferences saved',
+
+  // Account / danger
+  accountDeleteHint: 'Permanently delete this Atlas instance. This action cannot be undone.',
+  accountDeleteConfirmTitle: 'Delete account',
+  accountDeleteConfirmDescription: 'Type {email} to confirm. This deletes the instance, all providers and every uploaded object.',
+  accountDeleteConfirmInput: 'Type your email to confirm',
+  accountDeleted: 'Account deletion requested. Contact the admin to confirm.',
+
+  // Buckets list empty / error states
+  bucketEmptyNoBuckets: 'No buckets configured',
+  bucketEmptyCreateFirst: 'Create your first bucket',
+  providerConnectFirst: 'Connect your first provider to get started',
+  providerErrorSingle: 'provider is unreachable',
+  providerErrorPlural: 'providers are unreachable',
+  providerErrorsTitle: 'Could not list buckets from the configured providers',
+  providerErrorsHint: 'Check the credentials, endpoint or port. If you just connected a provider, edit it to fix the data.',
+
+  // File type chart
+  fileTypeTitle: 'Storage by size',
+  fileTypeSummary: '{size} · {count} files',
+  fileTypeEmpty: 'No files yet',
+  fileTypeEmptyHint: 'Upload files to see the breakdown',
+  fileTypeFileCount: '{count} files',
+  fileTypeImage: 'Images',
+  fileTypeVideo: 'Videos',
+  fileTypeAudio: 'Audio',
+  fileTypeCode: 'Code',
+  fileTypeDoc: 'Documents',
+  fileTypeArchive: 'Archives',
+  fileTypeOther: 'Other',
+
+  // Upload dialog
+  uploadDialogTitle: 'Upload files',
+  uploadDialogDescription: 'Drag files here or click to select',
+  uploadDragHint: 'Drag files here',
+  uploadClickHint: 'or click to browse',
+  uploadError: 'Error',
 };

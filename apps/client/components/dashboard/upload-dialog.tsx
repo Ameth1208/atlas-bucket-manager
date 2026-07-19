@@ -15,6 +15,7 @@ import { useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useURLStore } from '@/app/(app)/buckets/[name]/store/url';
 import { useBrowserStore } from '@/app/(app)/buckets/[name]/store/browser';
+import { useI18n } from '@/lib/i18n';
 import { toast } from 'sonner';
 
 interface UploadDialogProps {
@@ -31,6 +32,7 @@ const toPendingItems = (files: File[]): FileItem[] =>
   files.map(file => ({ file, status: 'pending' }));
 
 export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
+  const { t } = useI18n();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const { bucketName, providerId } = useURLStore();
@@ -91,9 +93,9 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>Subir archivos</DialogTitle>
+          <DialogTitle>{t.uploadDialogTitle}</DialogTitle>
           <DialogDescription>
-            Arrastra archivos aquí o haz clic para seleccionar
+            {t.uploadDialogDescription}
           </DialogDescription>
         </DialogHeader>
 
@@ -122,8 +124,8 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
             <Upload size={20} className="text-muted-foreground" />
           </div>
           <div className="text-center">
-            <p className="text-sm font-medium">Arrastra archivos aquí</p>
-            <p className="text-xs text-muted-foreground mt-0.5">o haz clic para buscar</p>
+            <p className="text-sm font-medium">{t.uploadDragHint}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t.uploadClickHint}</p>
           </div>
           <input 
             id="upload-file-input" 
@@ -154,7 +156,7 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
                   <Loader2 size={14} className="text-foreground animate-spin shrink-0" />
                 )}
                 {item.status === 'error' && (
-                  <span className="text-[10px] text-destructive">Error</span>
+                  <span className="text-[10px] text-destructive">{t.uploadError}</span>
                 )}
                 {item.status === 'pending' && (
                   <button

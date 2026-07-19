@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import * as path from 'path';
 import * as fs from 'fs';
 import { configuration } from './config/configuration';
@@ -14,7 +15,10 @@ import { ApiKeysModule } from './modules/api-keys/api-keys.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { InvitesModule } from './modules/invites/invites.module';
 import { CopyModule } from './modules/copy/copy.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
+import { IntegrationsModule } from './modules/integrations/integrations.module';
 import { HealthModule } from './modules/health/health.module';
+import { ActivityLoggingInterceptor } from './common/interceptors/activity-logging.interceptor';
 
 // Locate the monorepo-root .env (works for both `apps/api` cwd and `/app/apps/api` in docker).
 function findEnvFile(): string | undefined {
@@ -44,7 +48,12 @@ function findEnvFile(): string | undefined {
     ActivityModule,
     InvitesModule,
     CopyModule,
+    FavoritesModule,
+    IntegrationsModule,
     HealthModule,
+  ],
+  providers: [
+    { provide: APP_INTERCEPTOR, useClass: ActivityLoggingInterceptor },
   ],
 })
 export class AppModule {}

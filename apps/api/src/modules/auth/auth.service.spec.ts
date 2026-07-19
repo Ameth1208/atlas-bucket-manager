@@ -17,6 +17,9 @@ class FakeUserRepository implements IUserRepository {
   findByEmail(email: string): User | null {
     return this.users.find((u) => u.email === email) ?? null;
   }
+  findByResetToken(token: string): User | null {
+    return this.users.find((u) => u.passwordResetToken === token) ?? null;
+  }
   list(): UserInfo[] {
     return this.users.map((u) => ({
       id: u.id,
@@ -55,6 +58,12 @@ class FakeUserRepository implements IUserRepository {
     const before = this.users.length;
     this.users = this.users.filter((u) => u.id !== id);
     return this.users.length < before;
+  }
+  setPasswordResetToken(): void {
+    throw new Error('not implemented');
+  }
+  clearPasswordResetToken(): void {
+    throw new Error('not implemented');
   }
 }
 

@@ -3,6 +3,7 @@ import { InvitesService } from './invites.service';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
+import { Public } from '../../common/decorators/public.decorator';
 import { CreateInviteDto, AcceptInviteDto } from './dto/invite.dto';
 
 @Controller('invites')
@@ -29,6 +30,7 @@ export class InvitesController {
   }
 }
 
+@Public()
 @Controller('invites/public')
 export class InvitesPublicController {
   constructor(private readonly invites: InvitesService) {}

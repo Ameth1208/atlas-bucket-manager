@@ -105,11 +105,71 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         expires_at INTEGER,
         created_at INTEGER NOT NULL DEFAULT (unixepoch())
       );
+
+      CREATE TABLE IF NOT EXISTS copy_jobs (
+        id TEXT PRIMARY KEY,
+        actor TEXT,
+        source_provider_id TEXT NOT NULL,
+        source_bucket TEXT NOT NULL,
+        dest_provider_id TEXT NOT NULL,
+        dest_bucket TEXT NOT NULL,
+        prefix TEXT,
+        overwrite INTEGER NOT NULL DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'queued',
+        total_objects INTEGER NOT NULL DEFAULT 0,
+        copied_objects INTEGER NOT NULL DEFAULT 0,
+        total_bytes INTEGER NOT NULL DEFAULT 0,
+        copied_bytes INTEGER NOT NULL DEFAULT 0,
+        errors_json TEXT NOT NULL DEFAULT '[]',
+        started_at INTEGER NOT NULL DEFAULT (unixepoch()),
+        finished_at INTEGER
+      );
+      CREATE INDEX IF NOT EXISTS idx_copy_jobs_status ON copy_jobs(status);
+      CREATE INDEX IF NOT EXISTS idx_copy_jobs_started ON copy_jobs(started_at DESC);
+
+      CREATE TABLE IF NOT EXISTS favorites (
+        user_id TEXT NOT NULL,
+        provider_id TEXT NOT NULL,
+        bucket_name TEXT NOT NULL,
+        created_at INTEGER NOT NULL DEFAULT (unixepoch()),
+        PRIMARY KEY (user_id, provider_id, bucket_name),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+      CREATE INDEX IF NOT EXISTS idx_favorites_user ON favorites(user_id);
+
+      CREATE TABLE IF NOT EXISTS webhooks (
+        id TEXT PRIMARY KEY,
+        url TEXT NOT NULL,
+        events TEXT NOT NULL,
+        secret TEXT,
+        created_by TEXT NOT NULL,
+        created_at INTEGER NOT NULL DEFAULT (unixepoch())
+      );
+
+      CREATE TABLE IF NOT EXISTS notification_prefs (
+        user_id TEXT PRIMARY KEY,
+        email_enabled INTEGER NOT NULL DEFAULT 1,
+        on_upload INTEGER NOT NULL DEFAULT 1,
+        on_delete INTEGER NOT NULL DEFAULT 1,
+        updated_at INTEGER NOT NULL DEFAULT (unixepoch()),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
     `);
     try {
       this._db.exec('ALTER TABLE users ADD COLUMN avatar_seed TEXT;');
     } catch {
       // Column already exists
     }
+    try {
+      this._db.exec('ALTER TABLE users ADD COLUMN password_reset_token TEXT;');
+    } catch {
+      // Column already exists
+    }
+    try {
+      this._db.exec('ALTER TABLE users ADD COLUMN password_reset_expires_at INTEGER;');
+    } catch {
+      // Column already exists
+    }
+    this._db.exec('CREATE INDEX IF NOT EXISTS idx_users_reset_token ON users(password_reset_token);');
   }
 }

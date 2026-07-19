@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  PayloadTooLargeException,
 } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -15,6 +16,14 @@ import { StorageObject, SearchResult } from '../../domain/entities/object.entity
 import { CreateFolderBodyDto, DeleteObjectsDto } from '../buckets/dto/bucket.dto';
 import { ConfigService } from '@nestjs/config';
 import { ActivityService } from '../activity/activity.service';
+
+function fmtBytes(n: number): string {
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 ** 2) return `${(n / 1024).toFixed(1)} KB`;
+  if (n < 1024 ** 3) return `${(n / 1024 ** 2).toFixed(1)} MB`;
+  if (n < 1024 ** 4) return `${(n / 1024 ** 3).toFixed(2)} GB`;
+  return `${(n / 1024 ** 4).toFixed(2)} TB`;
+}
 
 @Injectable()
 export class ObjectsService {
@@ -99,6 +108,18 @@ export class ObjectsService {
     if (!files || files.length === 0) {
       throw new BadRequestException('No files provided');
     }
+
+    const limit = this.repo.getBucketLimit(providerId, bucket);
+    if (limit !== null && limit > 0) {
+      const incomingSize = files.reduce((s, f) => s + f.size, 0);
+      const currentUsage = await this.repo.getBucketUsage(providerId, bucket);
+      if (currentUsage + incomingSize > limit) {
+        throw new PayloadTooLargeException(
+          `Bucket limit exceeded: ${fmtBytes(limit)} (current ${fmtBytes(currentUsage)} + incoming ${fmtBytes(incomingSize)})`,
+        );
+      }
+    }
+
     const tempDir = this.config.get<string>('dbPath') ?? './data';
     const uploadDir = path.join(tempDir, '..', 'uploads');
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });

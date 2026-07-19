@@ -27,6 +27,11 @@ export const api = {
     logout: () => request<{ success: boolean }>('/auth/logout', { method: 'POST' }),
     changePassword: (body: { currentPassword: string; newPassword: string }) =>
       request<{ success: boolean }>('/auth/change-password', { method: 'POST', body: JSON.stringify(body) }),
+    resetPassword: (body: { token: string; password: string }) =>
+      request<{ success: boolean }>('/users/public/reset-password/accept', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
   },
 
   users: {
@@ -35,8 +40,9 @@ export const api = {
     update: (id: string, body: Partial<CreateUserBody>) =>
       request<User>(`/users/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
     resetPassword: (id: string) =>
-      request<{ temporaryPassword: string }>(`/users/${id}/reset-password`, { method: 'POST' }),
+      request<{ resetUrl: string; expiresAt: number }>(`/users/${id}/reset-password`, { method: 'POST' }),
     delete: (id: string) => request<{ success: boolean }>(`/users/${id}`, { method: 'DELETE' }),
+    deleteSelf: () => request<{ success: boolean }>('/users/me', { method: 'DELETE' }),
   },
 
   apiKeys: {
@@ -58,21 +64,40 @@ export const api = {
   },
 
   activity: {
-    list: (limit = 50, offset = 0) => request<ActivityEntry[]>(`/activity?limit=${limit}&offset=${offset}`),
+    list: (
+      limit = 50,
+      offset = 0,
+      filters: { action?: string; actor?: string; bucket?: string; provider?: string; from?: number; to?: number } = {},
+    ) => {
+      const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
+      if (filters.action) params.set('action', filters.action);
+      if (filters.actor) params.set('actor', filters.actor);
+      if (filters.bucket) params.set('bucket', filters.bucket);
+      if (filters.provider) params.set('provider', filters.provider);
+      if (typeof filters.from === 'number') params.set('from', String(filters.from));
+      if (typeof filters.to === 'number') params.set('to', String(filters.to));
+      return request<ActivityEntry[]>(`/activity?${params.toString()}`);
+    },
   },
 
   buckets: {
     list: () => request<BucketsListResult>('/buckets'),
-    create: (body: { name: string; providerId: string; limit?: number }) =>
+    statsMany: () => request<{ stats: Record<string, { totalSize: number; totalObjects: number }> }>('/buckets/stats'),
+    create: (body: { name: string; providerId: string; limit?: number; limitUnit?: 'B' | 'KB' | 'MB' | 'GB' | 'TB' }) =>
       request<{ success: boolean }>('/buckets', { method: 'POST', body: JSON.stringify(body) }),
     delete: (name: string, providerId: string) =>
       request<{ success: boolean }>(`/buckets/${providerId}/${encodeURIComponent(name)}`, { method: 'DELETE' }),
     stats: (name: string, providerId: string) =>
       request<BucketStats>(`/buckets/${providerId}/${name}/stats`),
-    setLimit: (name: string, providerId: string, limit: number) =>
-      request<{ success: boolean }>(`/buckets/${providerId}/${name}/limit`, { method: 'PUT', body: JSON.stringify({ limit }) }),
+    setLimit: (name: string, providerId: string, limit: number, unit: 'B' | 'KB' | 'MB' | 'GB' | 'TB' = 'B') =>
+      request<{ success: boolean }>(`/buckets/${providerId}/${name}/limit`, {
+        method: 'PUT',
+        body: JSON.stringify({ limit, unit }),
+      }),
     setPublic: (name: string, providerId: string, isPublic: boolean) =>
       request<{ success: boolean }>(`/buckets/${providerId}/${name}/policy`, { method: 'PUT', body: JSON.stringify({ isPublic }) }),
+    publicEndpoint: (name: string, providerId: string) =>
+      request<{ url: string | null }>(`/buckets/${providerId}/${name}/public-endpoint`),
     providers: () => request<Provider[]>('/providers'),
     getProvider: (id: string) => request<Provider>(`/providers/${id}`),
     createProvider: (body: CreateProviderBody) =>
@@ -116,6 +141,27 @@ export const api = {
       }
       return res.json();
     },
+  },
+
+  favorites: {
+    list: () => request<{ providerId: string; bucketName: string }[]>('/favorites'),
+    add: (providerId: string, bucketName: string) =>
+      request<{ success: boolean }>('/favorites', { method: 'POST', body: JSON.stringify({ providerId, bucketName }) }),
+    remove: (providerId: string, bucketName: string) =>
+      request<{ success: boolean }>(`/favorites/${providerId}/${encodeURIComponent(bucketName)}`, { method: 'DELETE' }),
+  },
+
+  integrations: {
+    listWebhooks: () => request<Webhook[]>('/integrations/webhooks'),
+    createWebhook: (body: { url: string; events: string[] }) =>
+      request<Webhook>('/integrations/webhooks', { method: 'POST', body: JSON.stringify(body) }),
+    deleteWebhook: (id: string) =>
+      request<{ success: boolean }>(`/integrations/webhooks/${id}`, { method: 'DELETE' }),
+    testWebhook: (id: string) =>
+      request<{ success: boolean }>(`/integrations/webhooks/${id}/test`, { method: 'POST' }),
+    getNotificationPrefs: () => request<NotificationPrefs>('/integrations/notifications'),
+    updateNotificationPrefs: (prefs: Partial<NotificationPrefs>) =>
+      request<NotificationPrefs>('/integrations/notifications', { method: 'PUT', body: JSON.stringify(prefs) }),
   },
 };
 
@@ -190,6 +236,7 @@ export interface Bucket {
   providerId: string;
   providerName?: string;
   isPublic?: boolean;
+  isFavorite?: boolean;
   limit?: number;
 }
 
@@ -247,6 +294,19 @@ export interface FileTypeCount {
   type: string;
   count: number;
   size: number;
+}
+
+export interface Webhook {
+  id: string;
+  url: string;
+  events: string[];
+  createdAt: number;
+}
+
+export interface NotificationPrefs {
+  emailEnabled: boolean;
+  onUpload: boolean;
+  onDelete: boolean;
 }
 
 export type CopyJobStatus = 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';

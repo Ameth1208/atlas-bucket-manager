@@ -7,6 +7,8 @@ import { CreateProviderDto } from './dto/provider.dto';
 import { ProviderInfo } from '../../domain/entities/provider.entity';
 import { ActivityService } from '../activity/activity.service';
 
+export type PublicProvider = Omit<ProviderInfo, 'secretKey'> & { secretKey: '' };
+
 @Injectable()
 export class ProvidersService {
   constructor(
@@ -15,17 +17,17 @@ export class ProvidersService {
     private readonly activity: ActivityService,
   ) {}
 
-  list(): ProviderInfo[] {
-    return this.buckets.listProviders();
+  list(): PublicProvider[] {
+    return this.buckets.listProviders().map(this.redact);
   }
 
-  get(id: string): ProviderInfo {
+  get(id: string): PublicProvider {
     const provider = this.buckets.getProvider(id);
     if (!provider) throw new NotFoundException('Provider not found');
-    return provider;
+    return this.redact(provider);
   }
 
-  async create(dto: CreateProviderDto, actor?: string): Promise<ProviderInfo> {
+  async create(dto: CreateProviderDto, actor?: string): Promise<PublicProvider> {
     const created = await this.buckets.createProvider({
       ...dto,
       useSSL: dto.useSSL ?? false,
@@ -34,10 +36,10 @@ export class ProvidersService {
     if (actor) {
       this.activity.log({ actor, action: 'provider', target: created.name });
     }
-    return created;
+    return this.redact(created);
   }
 
-  async update(id: string, dto: CreateProviderDto, actor?: string): Promise<ProviderInfo> {
+  async update(id: string, dto: CreateProviderDto, actor?: string): Promise<PublicProvider> {
     if (!this.buckets.getProvider(id)) {
       throw new NotFoundException('Provider not found');
     }
@@ -49,7 +51,7 @@ export class ProvidersService {
     if (actor) {
       this.activity.log({ actor, action: 'provider', target: updated.name });
     }
-    return updated;
+    return this.redact(updated);
   }
 
   remove(id: string, actor?: string): { success: boolean } {
@@ -62,4 +64,9 @@ export class ProvidersService {
     }
     return { success: true };
   }
+
+  private redact = (p: ProviderInfo): PublicProvider => {
+    const { secretKey, ...rest } = p;
+    return { ...rest, secretKey: '' };
+  };
 }

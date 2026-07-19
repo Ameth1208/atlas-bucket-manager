@@ -15,18 +15,22 @@ import { Label } from '@/components/ui/label';
 import { useI18n } from '@/lib/i18n';
 
 export type ConfirmVariant = 'destructive' | 'default';
+type DictKey = keyof ReturnType<typeof useI18n>['t'];
 
 export interface ConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  titleKey: keyof ReturnType<typeof useI18n>['t'];
-  descriptionKey: keyof ReturnType<typeof useI18n>['t'];
-  confirmKey: keyof ReturnType<typeof useI18n>['t'];
-  cancelKey?: keyof ReturnType<typeof useI18n>['t'];
+  titleKey?: DictKey;
+  title?: string;
+  descriptionKey?: DictKey;
+  description?: string;
+  confirmKey?: DictKey;
+  confirmLabel?: string;
+  cancelKey?: DictKey;
   variant?: ConfirmVariant;
   icon?: 'trash' | 'warning' | 'none';
   requireTextMatch?: string;
-  placeholderKey?: keyof ReturnType<typeof useI18n>['t'];
+  placeholderKey?: DictKey;
   vars?: Record<string, string | number>;
   isLoading?: boolean;
   onConfirm: () => void;
@@ -36,9 +40,12 @@ export function ConfirmDialog({
   open,
   onOpenChange,
   titleKey,
+  title,
   descriptionKey,
+  description,
   confirmKey,
-  cancelKey = 'cancel' as any,
+  confirmLabel,
+  cancelKey = 'cancel',
   variant = 'destructive',
   icon = 'warning',
   requireTextMatch,
@@ -47,7 +54,7 @@ export function ConfirmDialog({
   isLoading = false,
   onConfirm,
 }: ConfirmDialogProps) {
-  const { tx } = useI18n();
+  const { tx, t } = useI18n();
   const [typed, setTyped] = useState('');
 
   const matches = !requireTextMatch || typed === requireTextMatch;
@@ -58,26 +65,31 @@ export function ConfirmDialog({
 
   const IconComp = icon === 'trash' ? Trash2 : icon === 'warning' ? AlertTriangle : null;
 
+  const titleText = title ?? (titleKey ? tx(titleKey, vars) : '');
+  const descriptionText = description ?? (descriptionKey ? tx(descriptionKey, vars) : '');
+  const confirmText = confirmLabel ?? (confirmKey ? tx(confirmKey) : t.confirm);
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
           <div className={variant === 'destructive' ? 'flex items-center gap-2 text-destructive' : 'flex items-center gap-2'}>
             {IconComp && <IconComp size={18} />}
-            <DialogTitle>{tx(titleKey as any, vars)}</DialogTitle>
+            <DialogTitle>{titleText}</DialogTitle>
           </div>
-          <DialogDescription>{tx(descriptionKey as any, vars)}</DialogDescription>
+          <DialogDescription>{descriptionText}</DialogDescription>
         </DialogHeader>
 
         {requireTextMatch && (
           <div className="grid gap-1.5 py-2">
             <Label className="text-[12px]">
-              Type <span className="font-mono font-semibold text-foreground">{requireTextMatch}</span> to confirm
+              {t.confirmDeleteType}{' '}
+              <span className="font-mono font-semibold text-foreground">{requireTextMatch}</span>
             </Label>
             <Input
               value={typed}
               onChange={e => setTyped(e.target.value)}
-              placeholder={placeholderKey ? tx(placeholderKey as any) : requireTextMatch}
+              placeholder={placeholderKey ? tx(placeholderKey) : requireTextMatch}
               autoFocus
               onKeyDown={e => { if (e.key === 'Enter' && matches) onConfirm(); }}
             />
@@ -86,7 +98,7 @@ export function ConfirmDialog({
 
         <DialogFooter>
           <Button variant="pearl" onClick={handleClose} disabled={isLoading}>
-            {tx(cancelKey as any)}
+            {tx(cancelKey)}
           </Button>
           <Button
             variant={variant}
@@ -98,7 +110,7 @@ export function ConfirmDialog({
             ) : (
               <Trash2 size={14} />
             )}
-            {tx(confirmKey as any)}
+            {confirmText}
           </Button>
         </DialogFooter>
       </DialogContent>

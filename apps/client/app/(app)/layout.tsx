@@ -9,6 +9,7 @@ import { CreateBucketModal } from '@/components/modals/create-bucket';
 import { ConnectProviderModal, EditProviderModal } from '@/components/modals/connect-provider';
 import { CreateApiKeyModal } from '@/components/modals/create-api-key';
 import { CreateUserModal } from '@/components/modals/create-user';
+import { CloneProgressDock } from '@/components/dashboard/clone-progress-dock';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { setUser } = useAppStore();
@@ -36,6 +37,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <EditProviderModal />
         <CreateApiKeyModal />
         <CreateUserModal />
+        <CloneProgressDock />
       </SidebarProvider>
     </div>
   );

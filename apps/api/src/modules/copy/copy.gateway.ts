@@ -27,7 +27,11 @@ export class CopyGateway
     });
     this.copy.on('job-completed', (job) => {
       this.server?.emit('copy:completed', job);
+    });
+    this.copy.on('job-failed', (job) => {
       this.server?.emit('copy:failed', job);
+    });
+    this.copy.on('job-cancelled', (job) => {
       this.server?.emit('copy:cancelled', job);
     });
   }
