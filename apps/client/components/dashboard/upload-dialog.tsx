@@ -32,7 +32,7 @@ const toPendingItems = (files: File[]): FileItem[] =>
   files.map(file => ({ file, status: 'pending' }));
 
 export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
-  const { t } = useI18n();
+  const { t, tx } = useI18n();
   const [files, setFiles] = useState<FileItem[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const { bucketName, providerId } = useURLStore();
@@ -54,7 +54,7 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
       }));
     },
     onSuccess: () => {
-      toast.success('Archivos subidos');
+      toast.success(t.uploadToastSuccess);
       useBrowserStore.getState().fetchObjects();
       setFiles([]);
       onOpenChange(false);
@@ -102,7 +102,7 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
         <div
           role="button"
           tabIndex={0}
-          aria-label="Seleccionar archivos para subir"
+          aria-label={t.uploadSelectAria}
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
@@ -131,7 +131,7 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
             id="upload-file-input" 
             type="file" 
             multiple 
-            aria-label="Archivos para subir"
+            aria-label={t.uploadFilesAria}
             className="hidden" 
             onChange={handleFileSelect}
           />
@@ -161,7 +161,7 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
                 {item.status === 'pending' && (
                   <button
                     type="button"
-                    aria-label={`Eliminar ${item.file.name}`}
+                    aria-label={tx('uploadRemoveAria', { name: item.file.name })}
                     onClick={() => handleRemove(item.file)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
                   >
@@ -175,13 +175,17 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
 
         <DialogFooter>
           <Button variant="pearl" onClick={handleClose}>
-            Cancelar
+            {t.uploadCancel}
           </Button>
           <Button
             onClick={handleUpload}
             disabled={files.length === 0 || uploadMutation.isPending}
           >
-            {uploadMutation.isPending ? 'Subiendo...' : `Subir ${files.length > 0 ? `(${files.length})` : ''}`}
+            {uploadMutation.isPending
+              ? t.uploadSubmitting
+              : files.length > 0
+                ? tx('uploadSubmitWithCount', { count: files.length })
+                : t.uploadSubmit}
           </Button>
         </DialogFooter>
       </DialogContent>

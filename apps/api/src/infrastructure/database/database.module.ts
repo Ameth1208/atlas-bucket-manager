@@ -11,9 +11,21 @@ import { SqliteActivityRepository } from './repositories/sqlite-activity.reposit
 @Module({
   providers: [
     DatabaseService,
-    { provide: USER_REPOSITORY, useClass: SqliteUserRepository },
-    { provide: API_KEY_REPOSITORY, useClass: SqliteApiKeyRepository },
-    { provide: ACTIVITY_REPOSITORY, useClass: SqliteActivityRepository },
+    {
+      provide: USER_REPOSITORY,
+      useFactory: (database: DatabaseService) => new SqliteUserRepository(database),
+      inject: [DatabaseService],
+    },
+    {
+      provide: API_KEY_REPOSITORY,
+      useFactory: (database: DatabaseService) => new SqliteApiKeyRepository(database),
+      inject: [DatabaseService],
+    },
+    {
+      provide: ACTIVITY_REPOSITORY,
+      useFactory: (database: DatabaseService) => new SqliteActivityRepository(database),
+      inject: [DatabaseService],
+    },
   ],
   exports: [
     DatabaseService,

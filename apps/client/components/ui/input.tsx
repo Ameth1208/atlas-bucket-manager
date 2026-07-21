@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Input as InputPrimitive } from '@base-ui/react/input';
 import { Eye, EyeOff, AlertCircle, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 
 interface InputProps extends Omit<React.ComponentProps<'input'>, 'size'> {
   label?: string;
@@ -27,6 +28,7 @@ function Input({
   ...props
 }: InputProps) {
   const [showPassword, setShowPassword] = React.useState(false);
+  const { t } = useI18n();
   const isPassword = type === 'password';
   const effectiveType = isPassword && showPassword ? 'text' : type;
   const hasError = invalid;
@@ -85,7 +87,7 @@ function Input({
           <button
             type="button"
             onClick={() => setShowPassword((v) => !v)}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            aria-label={showPassword ? t.uiHidePassword : t.uiShowPassword}
             tabIndex={-1}
             className="p-1 text-muted-foreground hover:text-foreground transition-colors"
           >

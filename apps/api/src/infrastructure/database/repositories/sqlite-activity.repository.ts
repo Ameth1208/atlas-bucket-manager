@@ -1,9 +1,7 @@
-import { Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database.service';
 import { ActivityEntry } from '../../../domain/entities/activity.entity';
 import { IActivityRepository } from '../../../domain/repositories/activity.repository';
 
-@Injectable()
 export class SqliteActivityRepository implements IActivityRepository {
   constructor(private readonly database: DatabaseService) {}
 
@@ -31,6 +29,7 @@ export class SqliteActivityRepository implements IActivityRepository {
     offset: number,
     filters: {
       action?: string;
+      actions?: string[];
       actor?: string;
       bucket?: string;
       provider?: string;
@@ -40,7 +39,10 @@ export class SqliteActivityRepository implements IActivityRepository {
   ): ActivityEntry[] {
     const where: string[] = [];
     const params: any[] = [];
-    if (filters.action) {
+    if (filters.actions && filters.actions.length > 0) {
+      where.push(`action IN (${filters.actions.map(() => '?').join(',')})`);
+      params.push(...filters.actions);
+    } else if (filters.action) {
       where.push('action = ?');
       params.push(filters.action);
     }

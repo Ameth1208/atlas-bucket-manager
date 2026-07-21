@@ -4,15 +4,18 @@ import { useAppStore } from '@/lib/store';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
+import { useI18n } from '@/lib/i18n';
 import type { Provider } from '@/lib/api';
 
 export function ConnectProviderModal() {
+  const { t, tx } = useI18n();
   const open = useAppStore(s => s.connectProviderOpen);
   const setOpen = useAppStore(s => s.setConnectProviderOpen);
   const qc = useQueryClient();
 
   return (
     <ProviderFormModal
+      key="create"
       open={open}
       mode="create"
       onClose={() => setOpen(false)}
@@ -20,13 +23,14 @@ export function ConnectProviderModal() {
         qc.invalidateQueries({ queryKey: ['providers'] });
         qc.invalidateQueries({ queryKey: ['buckets'] });
         qc.invalidateQueries({ queryKey: ['activity'] });
-        toast.success(`Proveedor "${p.name}" conectado`);
+        toast.success(tx('providerConnected', { name: p.name }));
       }}
     />
   );
 }
 
 export function EditProviderModal() {
+  const { t, tx } = useI18n();
   const editProviderId = useAppStore(s => s.editProviderId);
   const setEditProviderId = useAppStore(s => s.setEditProviderId);
   const qc = useQueryClient();
@@ -37,6 +41,7 @@ export function EditProviderModal() {
 
   return (
     <ProviderFormModal
+      key={provider?.id ?? 'edit'}
       open={!!editProviderId}
       mode="edit"
       provider={provider}
@@ -47,7 +52,7 @@ export function EditProviderModal() {
         qc.setQueryData(['providers'], next);
         qc.invalidateQueries({ queryKey: ['buckets'] });
         qc.invalidateQueries({ queryKey: ['activity'] });
-        toast.success(`Proveedor "${p.name}" actualizado`);
+        toast.success(tx('providerUpdated', { name: p.name }));
       }}
     />
   );

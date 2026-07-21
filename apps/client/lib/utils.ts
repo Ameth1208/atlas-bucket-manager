@@ -21,10 +21,6 @@ export function fmtRelative(ts: number | undefined): string {
   return `hace ${Math.floor(diff / 86400)} d`;
 }
 
-export function initials(name: string): string {
-  return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-}
-
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 

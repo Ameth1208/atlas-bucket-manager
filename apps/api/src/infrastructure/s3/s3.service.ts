@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Client as MinioClient } from 'minio';
 import * as http from 'http';
 import * as https from 'https';
+import * as fs from 'fs/promises';
 import { DatabaseService } from '../database/database.service';
 import { ProviderInfo } from '../../domain/entities/provider.entity';
 
@@ -16,12 +17,15 @@ export class S3Service implements OnModuleInit {
     private readonly config: ConfigService,
   ) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     // Ensure data dirs exist
     const dataDir = this.config.get<string>('dbPath') ?? './data';
     for (const dir of [dataDir, './uploads', './temp']) {
-      const fs = require('fs') as typeof import('fs');
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      try {
+        await fs.access(dir);
+      } catch {
+        await fs.mkdir(dir, { recursive: true });
+      }
     }
   }
 
@@ -57,6 +61,25 @@ export class S3Service implements OnModuleInit {
 
   invalidateClient(providerId: string): void {
     this.clients.delete(providerId);
+  }
+
+  /**
+   * Build a one-off MinioClient for a provider with a region override.
+   * Used for presigned URL retry across regions without polluting the cache.
+   */
+  buildClient(
+    provider: ProviderInfo,
+    regionOverride?: string,
+  ): MinioClient {
+    return new MinioClient({
+      endPoint: provider.endPoint,
+      port: provider.port,
+      useSSL: provider.useSSL,
+      accessKey: provider.accessKey,
+      secretKey: provider.secretKey,
+      region: regionOverride ?? provider.region,
+      transportAgent: this.buildAgent(provider.useSSL) as any,
+    });
   }
 
   listProviders(): ProviderInfo[] {

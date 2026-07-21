@@ -25,8 +25,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const body = exception.getResponse();
       message = typeof body === 'string' ? { error: body } : body;
     } else if (exception instanceof Error) {
-      this.logger.error(`${request.method} ${request.url} → ${exception.message}`, exception.stack);
-      message = { error: exception.message };
+      this.logger.error(`${request.method} ${request.url} → ${exception.message}`);
+      message = { error: 'Internal server error' };
     } else {
       this.logger.error(`Unknown error on ${request.method} ${request.url}`, String(exception));
     }

@@ -21,8 +21,10 @@ import { CurrentUser, AuthUser } from '../../common/decorators/current-user.deco
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @Controller()
+@UseGuards(JwtAuthGuard)
 export class ObjectsController {
   constructor(private readonly objects: ObjectsService) {}
 

@@ -131,6 +131,14 @@ export interface Dictionary {
   uploadDragHint: string;
   uploadClickHint: string;
   uploadError: string;
+  uploadSelectAria: string;
+  uploadFilesAria: string;
+  uploadRemoveAria: string;
+  uploadCancel: string;
+  uploadSubmit: string;
+  uploadSubmitWithCount: string;
+  uploadSubmitting: string;
+  uploadToastSuccess: string;
 
   // Buckets list empty / error states
   bucketEmptyNoBuckets: string;
@@ -151,9 +159,6 @@ export interface Dictionary {
   bucketFiles: string;
   bucketEmptyTitle: string;
   bucketEmptyDescription: string;
-  bucketEmptyUpload: string;
-  bucketEmptyNewFolder: string;
-  bucketEmptyNoResults: string;
   bucketEmptyTryOther: string;
   bucketPreview: string;
   bucketDownload: string;
@@ -170,9 +175,7 @@ export interface Dictionary {
   // Provider
   providerConnect: string;
   providerName: string;
-  providerNamePh: string;
   providerEndpoint: string;
-  providerEndpointPh: string;
   providerPort: string;
   providerRegion: string;
   providerAccessKey: string;
@@ -182,22 +185,13 @@ export interface Dictionary {
   providerUseSSLEnabled: string;
   providerUseSSLDisabled: string;
   providerSelectKind: string;
-  providerChangeProvider: string;
-  providerMinio: string;
-  providerAws: string;
-  providerR2: string;
-  providerSpaces: string;
-  providerWasabi: string;
   providerKindPlaceholder: string;
-  providerConnected: string;
-  providerUpdated: string;
   providerDeleted: string;
   providerEditTitle: string;
   providerNewTitle: string;
 
   // Sidebar
   sidebarProviders: string;
-  sidebarNoProviders: string;
   sidebarConnectProvider: string;
   sidebarNewBucket: string;
   sidebarToggleTheme: string;
@@ -219,7 +213,15 @@ export interface Dictionary {
   sidebarProviderCopy: string;
   sidebarProviderEdit: string;
   sidebarProviderDelete: string;
-  sidebarNoBuckets: string;
+  sidebarUserMenu: string;
+  sidebarUserAccount: string;
+  sidebarUserProfile: string;
+  sidebarUserTheme: string;
+  sidebarUserLanguage: string;
+  sidebarUserLogout: string;
+  sidebarUserThemeLight: string;
+  sidebarUserThemeDark: string;
+  sidebarUserThemeSystem: string;
 
   // Errors
   errorConnectionFailed: string;
@@ -458,6 +460,9 @@ export interface Dictionary {
   shareLinkPlaceholder: string;
   shareCopyLink: string;
   shareClose: string;
+  sharePresignedLabel: string;
+  sharePresignedPh: string;
+  sharePresignedGenerate: string;
 
   // Team section
   teamTabMembers: string;
@@ -499,6 +504,295 @@ export interface Dictionary {
   notifyOnDeleteLabel: string;
   notifyOnDeleteDesc: string;
   notifySaved: string;
+
+  // Activity
+  activityTitle: string;
+  activitySubtitle: string;
+  activityFiltersHeading: string;
+  activityFilterAction: string;
+  activityFilterUser: string;
+  activityFilterClear: string;
+  activityFilterClearAll: string;
+  activityApply: string;
+  activityUserLabel: string;
+  activityUserPh: string;
+  activityNoMatches: string;
+  activityResult: string;
+  activityResults: string;
+  activityEmpty: string;
+  activityColWhen: string;
+  activityColActor: string;
+  activityColAction: string;
+  activityColDetail: string;
+  activityColBucket: string;
+  activityTimeNow: string;
+  activityTimeMin: string;
+  activityTimeHour: string;
+  activityTimeDay: string;
+  activityLiveTag: string;
+
+  // API keys
+  apiKeysTitle: string;
+  apiKeysSubtitle: string;
+  apiKeysCreate: string;
+  apiKeysPolicy: string;
+  apiKeysStatActive: string;
+  apiKeysStatRead: string;
+  apiKeysStatWrite: string;
+  apiKeysStatCalls30d: string;
+  apiKeysSection: string;
+  apiKeysSearch: string;
+  apiKeysColName: string;
+  apiKeysColToken: string;
+  apiKeysColScopes: string;
+  apiKeysColLastUsed: string;
+  apiKeysColActions: string;
+  apiKeysEmpty: string;
+  apiKeysCreated: string;
+  apiKeysRevoke: string;
+  apiKeysQuickstart: string;
+  apiKeysQuickstartCopy: string;
+  apiKeysShowToken: string;
+  apiKeysHideToken: string;
+  apiKeysCopyPrefix: string;
+  apiKeysRevoked: string;
+
+  // Buckets index
+  bucketsIndexTitle: string;
+  bucketsIndexSubtitle: string;
+  bucketsIndexEmpty: string;
+  bucketsIndexLoading: string;
+  bucketsIndexError: string;
+  bucketsIndexSearchPh: string;
+  bucketsIndexClear: string;
+  bucketsIndexNew: string;
+  bucketsIndexResult: string;
+  bucketsIndexResults: string;
+
+  // Dashboard
+  dashboardTitle: string;
+  dashboardSubtitle: string;
+  dashboardConnectProvider: string;
+  dashboardCreateBucket: string;
+  dashboardStatBuckets: string;
+  dashboardStatBucketsSub: string;
+  dashboardStatStorage: string;
+  dashboardStatStorageSub: string;
+  dashboardStatPublic: string;
+  dashboardStatPublicSub: string;
+  dashboardStatActivity: string;
+  dashboardStatActivitySub: string;
+  dashboardRecentActivity: string;
+  dashboardViewAll: string;
+  dashboardNoRecentActivity: string;
+
+  // Settings sections (descriptions)
+  settingsSectionAccount: string;
+  settingsSectionTeam: string;
+  settingsSectionIntegrations: string;
+  settingsSectionSecurity: string;
+
+  // Team
+  teamShareLink: string;
+  teamEmailColumn: string;
+
+  // Login (extra strings not in authLogin*)
+  loginFirstTime: string;
+
+  // Generic
+  errorGeneric: string;
+
+  // Clone dialog & progress dock
+  cloneSelectProvider: string;
+  cloneChooseDest: string;
+  cloneSameSourceWarn: string;
+  cloneOverwriteLabel: string;
+  cloneOverwriteHelp: string;
+  cloneStart: string;
+  cloneCancelJob: string;
+  cloneProgressTitle: string;
+  cloneProgressEmpty: string;
+  cloneProgressClear: string;
+  cloneProgressCloning: string;
+  cloneProgressCompleted: string;
+  cloneProgressFailed: string;
+  cloneProgressCancelled: string;
+  cloneProgressFrom: string;
+  cloneDialogSourceLabel: string;
+  cloneDialogDestProviderLabel: string;
+  cloneDialogDestProviderPh: string;
+  cloneDialogDestBucketLabel: string;
+  cloneDialogDestBucketPh: string;
+  cloneDialogSameProviderHint: string;
+  cloneDialogRemoteHint: string;
+  cloneDialogStarting: string;
+  cloneDialogSelectDestAria: string;
+  cloneProgressObjects: string;
+  cloneProgressBytes: string;
+  cloneProgressInit: string;
+  cloneProgressSelectAria: string;
+  cloneProgressCollapse: string;
+  cloneProgressExpand: string;
+  cloneProgressClose: string;
+  cloneProgressCancel: string;
+  cloneProgressDelete: string;
+  cloneProgressCancelledToast: string;
+  cloneProgressDeletedToast: string;
+  cloneProgressStatus: string;
+  cloneProgressStatusCopying: string;
+  cloneProgressErrorCount: string;
+
+  // Create bucket dialog
+  bucketCreateTitle: string;
+  bucketCreateNameLabel: string;
+  bucketCreateNamePh: string;
+  bucketCreateProviderLabel: string;
+  bucketCreateProviderEmpty: string;
+  bucketCreateLimitLabel: string;
+  bucketCreateLimitCurrent: string;
+  bucketCreateLimitMb: string;
+  bucketCreateLimitGb: string;
+  bucketCreateSubmit: string;
+  bucketCreateLimitNone: string;
+  bucketCreateLimit100mb: string;
+  bucketCreateLimit1gb: string;
+  bucketCreateLimit10gb: string;
+  bucketCreateLimit100gb: string;
+  bucketCreateSuccess: string;
+
+  // Create API key dialog
+  apiKeyCreateTitle: string;
+  apiKeyCreateNameLabel: string;
+  apiKeyCreateNamePh: string;
+  apiKeyCreateScopesLabel: string;
+  apiKeyCreateSubmit: string;
+  apiKeyCreatedHeading: string;
+  apiKeyCreatedBody: string;
+  apiKeyYourKey: string;
+  apiKeyCopy: string;
+  apiKeyCopied: string;
+  apiKeyDone: string;
+
+  // Provider form
+  providerEditTitleNamed: string;
+  providerChangeProvider: string;
+  providerNameLabel: string;
+  providerNamePh: string;
+  providerEndpointLabel: string;
+  providerEndpointPh: string;
+  providerPortLabel: string;
+  providerPortPh: string;
+  providerRegionLabel: string;
+  providerRegionPh: string;
+  providerAccessKeepHint: string;
+  providerAccessPh: string;
+  providerSecretKeepHint: string;
+  providerSecretPh: string;
+  providerSslLabel: string;
+  providerSslEnabled: string;
+  providerSslDisabled: string;
+  providerSubmitSave: string;
+  providerSubmitConnect: string;
+  providerConnected: string;
+  providerUpdated: string;
+  providerMinio: string;
+  providerAws: string;
+  providerR2: string;
+  providerSpaces: string;
+  providerWasabi: string;
+
+  // Bucket toolbar / list / grid / object card
+  bucketFilesCount: string;
+  bucketSearchPh: string;
+  bucketSearchClear: string;
+  bucketLayoutGrid: string;
+  bucketLayoutList: string;
+  bucketDeleteSelected: string;
+  bucketDeleteSelectedCount: string;
+  bucketEmptyNoResults: string;
+  bucketEmptyNoResultsHint: string;
+  bucketEmptyFolder: string;
+  bucketEmptyFolderHint: string;
+  bucketEmptyBucket: string;
+  bucketEmptyBucketHint: string;
+  bucketEmptyUpload: string;
+  bucketEmptyNewFolder: string;
+  bucketListColName: string;
+  bucketListColSize: string;
+  bucketListColModified: string;
+  bucketListColType: string;
+  bucketListColActions: string;
+  bucketListSelectAction: string;
+  bucketListPreview: string;
+  bucketListDownload: string;
+  bucketListDelete: string;
+  bucketListFolder: string;
+  bucketThumbnailErrorTitle: string;
+  bucketThumbnailErrorClose: string;
+  bucketFileKindImage: string;
+  bucketFileKindVideo: string;
+  bucketFileKindAudio: string;
+  bucketFileKindCode: string;
+  bucketFileKindDoc: string;
+  bucketFileKindArchive: string;
+  bucketObjectOpenFolder: string;
+  bucketObjectSelect: string;
+  bucketObjectFolderLabel: string;
+
+  // Toolbar
+  toolbarConnectProviderTitle: string;
+  toolbarNewBucketTitle: string;
+  toolbarOpenSettingsAria: string;
+
+  // Bucket switcher
+  bucketSwitcherTitle: string;
+  bucketSwitcherAll: string;
+  bucketSwitcherSearchPh: string;
+  bucketSwitcherCurrent: string;
+
+  // Common chrome
+  commonAtlas: string;
+  commonLoading: string;
+  bucketNotFound: string;
+
+  // File preview
+  filePreviewDownload: string;
+  filePreviewClose: string;
+  filePreviewCannotPreview: string;
+  filePreviewType: string;
+  filePreviewNotAvailable: string;
+  filePreviewDownloadToView: string;
+
+  // Sidebar
+  sidebarGroupSources: string;
+  sidebarGroupProviders: string;
+  sidebarGroupTools: string;
+  sidebarNoProviders: string;
+  sidebarNoBuckets: string;
+  sidebarErrorLogout: string;
+  sidebarErrorDeleteProvider: string;
+  sidebarProviderDeleted: string;
+  sidebarInfoBuckets: string;
+  sidebarInfoEndpoint: string;
+  sidebarInfoAccessKey: string;
+  sidebarInfoRegion: string;
+  sidebarInfoSsl: string;
+  sidebarInfoEdit: string;
+  sidebarInfoDelete: string;
+  sidebarInfoCopy: string;
+  sidebarNavDashboard: string;
+  sidebarNavFavorites: string;
+  sidebarNavActivity: string;
+  sidebarNavSettings: string;
+
+  // UI primitives
+  uiClose: string;
+  uiToggleSidebar: string;
+  uiShowPassword: string;
+  uiHidePassword: string;
+  uiLogoTagline: string;
+  uiMobileSidebarTitle: string;
+  uiMobileSidebarDescription: string;
 
   // Account / danger
   accountDeleteHint: string;

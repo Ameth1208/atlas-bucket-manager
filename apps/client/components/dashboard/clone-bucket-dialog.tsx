@@ -70,7 +70,7 @@ export function CloneBucketDialog({
         <div className="grid gap-4 py-2">
           <div className="grid gap-2">
             <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-              Origen
+              {t.cloneDialogSourceLabel}
             </Label>
             <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-muted/40">
               <div className="size-8 rounded-lg bg-background grid place-items-center text-muted-foreground ring-1 ring-border">
@@ -87,7 +87,7 @@ export function CloneBucketDialog({
 
           <div className="grid gap-2">
             <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-              Proveedor de destino
+              {t.cloneDialogDestProviderLabel}
             </Label>
             <Popover open={selectOpen} onOpenChange={setSelectOpen}>
               <PopoverTrigger
@@ -95,7 +95,7 @@ export function CloneBucketDialog({
                   <button
                     {...props}
                     type="button"
-                    aria-label="Seleccionar proveedor de destino"
+                    aria-label={t.cloneDialogSelectDestAria}
                     className={cn(
                       'w-full h-10 px-3 rounded-xl border border-input bg-canvas text-[13px] outline-none text-left',
                       'flex items-center gap-2.5',
@@ -107,11 +107,11 @@ export function CloneBucketDialog({
                       {destProvider?.name?.[0] ?? '?'}
                     </div>
                     <span className="flex-1 truncate text-foreground">
-                      {destProvider?.name ?? 'Selecciona un proveedor'}
+                      {destProvider?.name ?? t.cloneDialogDestProviderPh}
                     </span>
                     {destProviderId !== bucket.providerId && (
                       <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-                        remoto
+                        {t.cloneDialogRemoteHint}
                       </span>
                     )}
                     <ChevronDown size={14} className="text-muted-foreground" />
@@ -142,7 +142,7 @@ export function CloneBucketDialog({
                         <div className="flex-1 min-w-0">
                           <div className="truncate font-medium">{p.name}</div>
                           {isCurrent && (
-                            <div className="text-[10.5px] text-muted-foreground">mismo proveedor</div>
+                            <div className="text-[10.5px] text-muted-foreground">{t.cloneDialogSameProviderHint}</div>
                           )}
                         </div>
                         {active && <Check size={14} className="text-primary shrink-0" />}
@@ -156,13 +156,13 @@ export function CloneBucketDialog({
 
           <div className="grid gap-2">
             <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
-              Nombre del bucket destino
+              {t.cloneDialogDestBucketLabel}
             </Label>
             <Input
               value={destBucketName}
               onChange={(e) => setDestBucketName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleClone()}
-              placeholder="mi-bucket-clonado"
+              placeholder={t.cloneDialogDestBucketPh}
               className="h-10"
               autoFocus
             />
@@ -171,18 +171,18 @@ export function CloneBucketDialog({
 
         <DialogFooter>
           <Button variant="pearl" onClick={() => handleOpenChange(false)} disabled={isCloning}>
-            Cancelar
+            {t.cancel}
           </Button>
           <Button onClick={handleClone} disabled={!canSubmit}>
             {isCloning ? (
               <>
                 <Loader2 size={13} className="animate-spin" />
-                Iniciando…
+                {t.cloneDialogStarting}
               </>
             ) : (
               <>
                 <Copy size={13} />
-                Iniciar clonado
+                {t.cloneStart}
               </>
             )}
           </Button>

@@ -1,18 +1,16 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Star, Activity, Settings, Plus, ChevronRight, Database, Sun, Moon, LogOut, Pencil, Trash2, Copy, Check, MoreHorizontal } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { Home, Star, Activity, Settings, Plus, ChevronRight, Database, Pencil, Trash2, Copy, Check, MoreHorizontal } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Provider } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
 import { useBuckets } from '@/hooks/use-buckets';
 import { useProviders } from '@/hooks/use-providers';
-import { MemojiAvatar } from '@/components/ui/memoji-avatar';
 import { Logo } from '@/components/ui/logo';
-import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { UserMenu } from './user-menu';
 import {
   Sidebar,
   SidebarContent,
@@ -31,20 +29,20 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { toast } from 'sonner';
-import { useEffect, useState } from 'react';
-import { cn, initials } from '@/lib/utils';
-import { useTheme } from 'next-themes';
+import { useMemo, useState } from 'react';
+import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
-import { LanguageSwitcher } from '@/components/language-switcher';
 
-const NAV = [
-  { id: 'dashboard', href: '/dashboard', icon: Home, label: 'Todos los buckets' },
-  { id: 'favorites', href: '/favorites', icon: Star, label: 'Favoritos' },
-  { id: 'activity', href: '/activity', icon: Activity, label: 'Actividad' },
+type NavKey = 'sidebarNavDashboard' | 'sidebarNavFavorites' | 'sidebarNavActivity' | 'sidebarNavSettings';
+
+const NAV_KEYS: { id: string; href: string; icon: typeof Home; labelKey: NavKey }[] = [
+  { id: 'dashboard', href: '/dashboard', icon: Home, labelKey: 'sidebarNavDashboard' },
+  { id: 'favorites', href: '/favorites', icon: Star, labelKey: 'sidebarNavFavorites' },
+  { id: 'activity', href: '/activity', icon: Activity, labelKey: 'sidebarNavActivity' },
 ];
 
-const TOOLS = [
-  { id: 'settings', href: '/settings', icon: Settings, label: 'Ajustes' },
+const TOOL_KEYS: { id: string; href: string; icon: typeof Settings; labelKey: NavKey }[] = [
+  { id: 'settings', href: '/settings', icon: Settings, labelKey: 'sidebarNavSettings' },
 ];
 
 const openProviderEdit = (id: string) => {
@@ -54,13 +52,11 @@ const openProviderEdit = (id: string) => {
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, tx } = useI18n();
   const { user, setUser } = useAppStore();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const [providersOpen, setProvidersOpen] = useState<Record<string, boolean>>({});
+  const [deleteProviderTarget, setDeleteProviderTarget] = useState<{ id: string; name: string } | null>(null);
 
-  useEffect(() => setMounted(true), []);
   const { buckets } = useBuckets();
   const { providers } = useProviders();
 
@@ -70,13 +66,11 @@ export function AppSidebar() {
       setUser(null);
       router.push('/login');
     } catch {
-      toast.error('Error al cerrar sesión');
+      toast.error(t.sidebarErrorLogout);
     }
   };
 
   const toggleProvider = (id: string) => setProvidersOpen(s => ({ ...s, [id]: !s[id] }));
-
-  const [deleteProviderTarget, setDeleteProviderTarget] = useState<{ id: string; name: string } | null>(null);
 
   const handleDeleteProvider = (id: string, name: string) => {
     setDeleteProviderTarget({ id, name });
@@ -91,11 +85,11 @@ export function AppSidebar() {
         const err = await res.json().catch(() => ({ error: res.statusText }));
         throw new Error(err.error || `HTTP ${res.status}`);
       }
-      toast.success(`Proveedor "${name}" eliminado`);
+      toast.success(tx('sidebarProviderDeleted', { name }));
       setDeleteProviderTarget(null);
       window.location.reload();
     } catch (e: any) {
-      toast.error(e.message ?? 'Error al eliminar el proveedor');
+      toast.error(e.message ?? t.sidebarErrorDeleteProvider);
     }
   };
 
@@ -108,12 +102,13 @@ export function AppSidebar() {
       <SidebarSeparator />
 
       <SidebarContent className="px-2 py-3">
-        {/* Main nav */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">Fuentes</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">
+            {t.sidebarGroupSources}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {NAV.map(item => {
+              {NAV_KEYS.map(item => {
                 const active = pathname === item.href || pathname.startsWith(item.href + '/');
                 return (
                   <SidebarMenuItem key={item.id}>
@@ -124,7 +119,7 @@ export function AppSidebar() {
                       className="h-9"
                     >
                       <item.icon />
-                      <span>{item.label}</span>
+                      <span>{t[item.labelKey]}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -133,9 +128,10 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Providers */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">Proveedores</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">
+            {t.sidebarGroupProviders}
+          </SidebarGroupLabel>
           <SidebarGroupAction
             title={t.providerConnect}
             onClick={() => useAppStore.getState().setConnectProviderOpen(true)}
@@ -144,7 +140,7 @@ export function AppSidebar() {
           </SidebarGroupAction>
           <SidebarGroupContent>
             {providers.length === 0 && (
-              <p className="px-2 py-1 text-[11px] text-sidebar-foreground/60">Sin proveedores</p>
+              <p className="px-2 py-1 text-[11px] text-sidebar-foreground/60">{t.sidebarNoProviders}</p>
             )}
             <SidebarMenu>
               {providers.map(p => {
@@ -177,7 +173,7 @@ export function AppSidebar() {
                     {isOpen && (
                       <SidebarMenuSub>
                         {pBuckets.length === 0 && (
-                          <p className="px-2 py-1 text-[11px] text-sidebar-foreground/60">Sin buckets</p>
+                          <p className="px-2 py-1 text-[11px] text-sidebar-foreground/60">{t.sidebarNoBuckets}</p>
                         )}
                         {pBuckets.map(b => {
                           const active = pathname === `/buckets/${b.name}`;
@@ -202,12 +198,13 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Tools */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">Herramientas</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">
+            {t.sidebarGroupTools}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {TOOLS.map(item => {
+              {TOOL_KEYS.map(item => {
                 const active = pathname.startsWith(item.href);
                 return (
                   <SidebarMenuItem key={item.id}>
@@ -218,7 +215,7 @@ export function AppSidebar() {
                       className="h-9"
                     >
                       <item.icon />
-                      <span>{item.label}</span>
+                      <span>{t[item.labelKey]}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
@@ -231,31 +228,12 @@ export function AppSidebar() {
       <SidebarSeparator />
 
       <SidebarFooter className="p-3">
-        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-secondary border border-border">
-          <MemojiAvatar
-            name={user?.avatarSeed || user?.email || user?.name || 'user'}
-            size={32}
-            className="rounded-full shrink-0 w-8 h-8"
-          />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || '—'}</p>
-            <p className="text-xs text-sidebar-foreground/60 truncate capitalize">{user?.role}</p>
-          </div>
-          <LanguageSwitcher />
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            title={t.sidebarToggleTheme}
-            aria-label={t.sidebarToggleTheme}
-          >
-            {mounted ? (theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />) : <Moon size={13} />}
-          </Button>
-          <Button type="button" variant="ghost" size="icon-sm" onClick={logout} title={t.sidebarLogout} aria-label={t.sidebarLogout}>
-            <LogOut size={13} />
-          </Button>
-        </div>
+        <UserMenu
+          name={user?.name ?? '—'}
+          role={user?.role ?? 'viewer'}
+          avatarSeed={user?.avatarSeed || user?.email || user?.name || 'user'}
+          onLogout={logout}
+        />
       </SidebarFooter>
 
       <ConfirmDialog
@@ -271,6 +249,7 @@ export function AppSidebar() {
   );
 }
 
+
 interface ProviderInfoContentProps {
   provider: Provider;
   bucketCount: number;
@@ -279,6 +258,7 @@ interface ProviderInfoContentProps {
 }
 
 function ProviderInfoContent({ provider, bucketCount, onEdit, onDelete }: ProviderInfoContentProps) {
+  const { t, tx } = useI18n();
   const [copied, setCopied] = useState(false);
 
   const copy = (text: string) => {
@@ -302,17 +282,26 @@ function ProviderInfoContent({ provider, bucketCount, onEdit, onDelete }: Provid
       </div>
 
       <div className="p-3 space-y-2.5">
-        <Row label="Buckets" value={String(bucketCount)} />
+        <Row label={t.sidebarInfoBuckets} value={String(bucketCount)} />
         <Row
-          label="Endpoint"
-          value={`${provider.endPoint}:${provider.port}${provider.useSSL ? ' · SSL' : ''}`}
+          label={t.sidebarInfoEndpoint}
+          value={`${provider.endPoint}:${provider.port}${provider.useSSL ? ` · ${t.sidebarInfoSsl}` : ''}`}
           mono
           copyable
           onCopy={() => copy(`${provider.endPoint}:${provider.port}`)}
           copied={copied}
+          copyLabel={t.sidebarInfoCopy}
         />
-        <Row label="Access Key" value={provider.accessKey ?? '—'} mono copyable onCopy={() => copy(provider.accessKey ?? '')} copied={copied} />
-        <Row label="Región" value={provider.region ?? 'us-east-1'} />
+        <Row
+          label={t.sidebarInfoAccessKey}
+          value={provider.accessKey ?? '—'}
+          mono
+          copyable
+          onCopy={() => copy(provider.accessKey ?? '')}
+          copied={copied}
+          copyLabel={t.sidebarInfoCopy}
+        />
+        <Row label={t.sidebarInfoRegion} value={provider.region ?? 'us-east-1'} />
       </div>
 
       <div className="flex border-t border-border">
@@ -321,21 +310,21 @@ function ProviderInfoContent({ provider, bucketCount, onEdit, onDelete }: Provid
           onClick={onEdit}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-medium text-popover-foreground hover:bg-muted transition-colors border-r border-border"
         >
-          <Pencil size={12} /> Editar
+          <Pencil size={12} /> {t.sidebarInfoEdit}
         </button>
         <button
           type="button"
           onClick={onDelete}
           className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 text-[12px] font-medium text-destructive hover:bg-destructive-soft transition-colors"
         >
-          <Trash2 size={12} /> Eliminar
+          <Trash2 size={12} /> {t.sidebarInfoDelete}
         </button>
       </div>
     </PopoverContent>
   );
 }
 
-function Row({ label, value, mono, copyable, onCopy, copied }: { label: string; value: string; mono?: boolean; copyable?: boolean; onCopy?: () => void; copied?: boolean }) {
+function Row({ label, value, mono, copyable, onCopy, copied, copyLabel }: { label: string; value: string; mono?: boolean; copyable?: boolean; onCopy?: () => void; copied?: boolean; copyLabel?: string }) {
   return (
     <div className="flex items-center justify-between gap-2 min-w-0">
       <span className="text-[11px] text-muted-foreground shrink-0">{label}</span>
@@ -346,7 +335,7 @@ function Row({ label, value, mono, copyable, onCopy, copied }: { label: string; 
             type="button"
             onClick={onCopy}
             className="shrink-0 w-5 h-5 rounded flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted"
-            aria-label="Copiar"
+            aria-label={copyLabel ?? 'Copy'}
           >
             {copied ? <Check size={11} className="text-success" /> : <Copy size={11} />}
           </button>

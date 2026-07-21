@@ -34,6 +34,8 @@ interface BrowserStore {
   selected: Set<string>;
   lastSelected: string | null;
   thumbnails: Record<string, string>;
+  /** Reason the most recent presigned-URL signing failed (if any). */
+  thumbnailError: string | null;
   setObjects: (objects: StorageObject[]) => void;
   setLoading: (loading: boolean) => void;
   navigate: (folder: string) => void;
@@ -49,6 +51,7 @@ interface BrowserStore {
   setThumbnails: (t: Record<string, string>) => void;
   addThumbnail: (key: string, url: string) => void;
   clearThumbnail: (key: string) => void;
+  setThumbnailError: (msg: string | null) => void;
 }
 
 export const useBrowserStore = create<BrowserStore>((set, get) => ({
@@ -61,6 +64,7 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
   selected: new Set(),
   lastSelected: null,
   thumbnails: {},
+  thumbnailError: null,
   setObjects: (objects) => set({ objects }),
   setLoading: (isLoading) => set({ isLoading }),
   navigate: (folder) => {
@@ -68,6 +72,8 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
       path: [...state.path, folder],
       selected: new Set(),
       lastSelected: null,
+      thumbnails: {},
+      thumbnailError: null,
     }));
     syncPathToUrl(get().path);
     get().fetchObjects();
@@ -77,6 +83,8 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
       path: state.path.slice(0, idx),
       selected: new Set(),
       lastSelected: null,
+      thumbnails: {},
+      thumbnailError: null,
     }));
     syncPathToUrl(get().path);
     get().fetchObjects();
@@ -86,7 +94,14 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
   setSearch: (search) => set({ search }),
   reset: () => {
     const fromUrl = readPathFromUrl();
-    set({ path: fromUrl, selected: new Set(), lastSelected: null, search: '' });
+    set({
+      path: fromUrl,
+      selected: new Set(),
+      lastSelected: null,
+      search: '',
+      thumbnails: {},
+      thumbnailError: null,
+    });
     if (fromUrl.length === 0) syncPathToUrl([]);
   },
   setSelected: (selected) => set({ selected }),
@@ -134,6 +149,7 @@ export const useBrowserStore = create<BrowserStore>((set, get) => ({
     delete n[key];
     return { thumbnails: n };
   }),
+  setThumbnailError: (thumbnailError) => set({ thumbnailError }),
   fetchObjects: async () => {
     const { bucketName, providerId } = useURLStore.getState();
     const { path } = get();

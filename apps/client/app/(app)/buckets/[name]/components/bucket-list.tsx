@@ -3,12 +3,14 @@ import { useState } from 'react';
 import { Folder, File, Eye, Download, Trash2, Clock } from 'lucide-react';
 import { cn, fmtBytes, fmtDate } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
+import { useI18n } from '@/lib/i18n';
 import { useBrowserStore, filteredObjects } from '../store';
 import { useActionsStore } from '../store/actions';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 
 export function ObjectList() {
+  const { t, tx } = useI18n();
   const { objects, search, filter, selected, navigate, select } = useBrowserStore();
   const { handlePreview, handleDownload, handleDeleteOne } = useActionsStore();
   const filtered = filteredObjects(objects, search, filter);
@@ -19,11 +21,11 @@ export function ObjectList() {
     <Card className="overflow-hidden rounded-md">
       <div className="grid grid-cols-[40px_minmax(0,1fr)_100px_120px_120px_140px] gap-4 px-5 py-3 border-b border-border text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
         <span></span>
-        <span>Nombre</span>
-        <span className="text-right">Tamaño</span>
-        <span>Modificado</span>
-        <span>Tipo</span>
-        <span className="text-right">Acciones</span>
+        <span>{t.bucketListColName}</span>
+        <span className="text-right">{t.bucketListColSize}</span>
+        <span>{t.bucketListColModified}</span>
+        <span>{t.bucketListColType}</span>
+        <span className="text-right">{t.bucketListColActions}</span>
       </div>
       {filtered.map((obj, i) => {
         const fileName = (obj.key ?? '').split('/').filter(Boolean).pop() || obj.key;
@@ -34,7 +36,7 @@ export function ObjectList() {
             key={obj.key}
             role="button"
             tabIndex={0}
-            aria-label={`Seleccionar ${fileName}`}
+            aria-label={tx('bucketListSelectAction', { name: fileName })}
             className={cn(
               'grid grid-cols-[40px_minmax(0,1fr)_100px_120px_120px_140px] gap-4 items-center px-5 py-3 cursor-pointer transition-colors text-sm group',
               i > 0 && 'border-t border-border',
@@ -86,13 +88,13 @@ export function ObjectList() {
               ) : '—'}
             </span>
             <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-semibold">
-              {obj.isFolder ? 'Carpeta' : (ext || '—')}
+              {obj.isFolder ? t.bucketListFolder : (ext || '—')}
             </span>
             <div className="flex items-center gap-0.5 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-              <ListAction onClick={(e) => { e.stopPropagation(); handlePreview(obj.key); }} ariaLabel="Vista previa">
+              <ListAction onClick={(e) => { e.stopPropagation(); handlePreview(obj.key); }} ariaLabel={t.bucketListPreview}>
                 <Eye size={13} strokeWidth={1.8} />
               </ListAction>
-              <ListAction onClick={(e) => { e.stopPropagation(); handleDownload(obj.key); }} ariaLabel="Descargar">
+              <ListAction onClick={(e) => { e.stopPropagation(); handleDownload(obj.key); }} ariaLabel={t.bucketListDownload}>
                 <Download size={13} strokeWidth={1.8} />
               </ListAction>
               <ListAction
@@ -100,7 +102,7 @@ export function ObjectList() {
                   e.stopPropagation();
                   setDeleteTarget(obj.key);
                 }}
-                ariaLabel="Eliminar"
+                ariaLabel={t.bucketListDelete}
                 variant="danger"
               >
                 <Trash2 size={13} strokeWidth={1.8} />

@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { DatabaseService } from '../database.service';
 import {
@@ -9,7 +8,6 @@ import {
 } from '../../../domain/entities/api-key.entity';
 import { IApiKeyRepository } from '../../../domain/repositories/api-key.repository';
 
-@Injectable()
 export class SqliteApiKeyRepository implements IApiKeyRepository {
   constructor(private readonly database: DatabaseService) {}
 

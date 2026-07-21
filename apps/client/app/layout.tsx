@@ -13,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" suppressHydrationWarning>
       <body className='h-dvh w-dvw overflow-hidden'>
         <Providers>{children}</Providers>
-        <Toaster position="bottom-right" richColors closeButton />
+        <Toaster position="top-right" richColors closeButton />
       </body>
     </html>
   );

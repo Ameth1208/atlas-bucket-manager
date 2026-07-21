@@ -10,17 +10,20 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 
-const SCOPES = ['read', 'write', 'delete'];
+const SCOPES = ['read', 'write', 'delete'] as const;
+type Scope = (typeof SCOPES)[number];
 
 const close = () => useAppStore.getState().setCreateKeyOpen(false);
 
 export function CreateApiKeyModal() {
+  const { t, tx } = useI18n();
   const qc = useQueryClient();
   const open = useAppStore(s => s.createKeyOpen);
 
   const [name, setName] = useState('');
-  const [scopes, setScopes] = useState<string[]>(['read']);
+  const [scopes, setScopes] = useState<Scope[]>(['read']);
   const [created, setCreated] = useState<CreatedApiKey | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -30,7 +33,7 @@ export function CreateApiKeyModal() {
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const toggleScope = (s: string) =>
+  const toggleScope = (s: Scope) =>
     setScopes(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
 
   const copy = () => {
@@ -46,16 +49,20 @@ export function CreateApiKeyModal() {
   };
 
   return (
-    <Modal open={open} onClose={handleClose} title="Nueva clave de API">
+    <Modal open={open} onClose={handleClose} title={t.apiKeyCreateTitle}>
       {!created ? (
         <div className="flex flex-col gap-4">
           <div className="grid gap-1.5">
-            <Label>Nombre de la clave</Label>
-            <Input value={name} onChange={e => setName(e.target.value)} placeholder="deploy-ci, backup-bot…" />
+            <Label>{t.apiKeyCreateNameLabel}</Label>
+            <Input
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder={t.apiKeyCreateNamePh}
+            />
           </div>
 
           <div>
-            <Label className="mb-2">Permisos</Label>
+            <Label className="mb-2">{t.apiKeyCreateScopesLabel}</Label>
             <div className="flex gap-2 mt-2">
               {SCOPES.map(s => (
                 <button
@@ -77,7 +84,7 @@ export function CreateApiKeyModal() {
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="button" variant="pearl" className="flex-1" onClick={handleClose}>Cancelar</Button>
+            <Button type="button" variant="pearl" className="flex-1" onClick={handleClose}>{t.cancel}</Button>
             <Button
               type="button"
               className="flex-1"
@@ -87,7 +94,7 @@ export function CreateApiKeyModal() {
               {createMutation.isPending
                 ? <span className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                 : null}
-              Generar clave
+              {t.apiKeyCreateSubmit}
             </Button>
           </div>
         </div>
@@ -95,24 +102,24 @@ export function CreateApiKeyModal() {
         <div className="flex flex-col gap-4">
           <div className="rounded-xl p-3 bg-success/10 border border-success/30">
             <p className="text-sm font-medium text-success">
-              ¡Clave creada! Cópiala ahora — no podrás verla de nuevo.
+              {t.apiKeyCreatedHeading}
             </p>
           </div>
           <div>
-            <Label className="mb-1.5">Tu clave de API</Label>
+            <Label className="mb-1.5">{t.apiKeyYourKey}</Label>
             <div className="flex items-center gap-2 p-3 rounded-xl border border-border bg-muted/50 mt-1.5">
               <code className="flex-1 font-mono text-xs text-foreground break-all">{created.fullKey}</code>
               <button
                 type="button"
                 onClick={copy}
-                aria-label={copied ? 'Copiado' : 'Copiar clave'}
+                aria-label={copied ? t.apiKeyCopied : t.apiKeyCopy}
                 className="w-7 h-7 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors shrink-0"
               >
                 {copied ? <Check size={13} className="text-success" /> : <Copy size={13} />}
               </button>
             </div>
           </div>
-          <Button type="button" onClick={handleClose}>Entendido, la guardé</Button>
+          <Button type="button" onClick={handleClose}>{t.apiKeyDone}</Button>
         </div>
       )}
     </Modal>

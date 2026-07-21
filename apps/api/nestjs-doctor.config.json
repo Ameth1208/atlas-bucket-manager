@@ -1,0 +1,13 @@
+{
+  "rules": {
+    "architecture/no-manual-instantiation": {
+      "excludeClasses": [
+        "SqliteActivityRepository",
+        "SqliteApiKeyRepository",
+        "SqliteInviteRepository",
+        "SqliteUserRepository",
+        "S3BucketRepository"
+      ]
+    }
+  }
+}

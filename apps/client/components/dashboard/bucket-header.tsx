@@ -1,15 +1,17 @@
 'use client';
-import { useBucketStats } from '@/hooks/use-buckets';
+import { useBucketStats, useBuckets } from '@/hooks/use-buckets';
 import { QuotaBar } from '@/components/ui/quota-bar';
 import { fmtBytes, fmtDate } from '@/lib/utils';
 import { Database, File, RefreshCw, Key } from 'lucide-react';
 import type { Bucket } from '@/lib/api';
 import { Card } from '../ui/card';
 import { BucketActions } from './bucket-actions';
+import { BucketSwitcher } from './bucket-switcher';
 import { UploadDialog } from './upload-dialog';
 import { NewFolderDialog } from '@/app/(app)/buckets/[name]/components/new-folder-dialog';
 import { useRouter } from 'next/navigation';
 import { useBucketUIStore } from '@/app/(app)/buckets/[name]/store/ui';
+import { useI18n } from '@/lib/i18n';
 
 interface BucketHeaderProps {
   bucket: Bucket;
@@ -17,6 +19,8 @@ interface BucketHeaderProps {
 
 export function BucketHeader({ bucket }: BucketHeaderProps) {
   const { data: stats } = useBucketStats(bucket.name, bucket.providerId);
+  const { buckets } = useBuckets();
+  const { t, tx } = useI18n();
   const router = useRouter();
   const uploadOpen = useBucketUIStore(s => s.uploadOpen);
   const setUploadOpen = useBucketUIStore(s => s.setUploadOpen);
@@ -26,25 +30,25 @@ export function BucketHeader({ bucket }: BucketHeaderProps) {
   const statsData = [
     {
       icon: File,
-      label: 'Objetos',
+      label: t.bucketObjects,
       value: stats?.totalObjects?.toLocaleString() ?? '—',
     },
     {
       icon: Database,
-      label: 'Espacio usado',
+      label: t.bucketUsedSpace,
       value: stats?.totalSize ? fmtBytes(stats.totalSize) : '—',
     },
     {
       icon: RefreshCw,
-      label: 'Actualizado',
+      label: t.bucketUpdated,
       value: bucket.creationDate ? fmtDate(bucket.creationDate) : '—',
     },
     {
       icon: Key,
-      label: bucket.limit ? 'Cuota' : 'Sin límite',
+      label: bucket.limit ? t.bucketQuota : t.bucketNoLimit,
       value: bucket.limit
         ? `${stats?.totalSize ? fmtBytes(stats.totalSize) : '0 B'} / ${fmtBytes(bucket.limit)}`
-        : 'Ilimitado',
+        : t.bucketUnlimited,
       progress: bucket.limit ? { used: stats?.totalSize ?? 0, limit: bucket.limit } : undefined,
     },
   ];
@@ -72,6 +76,13 @@ export function BucketHeader({ bucket }: BucketHeaderProps) {
           onUpload={() => setUploadOpen(true)}
           onNewFolder={() => setNewFolderOpen(true)}
         />
+      </div>
+
+      <div className="flex items-center justify-between gap-2 -mt-1">
+        <BucketSwitcher current={bucket} />
+        <span className="text-[11.5px] text-muted-foreground">
+          {tx('dashboardBucketsSubtitle', { count: buckets.length })}
+        </span>
       </div>
 
       <Card>

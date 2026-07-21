@@ -80,13 +80,23 @@ export const useActionsStore = create(() => ({
 
   loadThumbnail: async (key: string) => {
     const { bucketName, providerId } = useURLStore.getState();
-    const thumbnails = useBrowserStore.getState().thumbnails;
-    if (thumbnails[key] || !providerId) return;
+    const browser = useBrowserStore.getState();
+    if (browser.thumbnails[key] || !providerId) return;
+    // If we've already flagged the provider as failing, don't keep retrying
+    // for every object in the bucket. One banner is enough.
+    if (browser.thumbnailError) return;
     const ext = key.split('/').pop()?.split('.').pop()?.toLowerCase() || '';
     if (!IMAGE_EXTS.includes(ext)) return;
     try {
       const { url } = await api.objects.presignedUrl(bucketName, key, providerId);
       useBrowserStore.getState().addThumbnail(key, url);
-    } catch {}
+    } catch (e: any) {
+      const msg = e?.message || 'No se pudo generar la URL de la miniatura';
+      useBrowserStore.getState().setThumbnailError(msg);
+      toast.error(msg, {
+        id: 'thumbnail-presign-error',
+        description: 'Las miniaturas no se pueden cargar. El bucket sigue siendo accesible.',
+      });
+    }
   },
 }));

@@ -13,13 +13,6 @@ import { IntegrationsSection } from './components/integrations-section';
 import { SecuritySection } from './components/security-section';
 import type { Section } from './lib/types';
 
-const DESCRIPTIONS: Record<Section, string> = {
-  account: 'Gestiona tu información personal y preferencias.',
-  team: 'Invita y controla el acceso de tu equipo.',
-  integrations: 'Conecta Atlas con servicios externos.',
-  security: 'Protege tu cuenta y datos.',
-};
-
 export default function SettingsPage() {
   const { t } = useI18n();
   const [section, setSection] = useState<Section>('account');
@@ -46,6 +39,13 @@ export default function SettingsPage() {
     security: t.settingsSecurity,
   };
 
+  const descriptions: Record<Section, string> = {
+    account: t.settingsSectionAccount,
+    team: t.settingsSectionTeam,
+    integrations: t.settingsSectionIntegrations,
+    security: t.settingsSectionSecurity,
+  };
+
   return (
     <div className="flex flex-col h-full overflow-hidden bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-muted via-background to-background">
       <Toolbar crumbs={[{ label: 'Atlas', href: '/dashboard' }, { label: t.settingsTitle }]} />
@@ -62,7 +62,11 @@ export default function SettingsPage() {
 
         <div className="flex-1 overflow-y-auto p-5 lg:p-8">
           <div className="max-w-5xl mx-auto">
-            <SectionHeader icon={SectionIcon} title={titles[section]} description={DESCRIPTIONS[section]} />
+            <SectionHeader
+              icon={SectionIcon}
+              title={titles[section]}
+              description={descriptions[section]}
+            />
 
             {section === 'account' && <AccountSection />}
             {section === 'team' && <TeamSection />}

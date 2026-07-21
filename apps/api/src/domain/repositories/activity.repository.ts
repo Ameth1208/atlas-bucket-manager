@@ -4,6 +4,7 @@ export const ACTIVITY_REPOSITORY = Symbol('ACTIVITY_REPOSITORY');
 
 export interface ActivityFilters {
   action?: string;
+  actions?: string[];
   actor?: string;
   bucket?: string;
   provider?: string;

@@ -11,22 +11,26 @@ export class ActivityController {
 
   @Get()
   list(
-    @Query('limit') limit = '50',
-    @Query('offset') offset = '0',
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
     @Query('action') action?: string,
+    @Query('actions') actions?: string,
     @Query('actor') actor?: string,
     @Query('bucket') bucket?: string,
     @Query('provider') provider?: string,
     @Query('from') from?: string,
     @Query('to') to?: string,
   ) {
-    return this.activity.list(parseInt(limit, 10), parseInt(offset, 10), {
+    return this.activity.list({
+      limit,
+      offset,
       action,
+      actions,
       actor,
       bucket,
       provider,
-      from: from ? parseInt(from, 10) : undefined,
-      to: to ? parseInt(to, 10) : undefined,
+      from,
+      to,
     });
   }
 }

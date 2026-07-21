@@ -5,7 +5,7 @@ import {
   NotFoundException,
   PayloadTooLargeException,
 } from '@nestjs/common';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import {
@@ -122,12 +122,16 @@ export class ObjectsService {
 
     const tempDir = this.config.get<string>('dbPath') ?? './data';
     const uploadDir = path.join(tempDir, '..', 'uploads');
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    try {
+      await fs.access(uploadDir);
+    } catch {
+      await fs.mkdir(uploadDir, { recursive: true });
+    }
 
     const uploaded: string[] = [];
     for (const file of files) {
       const tempPath = path.join(uploadDir, `${crypto.randomUUID()}-${file.originalname}`);
-      fs.writeFileSync(tempPath, file.buffer);
+      await fs.writeFile(tempPath, file.buffer);
       const objectName = prefix
         ? `${prefix.replace(/\/$/, '')}/${file.originalname}`
         : file.originalname;

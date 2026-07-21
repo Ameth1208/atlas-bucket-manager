@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { EventEmitter } from 'events';
 import * as crypto from 'crypto';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as path from 'path';
 import { DatabaseService } from '../../infrastructure/database/database.service';
@@ -59,7 +59,7 @@ export class CopyService extends EventEmitter {
         this.jobs.set(job.id, job);
         if (job.status === 'running' || job.status === 'queued') {
           const worker = this.run(job).catch((err) => {
-            this.logger.error(`Copy job ${job.id} failed: ${err.message}`, err.stack);
+            this.logger.error(`Copy job ${job.id} failed: ${err.message}`);
           });
           this.workers.set(job.id, worker);
         }
@@ -104,13 +104,13 @@ export class CopyService extends EventEmitter {
     };
     this.persist(job, actor);
     const worker = this.run(job).catch((err) => {
-      this.logger.error(`Copy job ${id} failed: ${err.message}`, err.stack);
+      this.logger.error(`Copy job ${id} failed: ${err.message}`);
     });
     this.workers.set(id, worker);
     return job;
   }
 
-  async cancel(id: string): Promise<{ success: boolean }> {
+  cancel(id: string): { success: boolean } {
     const job = this.jobs.get(id);
     if (!job || job.status === 'completed' || job.status === 'failed' || job.status === 'cancelled') {
       throw new NotFoundException('Job not running');
@@ -123,7 +123,7 @@ export class CopyService extends EventEmitter {
     return { success: true };
   }
 
-  async delete(id: string): Promise<{ success: boolean }> {
+  delete(id: string): { success: boolean } {
     const job = this.jobs.get(id);
     if (!job) throw new NotFoundException('Copy job not found');
     this.jobs.delete(id);
@@ -138,7 +138,7 @@ export class CopyService extends EventEmitter {
     this.persist(job);
     this.emit('job-progress', job);
 
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), `atlas-copy-${job.id}-`));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), `atlas-copy-${job.id}-`));
     const completed: string[] = [];
 
     try {
@@ -181,7 +181,7 @@ export class CopyService extends EventEmitter {
         try {
           await sourceClient.fGetObject(job.sourceBucket, obj.name, tmpPath);
           if ((job.status as CopyJobStatus) === 'cancelled') {
-            try { fs.unlinkSync(tmpPath); } catch { /* ignore */ }
+            try { await fs.unlink(tmpPath); } catch { /* ignore */ }
             break;
           }
           await destClient.fPutObject(job.destBucket, obj.name, tmpPath, {});
@@ -191,7 +191,7 @@ export class CopyService extends EventEmitter {
         } catch (err: any) {
           job.errors.push({ key: obj.name, message: err.message });
         } finally {
-          try { fs.unlinkSync(tmpPath); } catch { /* ignore */ }
+          try { await fs.unlink(tmpPath); } catch { /* ignore */ }
         }
         this.persist(job);
         this.emit('job-progress', job);
@@ -250,9 +250,9 @@ export class CopyService extends EventEmitter {
     } finally {
       try {
         for (const p of completed) {
-          try { fs.unlinkSync(p); } catch { /* ignore */ }
+          try { await fs.unlink(p); } catch { /* ignore */ }
         }
-        fs.rmdirSync(tmpDir);
+        await fs.rmdir(tmpDir);
       } catch { /* ignore */ }
       this.workers.delete(job.id);
     }

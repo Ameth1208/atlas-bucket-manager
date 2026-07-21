@@ -115,31 +115,28 @@ export class BucketsService {
     name: string,
     dto: SetBucketLimitDto,
     actor?: string,
-  ): Promise<{ success: boolean; limit: number }> {
+  ): { success: boolean; limit: number } {
     if (!this.repo.getProvider(providerId)) {
       throw new NotFoundException('Provider not found');
     }
-    return this.repo
-      .setBucketLimit(providerId, name, dto.limit)
-      .then(() => {
-        if (actor) {
-          this.activity.log({
-            actor,
-            action: 'policy',
-            target: `límite ${fmtBytes(dto.limit)}`,
-            bucket: name,
-            provider: providerId,
-          });
-        }
-        return { success: true, limit: dto.limit };
+    this.repo.setBucketLimit(providerId, name, dto.limit);
+    if (actor) {
+      this.activity.log({
+        actor,
+        action: 'policy',
+        target: `límite ${fmtBytes(dto.limit)}`,
+        bucket: name,
+        provider: providerId,
       });
+    }
+    return { success: true, limit: dto.limit };
   }
 
   stats(providerId: string, name: string): Promise<BucketStats> {
     return this.repo.getBucketStats(providerId, name);
   }
 
-  publicEndpoint(providerId: string, name: string): Promise<string | null> {
+  publicEndpoint(providerId: string, name: string): string | null {
     return this.repo.getPublicEndpoint(providerId, name);
   }
 }

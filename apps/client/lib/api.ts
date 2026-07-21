@@ -67,10 +67,22 @@ export const api = {
     list: (
       limit = 50,
       offset = 0,
-      filters: { action?: string; actor?: string; bucket?: string; provider?: string; from?: number; to?: number } = {},
+      filters: {
+        action?: string;
+        actions?: string[];
+        actor?: string;
+        bucket?: string;
+        provider?: string;
+        from?: number;
+        to?: number;
+      } = {},
     ) => {
       const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });
-      if (filters.action) params.set('action', filters.action);
+      if (filters.actions && filters.actions.length > 0) {
+        params.set('actions', filters.actions.join(','));
+      } else if (filters.action) {
+        params.set('action', filters.action);
+      }
       if (filters.actor) params.set('actor', filters.actor);
       if (filters.bucket) params.set('bucket', filters.bucket);
       if (filters.provider) params.set('provider', filters.provider);

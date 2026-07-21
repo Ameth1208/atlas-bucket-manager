@@ -164,13 +164,13 @@ function ShareBody({
         <div className="space-y-2">
           <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <KeyRound size={11} className="inline mr-1" />
-            Presigned link
+            {t.sharePresignedLabel}
           </Label>
           <div className="flex gap-2">
             <Input
               value={objectKey}
               onChange={(e) => setObjectKey(e.target.value)}
-              placeholder="path/to/object.png"
+              placeholder={t.sharePresignedPh}
               className="font-mono text-xs h-9"
             />
             <Button
@@ -178,7 +178,7 @@ function ShareBody({
               disabled={!objectKey.trim() || loadingPresign}
               size="sm"
               className="h-9 w-9 p-0"
-              aria-label="Generate"
+              aria-label={t.sharePresignedGenerate}
             >
               {loadingPresign ? <RefreshCw size={13} className="animate-spin" /> : <Link size={13} />}
             </Button>

@@ -7,6 +7,7 @@ import { useBuckets } from '@/hooks/use-buckets';
 import { useProviders } from '@/hooks/use-providers';
 import { Toolbar } from '@/components/layout/toolbar';
 import { useAppStore } from '@/lib/store';
+import { useI18n } from '@/lib/i18n';
 import { FileTypeChart } from '@/components/dashboard/file-type-chart';
 import { useDashboardStats } from './hooks/use-dashboard-stats';
 import { DashboardHeader } from './components/dashboard-header';
@@ -15,6 +16,7 @@ import { BucketsPanel } from './components/buckets-panel';
 import { ActivityPanel } from './components/activity-panel';
 
 export default function DashboardPage() {
+  const { t } = useI18n();
   const { setCreateBucketOpen, setConnectProviderOpen } = useAppStore();
   const [search, setSearch] = useState('');
 
@@ -30,7 +32,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden bg-background">
-      <Toolbar crumbs={[{ label: 'Atlas', href: '/dashboard' }, { label: 'Dashboard' }]} />
+      <Toolbar crumbs={[{ label: 'Atlas', href: '/dashboard' }, { label: t.dashboardTitle }]} />
 
       <div className="flex-1 min-h-0 overflow-hidden">
         <div className="h-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">

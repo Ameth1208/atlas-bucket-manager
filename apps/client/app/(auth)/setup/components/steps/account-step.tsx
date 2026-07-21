@@ -74,7 +74,7 @@ export function AccountStep() {
       setUser(user);
       setStep(3);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error');
+      toast.error(err instanceof Error ? err.message : t.errorGeneric);
     } finally {
       setLoading(false);
     }

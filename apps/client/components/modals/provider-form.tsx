@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Cloud, Server, KeyRound, ArrowLeft, Check, Save } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -10,16 +10,25 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 import type { CreateProviderBody, Provider } from '@/lib/api';
 
 type Kind = 'minio' | 'aws' | 'r2' | 'spaces' | 'wasabi';
 
-const PROVIDERS: { id: Kind; name: string; endpoint: string; port: number; ssl: boolean }[] = [
-  { id: 'minio', name: 'MinIO', endpoint: '', port: 9000, ssl: false },
-  { id: 'aws', name: 'AWS S3', endpoint: 's3.amazonaws.com', port: 443, ssl: true },
-  { id: 'r2', name: 'Cloudflare R2', endpoint: '', port: 443, ssl: true },
-  { id: 'spaces', name: 'DigitalOcean Spaces', endpoint: '', port: 443, ssl: true },
-  { id: 'wasabi', name: 'Wasabi', endpoint: 's3.wasabisys.com', port: 443, ssl: true },
+const KIND_LABEL: Record<Kind, 'providerMinio' | 'providerAws' | 'providerR2' | 'providerSpaces' | 'providerWasabi'> = {
+  minio: 'providerMinio',
+  aws: 'providerAws',
+  r2: 'providerR2',
+  spaces: 'providerSpaces',
+  wasabi: 'providerWasabi',
+};
+
+const PROVIDER_PRESETS: { id: Kind; endpoint: string; port: number; ssl: boolean }[] = [
+  { id: 'minio', endpoint: '', port: 9000, ssl: false },
+  { id: 'aws', endpoint: 's3.amazonaws.com', port: 443, ssl: true },
+  { id: 'r2', endpoint: '', port: 443, ssl: true },
+  { id: 'spaces', endpoint: '', port: 443, ssl: true },
+  { id: 'wasabi', endpoint: 's3.wasabisys.com', port: 443, ssl: true },
 ];
 
 const PROVIDER_ICONS: Record<Kind, React.ElementType> = {
@@ -40,6 +49,25 @@ const EMPTY_FORM: Form = {
   accessKey: '', secretKey: '', region: 'us-east-1',
 };
 
+function getInitialForm(provider?: Provider | null): Form {
+  if (!provider) return EMPTY_FORM;
+  return {
+    name: provider.name ?? '',
+    endPoint: provider.endPoint ?? '',
+    port: provider.port ?? 9000,
+    useSSL: provider.useSSL ?? false,
+    accessKey: provider.accessKey ?? '',
+    secretKey: provider.secretKey ?? '',
+    region: provider.region ?? 'us-east-1',
+  };
+}
+
+function getInitialKind(provider?: Provider | null): Kind | null {
+  if (!provider) return null;
+  const k = provider.kind as Kind;
+  return PROVIDER_PRESETS.some(p => p.id === k) ? k : null;
+}
+
 interface ProviderFormModalProps {
   open: boolean;
   onClose: () => void;
@@ -49,32 +77,11 @@ interface ProviderFormModalProps {
 }
 
 export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: ProviderFormModalProps) {
-  const [kind, setKind] = useState<Kind | null>(null);
-  const [form, setForm] = useState<Form>(EMPTY_FORM);
+  const { t, tx } = useI18n();
+  const [kind, setKind] = useState<Kind | null>(() => getInitialKind(provider));
+  const [form, setForm] = useState<Form>(() => getInitialForm(provider));
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [showKindPicker, setShowKindPicker] = useState(mode === 'create');
-
-  useEffect(() => {
-    if (!open) return;
-    if (mode === 'edit' && provider) {
-      setKind(((provider.kind as Kind) ?? 'minio'));
-      setForm({
-        name: provider.name ?? '',
-        endPoint: provider.endPoint ?? '',
-        port: provider.port ?? 9000,
-        useSSL: provider.useSSL ?? false,
-        accessKey: provider.accessKey ?? '',
-        secretKey: provider.secretKey ?? '',
-        region: provider.region ?? 'us-east-1',
-      });
-      setShowKindPicker(false);
-    } else {
-      setKind(null);
-      setForm(EMPTY_FORM);
-      setShowKindPicker(true);
-    }
-    setTouched({});
-  }, [open, mode, provider]);
 
   const saveMutation = useMutation({
     mutationFn: (body: CreateProviderBody) => {
@@ -90,7 +97,7 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
     onError: (e: Error) => toast.error(e.message),
   });
 
-  const selectKind = (p: typeof PROVIDERS[0]) => {
+  const selectKind = (p: typeof PROVIDER_PRESETS[0]) => {
     setKind(p.id);
     setForm(f => ({ ...f, endPoint: p.endpoint, port: p.port, useSSL: p.ssl }));
     setShowKindPicker(false);
@@ -99,7 +106,6 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
   const update = (field: keyof Form, value: string | number | boolean) =>
     setForm(f => {
       const next = { ...f, [field]: value };
-      // Auto-toggle SSL based on port: 443 → true, 9000 → false (only if user hasn't manually changed it)
       if (field === 'port') {
         const port = Number(value);
         if (port === 443) next.useSSL = true;
@@ -132,15 +138,18 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
     });
   };
 
-  const title = mode === 'edit' ? `Editar proveedor · ${provider?.name ?? ''}` : 'Conectar proveedor';
-  const submitLabel = mode === 'edit' ? 'Guardar cambios' : 'Conectar';
+  const title =
+    mode === 'edit' && provider
+      ? tx('providerEditTitleNamed', { name: provider.name ?? '' })
+      : t.providerNewTitle;
+  const submitLabel = mode === 'edit' ? t.providerSubmitSave : t.providerSubmitConnect;
   const SubmitIcon = mode === 'edit' ? Save : Check;
 
   return (
     <Modal open={open} onClose={onClose} title={title} width="480px">
       {showKindPicker ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {PROVIDERS.map(p => {
+          {PROVIDER_PRESETS.map(p => {
             const Icon = PROVIDER_ICONS[p.id];
             return (
               <button
@@ -152,7 +161,7 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
                 <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center">
                   <Icon size={18} className="text-foreground" />
                 </div>
-                <span className="text-[13px] font-medium text-foreground">{p.name}</span>
+                <span className="text-[13px] font-medium text-foreground">{t[KIND_LABEL[p.id]]}</span>
               </button>
             );
           })}
@@ -165,37 +174,37 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
               onClick={() => setShowKindPicker(true)}
               className="inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors self-start"
             >
-              <ArrowLeft size={12} /> Cambiar proveedor
+              <ArrowLeft size={12} /> {t.providerChangeProvider}
             </button>
           )}
 
           <div className="grid gap-3">
             <div className="grid gap-1.5">
-              <Label className="text-[13px] font-semibold">Nombre</Label>
+              <Label className="text-[13px] font-semibold">{t.providerNameLabel}</Label>
               <Input
                 value={form.name}
                 onChange={e => update('name', e.target.value)}
                 onBlur={() => markTouched('name')}
                 invalid={isInvalid('name')}
-                placeholder="Ej: Mi MinIO"
+                placeholder={t.providerNamePh}
               />
             </div>
 
             <div className="grid gap-1.5">
-              <Label className="text-[13px] font-semibold">Endpoint</Label>
+              <Label className="text-[13px] font-semibold">{t.providerEndpointLabel}</Label>
               <Input
                 value={form.endPoint}
                 onChange={e => update('endPoint', e.target.value)}
                 onBlur={() => markTouched('endPoint')}
                 invalid={isInvalid('endPoint')}
-                placeholder="s3.ejemplo.com"
+                placeholder={t.providerEndpointPh}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-1.5">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[13px] font-semibold">Puerto</Label>
+                  <Label className="text-[13px] font-semibold">{t.providerPortLabel}</Label>
                   <div className="flex gap-1">
                     {[
                       { port: 443, label: '443' },
@@ -221,35 +230,41 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
                   type="number"
                   value={String(form.port)}
                   onChange={e => update('port', Number(e.target.value))}
-                  placeholder="9000"
+                  placeholder={t.providerPortPh}
                 />
               </div>
               <div className="grid gap-1.5">
-                <Label className="text-[13px] font-semibold">Región</Label>
+                <Label className="text-[13px] font-semibold">{t.providerRegionLabel}</Label>
                 <Input
                   value={form.region}
                   onChange={e => update('region', e.target.value)}
-                  placeholder="us-east-1"
+                  placeholder={t.providerRegionPh}
                 />
               </div>
             </div>
 
             <div className="grid gap-1.5">
               <Label className="text-[13px] font-semibold">
-                Access Key {mode === 'edit' && <span className="text-muted-foreground font-normal">(deja en blanco para mantener)</span>}
+                {t.providerAccessKey}{' '}
+                {mode === 'edit' && (
+                  <span className="text-muted-foreground font-normal">{t.providerAccessKeepHint}</span>
+                )}
               </Label>
               <Input
                 value={form.accessKey}
                 onChange={e => update('accessKey', e.target.value)}
                 onBlur={() => markTouched('accessKey')}
                 invalid={isInvalid('accessKey')}
-                placeholder="minioadmin"
+                placeholder={t.providerAccessPh}
               />
             </div>
 
             <div className="grid gap-1.5">
               <Label className="text-[13px] font-semibold">
-                Secret Key {mode === 'edit' && <span className="text-muted-foreground font-normal">(deja en blanco para mantener)</span>}
+                {t.providerSecretKey}{' '}
+                {mode === 'edit' && (
+                  <span className="text-muted-foreground font-normal">{t.providerSecretKeepHint}</span>
+                )}
               </Label>
               <Input
                 type="password"
@@ -257,7 +272,7 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
                 onChange={e => update('secretKey', e.target.value)}
                 onBlur={() => markTouched('secretKey')}
                 invalid={isInvalid('secretKey')}
-                placeholder="••••••••"
+                placeholder={t.providerSecretPh}
               />
             </div>
 
@@ -265,12 +280,10 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <KeyRound size={14} className="text-foreground" />
-                  <span className="text-sm font-medium text-foreground">Usar SSL / HTTPS</span>
+                  <span className="text-sm font-medium text-foreground">{t.providerSslLabel}</span>
                 </div>
                 <span className="text-[11px] text-muted-foreground mt-0.5">
-                  {form.useSSL
-                    ? 'Conexión cifrada (HTTPS)'
-                    : 'Conexión en texto plano (HTTP)'}
+                  {form.useSSL ? t.providerSslEnabled : t.providerSslDisabled}
                 </span>
               </div>
               <Switch
@@ -281,7 +294,7 @@ export function ProviderFormModal({ open, onClose, mode, provider, onSuccess }: 
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button type="button" variant="pearl" className="flex-1 h-10" onClick={onClose}>Cancelar</Button>
+            <Button type="button" variant="pearl" className="flex-1 h-10" onClick={onClose}>{t.cancel}</Button>
             <Button
               type="button"
               className="flex-1 h-10"

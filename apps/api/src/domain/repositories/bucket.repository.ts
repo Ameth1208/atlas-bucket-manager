@@ -44,11 +44,11 @@ export interface IBucketRepository {
     providerId: string,
     name: string,
     maxSize: number,
-  ): Promise<void>;
+  ): void;
   getPublicEndpoint(
     providerId: string,
     name: string,
-  ): Promise<string | null>;
+  ): string | null;
   getBucketLimit(
     providerId: string,
     name: string,

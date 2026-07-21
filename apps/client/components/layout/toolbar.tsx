@@ -5,17 +5,18 @@ import { MemojiAvatar } from '@/components/ui/memoji-avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/lib/i18n';
 
 interface Crumb { label: string; href?: string; }
 interface ToolbarProps { crumbs?: Crumb[]; }
 
 export function Toolbar({ crumbs = [] }: ToolbarProps) {
   const router = useRouter();
+  const { t } = useI18n();
   const { user, setCreateBucketOpen, setConnectProviderOpen } = useAppStore();
 
   return (
     <div className="flex items-center gap-2 px-4 h-12 border-b border-border bg-background/80 backdrop-blur shrink-0">
-      {/* Breadcrumbs */}
       <div className="flex items-center gap-1 flex-1 min-w-0 text-[14px] tracking-[-0.224px]">
         {crumbs.map((c, i) => (
           <span key={c.href + '-' + c.label} className="flex items-center gap-1">
@@ -34,19 +35,37 @@ export function Toolbar({ crumbs = [] }: ToolbarProps) {
         ))}
       </div>
 
-      {/* Actions */}
       <div className="flex items-center gap-1 shrink-0">
-        <Button type="button" variant="ghost" size="icon-sm" onClick={() => setConnectProviderOpen(true)} title="Conectar proveedor" aria-label="Conectar proveedor">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => setConnectProviderOpen(true)}
+          title={t.toolbarConnectProviderTitle}
+          aria-label={t.toolbarConnectProviderTitle}
+        >
           <Cloud size={14} />
         </Button>
-        <Button type="button" variant="ghost" size="icon-sm" onClick={() => setCreateBucketOpen(true)} title="Nuevo bucket" aria-label="Nuevo bucket">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => setCreateBucketOpen(true)}
+          title={t.toolbarNewBucketTitle}
+          aria-label={t.toolbarNewBucketTitle}
+        >
           <Plus size={14} />
         </Button>
 
         <Separator orientation="vertical" className="h-5 mx-1 bg-border" />
 
         {user && (
-          <button type="button" onClick={() => router.push('/settings')} className="rounded-full" aria-label="Abrir configuración">
+          <button
+            type="button"
+            onClick={() => router.push('/settings')}
+            className="rounded-full"
+            aria-label={t.toolbarOpenSettingsAria}
+          >
             <MemojiAvatar
               name={user.avatarSeed || user.email || user.name}
               size={28}

@@ -2,25 +2,26 @@
 import { Suspense, useEffect } from 'react';
 import { useParams, useSearchParams, useRouter } from 'next/navigation';
 import { useBuckets } from '@/hooks/use-buckets';
+import { useI18n } from '@/lib/i18n';
 import { useURLStore } from './store/url';
 import { useBrowserStore } from './store/browser';
 import { BucketBrowser } from './components/bucket-browser';
+import type { Bucket } from '@/lib/api';
 
-function BucketPageContent({ name, buckets }: { name: string; buckets: any[] }) {
+function BucketPageContent({ name, buckets }: { name: string; buckets: Bucket[] }) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { t } = useI18n();
 
   const providerFromUrl = searchParams.get('provider') || '';
 
-  const matches = buckets.filter((b: any) => b.name === name);
+  const matches = buckets.filter((b) => b.name === name);
   const bucket = providerFromUrl
-    ? matches.find((b: any) => b.providerId === providerFromUrl)
+    ? matches.find((b) => b.providerId === providerFromUrl)
     : matches[0];
 
   const resolvedProviderId = bucket?.providerId ?? providerFromUrl;
 
-  // Keep the provider param redirect inside a Suspense-wrapped child so the
-  // page itself does not opt-out of static pre-rendering.
   useEffect(() => {
     if (!providerFromUrl && bucket?.providerId) {
       const newUrl = `/buckets/${encodeURIComponent(name)}?provider=${bucket.providerId}`;
@@ -37,8 +38,8 @@ function BucketPageContent({ name, buckets }: { name: string; buckets: any[] }) 
   }, [name, resolvedProviderId]);
 
   const crumbs = [
-    { label: 'Atlas', href: '/dashboard' },
-    { label: 'Buckets', href: '/dashboard' },
+    { label: t.commonAtlas, href: '/dashboard' },
+    { label: t.bucketsIndexTitle, href: '/dashboard' },
     { label: name },
   ];
 
@@ -46,7 +47,7 @@ function BucketPageContent({ name, buckets }: { name: string; buckets: any[] }) 
     return (
       <div className="flex flex-col h-full overflow-hidden">
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground">Bucket no encontrado</p>
+          <p className="text-muted-foreground">{t.bucketNotFound}</p>
         </div>
       </div>
     );
@@ -56,6 +57,7 @@ function BucketPageContent({ name, buckets }: { name: string; buckets: any[] }) 
 }
 
 export default function BucketPage() {
+  const { t } = useI18n();
   const params = useParams();
   const name = decodeURIComponent(params.name as string);
 
@@ -65,7 +67,7 @@ export default function BucketPage() {
     return (
       <div className="flex flex-col h-full overflow-hidden">
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-muted-foreground text-sm">Cargando…</p>
+          <p className="text-muted-foreground text-sm">{t.commonLoading}</p>
         </div>
       </div>
     );
@@ -76,7 +78,7 @@ export default function BucketPage() {
       fallback={
         <div className="flex flex-col h-full overflow-hidden">
           <div className="flex-1 flex items-center justify-center">
-            <p className="text-muted-foreground text-sm">Cargando…</p>
+            <p className="text-muted-foreground text-sm">{t.commonLoading}</p>
           </div>
         </div>
       }

@@ -2,7 +2,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import Database from 'better-sqlite3';
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
@@ -11,10 +11,12 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   constructor(private readonly config: ConfigService) {}
 
-  onModuleInit(): void {
+  async onModuleInit(): Promise<void> {
     const dbPath = this.config.get<string>('dbPath') ?? './data';
-    if (!fs.existsSync(dbPath)) {
-      fs.mkdirSync(dbPath, { recursive: true });
+    try {
+      await fs.access(dbPath);
+    } catch {
+      await fs.mkdir(dbPath, { recursive: true });
     }
     const file = path.join(dbPath, 'atlas.db');
     this._db = new Database(file);

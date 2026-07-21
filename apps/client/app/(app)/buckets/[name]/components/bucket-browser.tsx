@@ -8,6 +8,7 @@ import { ObjectGrid } from './bucket-grid';
 import { ObjectList } from './bucket-list';
 import { SkeletonGrid } from './bucket-skeleton';
 import { EmptyBucketState } from './bucket-empty-state';
+import { ThumbnailErrorBanner } from './thumbnail-error-banner';
 import { FilePreview } from '@/components/file-preview';
 import { useBrowserStore, usePreviewStore, filteredObjects } from '../store';
 import type { Bucket } from '@/lib/api';
@@ -19,7 +20,7 @@ interface BucketBrowserProps {
 
 export function BucketBrowser({ bucket, crumbs }: BucketBrowserProps) {
 
-  const { layout, isLoading, objects, search, filter } = useBrowserStore();
+  const { layout, isLoading, objects, search, filter, thumbnailError, setThumbnailError } = useBrowserStore();
   const { file: previewFile, set: setPreviewFile } = usePreviewStore();
   const filtered = filteredObjects(objects, search, filter);
 
@@ -32,6 +33,13 @@ export function BucketBrowser({ bucket, crumbs }: BucketBrowserProps) {
           <BucketToolbar />
         </div>
       </div>
+
+      {thumbnailError && (
+        <ThumbnailErrorBanner
+          message={thumbnailError}
+          onDismiss={() => setThumbnailError(null)}
+        />
+      )}
 
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 max-w-[1600px] mx-auto w-full">

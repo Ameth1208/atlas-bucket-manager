@@ -4,6 +4,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { X, Download, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import { useI18n } from '@/lib/i18n';
 
 interface FilePreviewProps {
   src: string;
@@ -22,6 +23,7 @@ export function FilePreview(props: FilePreviewProps) {
 }
 
 function FilePreviewInner({ src, fileName, fileType, fileSize, onClose }: FilePreviewProps) {
+  const { t, tx } = useI18n();
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   const ext = fileName.split('.').pop()?.toLowerCase() || '';
@@ -44,10 +46,10 @@ function FilePreviewInner({ src, fileName, fileType, fileSize, onClose }: FilePr
             <span className="text-xs text-muted-foreground shrink-0">{formatSize(fileSize)}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon-sm" onClick={() => window.open(src, '_blank')} title="Descargar">
+            <Button variant="ghost" size="icon-sm" onClick={() => window.open(src, '_blank')} title={t.filePreviewDownload}>
               <Download size={14} />
             </Button>
-            <Button variant="ghost" size="icon-sm" onClick={onClose} title="Cerrar">
+            <Button variant="ghost" size="icon-sm" onClick={onClose} title={t.filePreviewClose}>
               <X size={14} />
             </Button>
           </div>
@@ -61,10 +63,10 @@ function FilePreviewInner({ src, fileName, fileType, fileSize, onClose }: FilePr
           )}
           {error ? (
             <div className="text-center text-muted-foreground p-6">
-              <p className="text-sm font-medium">No se puede previsualizar este archivo</p>
-              <p className="text-xs mt-1">Tipo: {fileType}</p>
+              <p className="text-sm font-medium">{t.filePreviewCannotPreview}</p>
+              <p className="text-xs mt-1">{tx('filePreviewType', { type: fileType })}</p>
               <Button className="mt-4" onClick={() => window.open(src, '_blank')}>
-                <Download size={14} /> Descargar
+                <Download size={14} /> {t.filePreviewDownload}
               </Button>
             </div>
           ) : isImage ? (
@@ -92,10 +94,10 @@ function FilePreviewInner({ src, fileName, fileType, fileSize, onClose }: FilePr
             />
           ) : (
             <div className="text-center text-muted-foreground p-6">
-              <p className="text-sm font-medium">Vista previa no disponible</p>
-              <p className="text-xs mt-1">Descarga el archivo para verlo</p>
+              <p className="text-sm font-medium">{t.filePreviewNotAvailable}</p>
+              <p className="text-xs mt-1">{t.filePreviewDownloadToView}</p>
               <Button className="mt-4" onClick={() => window.open(src, '_blank')}>
-                <Download size={14} /> Descargar
+                <Download size={14} /> {t.filePreviewDownload}
               </Button>
             </div>
           )}

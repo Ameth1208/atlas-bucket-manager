@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAppStore } from '@/lib/store';
 
@@ -42,21 +42,27 @@ function AcceptInviteInner() {
   const canSubmit =
     invite?.valid && name.trim().length > 0 && seededEmail.trim().length > 0 && password.length >= 8 && !mismatch;
 
-  const acceptMutation = useMutation({
-    mutationFn: () => api.invites.accept(token, { name, email: seededEmail, password }),
-    onSuccess: async (user) => {
+  const [accepting, setAccepting] = useState(false);
+
+  const handleAccept = async () => {
+    if (!canSubmit) return;
+    setAccepting(true);
+    try {
+      const user = await api.invites.accept(token, { name, email: seededEmail, password });
       setUser(user);
       toast.success(t.inviteAccepted);
       router.push('/dashboard');
-    },
-    onError: (e: Error) => {
-      if (e.message.toLowerCase().includes('used')) {
+    } catch (e: any) {
+      const msg = e?.message ?? '';
+      if (msg.toLowerCase().includes('used')) {
         toast.error(t.inviteAlreadyUsed);
       } else {
-        toast.error(e.message);
+        toast.error(msg);
       }
-    },
-  });
+    } finally {
+      setAccepting(false);
+    }
+  };
 
   return (
     <main className="min-h-dvh w-dvw flex items-center justify-center bg-background px-4 py-8">
@@ -95,7 +101,7 @@ function AcceptInviteInner() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  if (canSubmit) acceptMutation.mutate();
+                  handleAccept();
                 }}
                 className="space-y-3"
               >
@@ -151,9 +157,9 @@ function AcceptInviteInner() {
                 <Button
                   type="submit"
                   className="w-full mt-2"
-                  disabled={!canSubmit || acceptMutation.isPending}
+                  disabled={!canSubmit || accepting}
                 >
-                  {acceptMutation.isPending ? (
+                  {accepting ? (
                     <Loader2 size={14} className="animate-spin" />
                   ) : (
                     <>

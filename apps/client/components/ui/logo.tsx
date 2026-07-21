@@ -1,5 +1,8 @@
+'use client';
+
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { useI18n } from '@/lib/i18n';
 
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -14,6 +17,7 @@ const sizes = {
 };
 
 export function Logo({ size = 'md', showText = false, className }: LogoProps) {
+  const { t } = useI18n();
   const s = sizes[size];
 
   return (
@@ -31,7 +35,7 @@ export function Logo({ size = 'md', showText = false, className }: LogoProps) {
       {showText && (
         <div>
           <p className="text-sm font-semibold text-foreground">Atlas</p>
-          <p className="text-xs text-muted-foreground">Bucket Manager</p>
+          <p className="text-xs text-muted-foreground">{t.uiLogoTagline}</p>
         </div>
       )}
     </div>

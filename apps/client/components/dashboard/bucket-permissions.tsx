@@ -9,13 +9,22 @@ import { fmtBytes } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 import type { Bucket } from '@/lib/api';
 
-const PRESETS = [
-  { label: 'Sin límite', value: 0 },
+type Preset = { label: string; value: number };
+
+const PRESET_VALUES: { labelKey?: keyof import('@/lib/i18n/types').Dictionary; label?: string; value: number }[] = [
+  { labelKey: 'bucketNoLimit', value: 0 },
   { label: '1 GB', value: 1073741824 },
   { label: '10 GB', value: 10737418240 },
   { label: '100 GB', value: 107374182400 },
   { label: '1 TB', value: 1099511627776 },
 ];
+
+function buildPresets(t: import('@/lib/i18n/types').Dictionary): Preset[] {
+  return PRESET_VALUES.map((p) => ({
+    label: p.labelKey ? t[p.labelKey] : (p.label ?? ''),
+    value: p.value,
+  }));
+}
 
 interface BucketPermissionsProps {
   bucket: Bucket;
@@ -77,18 +86,19 @@ function PermissionsBody({
   isSavingLimit?: boolean;
   t: ReturnType<typeof useI18n>['t'];
 }) {
+  const presets = buildPresets(t);
   const [sliderValue, setSliderValue] = useState(() => sliderIndexForLimit(initialLimit));
   const [limitValue, setLimitValue] = useState(initialLimit);
 
   const onSliderChange = (val: number | readonly number[]) => {
     const nextValue = Array.isArray(val) ? val[0] : val;
     setSliderValue(nextValue);
-    setLimitValue(PRESETS[nextValue]?.value ?? 0);
+    setLimitValue(presets[nextValue]?.value ?? 0);
   };
 
   const onPresetClick = (index: number) => {
     setSliderValue(index);
-    setLimitValue(PRESETS[index]?.value ?? 0);
+    setLimitValue(presets[index]?.value ?? 0);
   };
 
   return (
@@ -136,12 +146,12 @@ function PermissionsBody({
             defaultValue={[sliderValue]}
             onValueChange={onSliderChange}
             min={0}
-            max={PRESETS.length - 1}
+            max={presets.length - 1}
             step={1}
           />
 
           <div className="flex justify-between text-[10px] text-muted-foreground px-0.5">
-            {PRESETS.map((p, i) => (
+            {presets.map((p, i) => (
               <button
                 type="button"
                 key={p.value}

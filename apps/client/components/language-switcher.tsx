@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 import { Check, ChevronDown } from 'lucide-react';
 import US from 'country-flag-icons/react/3x2/US';
 import ES from 'country-flag-icons/react/3x2/ES';
@@ -9,13 +9,13 @@ import { LOCALES, LOCALE_META, type Locale } from '@/lib/i18n/types';
 import { useI18n } from '@/lib/i18n';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-const FLAG_COMPONENTS: Record<string, (props: { style?: CSSProperties; className?: string; title?: string }) => React.JSX.Element> = {
+const FLAG_COMPONENTS: Record<string, (props: { style?: React.CSSProperties; className?: string; title?: string }) => React.JSX.Element> = {
   US,
   ES,
   BR,
 };
 
-function Flag({ code, style, className }: { code: string; style?: CSSProperties; className?: string }) {
+function Flag({ code, style, className }: { code: string; style?: React.CSSProperties; className?: string }) {
   const FlagComponent = FLAG_COMPONENTS[code] ?? US;
   return <FlagComponent style={style} className={className} title={code} />;
 }
@@ -57,7 +57,6 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
         <div role="listbox" aria-label={t.languageLabel}>
           {LOCALES.map((l: Locale) => {
             const active = l === locale;
-            const flag = (l === 'en' ? 'US' : l === 'es' ? 'ES' : 'BR');
             return (
               <button
                 key={l}
@@ -76,13 +75,11 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
               >
                 <span className="inline-block w-5 h-3.5 rounded-[2px] overflow-hidden ring-1 ring-black/[0.08] shrink-0">
                   <Flag
-                    code={flag}
+                    code={LOCALE_META[l].flagCode}
                     style={{ width: '100%', height: '100%', display: 'block' }}
                   />
                 </span>
-                <span className="font-medium">
-                  {l === 'en' ? 'English' : l === 'es' ? 'Español' : 'Português'}
-                </span>
+                <span className="font-medium">{LOCALE_META[l].label}</span>
                 {active && (
                   <Check size={14} strokeWidth={2.5} className="ml-auto text-foreground" />
                 )}

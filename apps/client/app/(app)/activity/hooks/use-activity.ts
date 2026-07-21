@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 
 export interface ActivityFilterState {
   action?: string;
+  actions?: string[];
   actor?: string;
   bucket?: string;
   provider?: string;

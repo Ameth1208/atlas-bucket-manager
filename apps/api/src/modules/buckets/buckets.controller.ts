@@ -19,8 +19,10 @@ import { CurrentUser, AuthUser } from '../../common/decorators/current-user.deco
 import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @Controller('buckets')
+@UseGuards(JwtAuthGuard)
 export class BucketsController {
   constructor(private readonly buckets: BucketsService) {}
 
@@ -88,11 +90,11 @@ export class BucketsController {
   }
 
   @Get(':providerId/:name/public-endpoint')
-  async publicEndpoint(
+  publicEndpoint(
     @Param('providerId') providerId: string,
     @Param('name') name: string,
   ) {
-    const url = await this.buckets.publicEndpoint(providerId, name);
+    const url = this.buckets.publicEndpoint(providerId, name);
     return { url };
   }
 }

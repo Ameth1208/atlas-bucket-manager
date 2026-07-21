@@ -20,12 +20,20 @@ import { getRoleLabel, getRoleStyle } from '../lib/role-utils';
 import type { User } from '@/lib/api';
 import type { Dictionary } from '@/lib/i18n/types';
 
-const formatDate = (ts?: number) =>
-  ts ? new Date(ts).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }) : '—';
+const formatDate = (ts: number | undefined, locale: string) =>
+  ts
+    ? new Date(ts).toLocaleDateString(locale, {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
+      })
+    : '—';
 
 export function TeamSection() {
-  const { t, tx } = useI18n();
+  const { t, tx, meta } = useI18n();
   const { user, isOwner, users, invites, deleteMutation, roleMutation, resetMutation } = useTeam();
+  const dateLocale = meta.htmlLang;
   const {
     inviteOpen,
     setInviteOpen,
@@ -121,6 +129,7 @@ export function TeamSection() {
           onRequestDelete={setPendingDelete}
           onRequestDemote={(u, nextRole) => setPendingDemote({ user: u, nextRole })}
           query={query}
+          formatDate={(ts) => formatDate(ts, dateLocale)}
         />
       )}
 
@@ -129,7 +138,7 @@ export function TeamSection() {
           t={t}
           pendingInvites={pendingInvites}
           revokeInviteMutation={revokeInviteMutation}
-          formatDate={formatDate}
+          formatDate={(ts) => formatDate(ts, dateLocale)}
         />
       )}
 
@@ -243,7 +252,7 @@ function InviteForm({
 
         {inviteResult && (
           <div className="mt-4 p-3 rounded-md bg-muted/30 border border-border/60">
-            <p className="text-xs font-medium text-muted-foreground mb-1.5">Share this link</p>
+            <p className="text-xs font-medium text-muted-foreground mb-1.5">{t.teamShareLink}</p>
             <div className="flex items-center gap-2">
               <Input
                 value={`${origin}${inviteResult.url}`}
@@ -282,6 +291,7 @@ interface MembersTabProps {
   onRequestDelete: (user: User) => void;
   onRequestDemote: (user: User, nextRole: User['role']) => void;
   query: string;
+  formatDate: (ts?: number) => string;
 }
 
 function MembersTab({
@@ -294,6 +304,7 @@ function MembersTab({
   resetMutation,
   onRequestDelete,
   onRequestDemote,
+  formatDate,
   query,
 }: MembersTabProps) {
   return (
@@ -415,7 +426,7 @@ function InvitesTab({ t, pendingInvites, revokeInviteMutation, formatDate }: Inv
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs uppercase tracking-wider text-muted-foreground">
-                  <th className="px-4 py-2.5 font-medium w-full">Email</th>
+                  <th className="px-4 py-2.5 font-medium w-full">{t.teamEmailColumn}</th>
                   <th className="px-4 py-2.5 font-medium whitespace-nowrap">{t.settingsTeamTableRole}</th>
                   <th className="px-4 py-2.5 font-medium whitespace-nowrap">{t.settingsInviteExpires}</th>
                   <th className="px-4 py-2.5 font-medium whitespace-nowrap">{t.settingsInviteCreated}</th>

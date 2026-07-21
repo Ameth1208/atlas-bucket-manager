@@ -1,5 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as fs from 'fs';
+import { Logger } from '@nestjs/common';
+import * as fs from 'fs/promises';
 import * as http from 'http';
 import * as https from 'https';
 import { S3Service } from './s3.service';
@@ -20,7 +20,6 @@ import {
 import * as crypto from 'crypto';
 import { Client as MinioClient } from 'minio';
 
-@Injectable()
 export class S3BucketRepository implements IBucketRepository {
   private readonly logger = new Logger(S3BucketRepository.name);
   // Cache the file-type breakdown for 60s. The walk is expensive on large buckets
@@ -323,11 +322,11 @@ export class S3BucketRepository implements IBucketRepository {
       .run(isPublic ? 1 : 0, providerId, name);
   }
 
-  async setBucketLimit(
+  setBucketLimit(
     providerId: string,
     name: string,
     maxSize: number,
-  ): Promise<void> {
+  ): void {
     this.database.db
       .prepare(
         `UPDATE bucket_configs SET max_size = ? WHERE provider_id = ? AND name = ?`,
@@ -336,7 +335,7 @@ export class S3BucketRepository implements IBucketRepository {
     this.statsCache.delete(`${providerId}:${name}`);
   }
 
-  async getPublicEndpoint(providerId: string, name: string): Promise<string | null> {
+  getPublicEndpoint(providerId: string, name: string): string | null {
     const config = this.database.db
       .prepare(
         'SELECT is_public FROM bucket_configs WHERE provider_id = ? AND name = ?',
@@ -369,7 +368,7 @@ export class S3BucketRepository implements IBucketRepository {
         size += obj.size ?? 0;
       }
     }
-    return size;
+    return await Promise.resolve(size);
   }
 
   async getBucketStats(
@@ -439,11 +438,11 @@ export class S3BucketRepository implements IBucketRepository {
     const config = this.database.db
       .prepare('SELECT max_size FROM bucket_configs WHERE provider_id = ? AND name = ?')
       .get(providerId, name) as { max_size: number | null } | undefined;
-    return {
+    return await Promise.resolve({
       totalSize: size,
       totalObjects: count,
       limit: config?.max_size ?? undefined,
-    };
+    });
   }
 
   // ── Objects ────────────────────────────────────────────────────
@@ -470,7 +469,7 @@ export class S3BucketRepository implements IBucketRepository {
         isFolder: key.endsWith('/'),
       });
     }
-    return list;
+    return await Promise.resolve(list);
   }
 
   async uploadFile(
@@ -484,7 +483,7 @@ export class S3BucketRepository implements IBucketRepository {
     const metaData = { 'Content-Type': contentType };
     await client.fPutObject(bucket, objectName, filePath, metaData);
     try {
-      fs.unlinkSync(filePath);
+      await fs.unlink(filePath);
     } catch {
       /* ignore */
     }
@@ -595,11 +594,95 @@ export class S3BucketRepository implements IBucketRepository {
     key: string,
     expirySeconds = 3600,
   ): Promise<string> {
-    const client = this.s3.getClient(providerId);
+    const provider = this.s3.findProvider(providerId);
+    if (!provider) throw new Error(`Provider not found: ${providerId}`);
+
+    // Resolve the correct region for this provider/bucket. If a probe
+    // (getBucketLocation) reports a different region than the one stored
+    // in the DB, we use it for signing. The result is cached per provider
+    // so we only probe once.
+    const region = await this.resolveRegion(providerId, bucket, provider);
+    const client = this.s3.buildClient(provider, region);
     return client.presignedGetObject(bucket, key, expirySeconds);
   }
 
-  async getObjectStream(
+  private regionCache = new Map<string, string>();
+  private regionProbes = new Map<string, Promise<string>>();
+
+  private async resolveRegion(
+    providerId: string,
+    bucket: string,
+    provider: ProviderInfo,
+  ): Promise<string> {
+    const cacheKey = `${providerId}:${bucket}`;
+    const cached = this.regionCache.get(cacheKey);
+    if (cached) return cached;
+
+    const inFlight = this.regionProbes.get(cacheKey);
+    if (inFlight) return inFlight;
+
+    const probe = this.probeRegion(provider, bucket);
+    this.regionProbes.set(cacheKey, probe);
+    const region = await probe;
+    this.regionCache.set(cacheKey, region);
+    this.regionProbes.delete(cacheKey);
+    return region;
+  }
+
+  private async probeRegion(provider: ProviderInfo, bucket: string): Promise<string> {
+    // 1. Try the provider's stored region first.
+    // 2. On failure, try common S3 regions and the empty string.
+    // 3. The first region that signs a successful bucket location request wins.
+    const fallbacks = uniqueRegions([
+      provider.region,
+      'us-east-1',
+      '',
+      'auto',
+      'us-west-1',
+      'us-west-2',
+      'eu-west-1',
+      'eu-central-1',
+      'ap-southeast-1',
+    ]);
+
+    let lastErr: unknown = null;
+    for (const region of fallbacks) {
+      const client = this.s3.buildClient(provider, region);
+      try {
+        await client.getBucketRegionAsync(bucket);
+        if (region !== provider.region) {
+          this.logger.warn(
+            `Region fallback for provider ${provider.name}: stored=${provider.region} actual=${region || '<empty>'}`,
+          );
+        }
+        return region;
+      } catch (err) {
+        lastErr = err;
+        // If the S3 server told us the right region, jump straight to it.
+        const hinted = extractRegionFromError(err);
+        if (hinted && !fallbacks.includes(hinted)) {
+          try {
+            const hintedClient = this.s3.buildClient(provider, hinted);
+            await hintedClient.getBucketRegionAsync(bucket);
+            this.logger.warn(
+              `Region fallback (server-hinted) for provider ${provider.name}: ${hinted || '<empty>'}`,
+            );
+            return hinted;
+          } catch (e) {
+            lastErr = e;
+          }
+        }
+      }
+    }
+    // Couldn't determine a working region. Fall back to the stored one
+    // so the URL is at least signed with consistent credentials.
+    this.logger.error(
+      `Could not determine region for ${provider.name}/${bucket}: ${(lastErr as Error)?.message ?? 'unknown'}`,
+    );
+    return provider.region;
+  }
+
+  getObjectStream(
     providerId: string,
     bucket: string,
     key: string,
@@ -666,4 +749,27 @@ export class S3BucketRepository implements IBucketRepository {
     };
     return map[ext] ?? 'application/octet-stream';
   }
+}
+
+function uniqueRegions(input: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const r of input) {
+    if (!seen.has(r)) {
+      seen.add(r);
+      out.push(r);
+    }
+  }
+  return out;
+}
+
+function extractRegionFromError(err: unknown): string | null {
+  if (!err || typeof err !== 'object') return null;
+  const e = err as { code?: string; region?: string; message?: string };
+  if (typeof e.region === 'string' && e.region.length > 0) return e.region;
+  if (e.code === 'PermanentRedirect' && typeof e.message === 'string') {
+    const m = e.message.match(/<Region>([^<]+)<\/Region>/i);
+    if (m) return m[1];
+  }
+  return null;
 }

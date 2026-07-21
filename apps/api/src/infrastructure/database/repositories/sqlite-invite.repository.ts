@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { DatabaseService } from '../database.service';
 import { IInviteRepository } from '../../../domain/repositories/invite.repository';
 import { Invite } from '../../../domain/entities/invite.entity';
 
-@Injectable()
 export class SqliteInviteRepository implements IInviteRepository {
   constructor(private readonly database: DatabaseService) {}
 

@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcryptjs';
 import { DatabaseService } from '../database.service';
@@ -9,7 +8,6 @@ import {
   UserInfo,
 } from '../../../domain/entities/user.entity';
 
-@Injectable()
 export class SqliteUserRepository implements IUserRepository {
   constructor(
     private readonly database: DatabaseService,

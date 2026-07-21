@@ -2,19 +2,27 @@
 import { File, Upload, FolderPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useI18n } from '@/lib/i18n';
 import { useBrowserStore } from '../store';
 import { useBucketUIStore } from '../store/ui';
 
 export function EmptyBucketState() {
+  const { t } = useI18n();
   const { search, path } = useBrowserStore();
   const setUploadOpen = useBucketUIStore(s => s.setUploadOpen);
   const setNewFolderOpen = useBucketUIStore(s => s.setNewFolderOpen);
 
   const inFolder = path.length > 0;
-  const title = search ? 'Sin resultados' : (inFolder ? 'Esta carpeta está vacía' : 'Este bucket está vacío');
+  const title = search
+    ? t.bucketEmptyNoResults
+    : inFolder
+      ? t.bucketEmptyFolder
+      : t.bucketEmptyBucket;
   const description = search
-    ? 'Prueba con otra búsqueda'
-    : (inFolder ? 'Sube archivos o crea una subcarpeta' : 'Sube archivos o crea una carpeta para empezar');
+    ? t.bucketEmptyNoResultsHint
+    : inFolder
+      ? t.bucketEmptyFolderHint
+      : t.bucketEmptyBucketHint;
 
   return (
     <Card className="border-dashed border-border bg-transparent rounded-md">
@@ -31,10 +39,10 @@ export function EmptyBucketState() {
         {!search && (
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={() => setUploadOpen(true)}>
-              <Upload size={13} /> Subir archivos
+              <Upload size={13} /> {t.bucketEmptyUpload}
             </Button>
             <Button variant="pearl" size="sm" onClick={() => setNewFolderOpen(true)}>
-              <FolderPlus size={13} /> Nueva carpeta
+              <FolderPlus size={13} /> {t.bucketEmptyNewFolder}
             </Button>
           </div>
         )}

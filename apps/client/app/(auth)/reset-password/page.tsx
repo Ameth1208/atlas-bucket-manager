@@ -10,7 +10,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { api } from '@/lib/api';
 import { useI18n } from '@/lib/i18n';
-import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 function ResetInner() {
@@ -25,14 +24,21 @@ function ResetInner() {
   const tooShort = password.length > 0 && password.length < 6;
   const canSubmit = token.length > 0 && password.length >= 6 && !mismatch;
 
-  const mutation = useMutation({
-    mutationFn: () => api.auth.resetPassword({ token, password }),
-    onSuccess: () => {
+  const [resetting, setResetting] = useState(false);
+
+  const handleReset = async () => {
+    if (!canSubmit) return;
+    setResetting(true);
+    try {
+      await api.auth.resetPassword({ token, password });
       toast.success(t.resetDone);
       router.push('/login');
-    },
-    onError: (e: Error) => toast.error(e.message),
-  });
+    } catch (e: any) {
+      toast.error(e?.message ?? t.errorGeneric);
+    } finally {
+      setResetting(false);
+    }
+  };
 
   if (!token) {
     return (
@@ -77,7 +83,7 @@ function ResetInner() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (canSubmit) mutation.mutate();
+                if (canSubmit) handleReset();
               }}
               className="space-y-3"
             >
@@ -110,9 +116,9 @@ function ResetInner() {
               <Button
                 type="submit"
                 className="w-full mt-2"
-                disabled={!canSubmit || mutation.isPending}
+                disabled={!canSubmit || resetting}
               >
-                {mutation.isPending ? <Loader2 size={14} className="animate-spin" /> : t.resetSubmit}
+                {resetting ? <Loader2 size={14} className="animate-spin" /> : t.resetSubmit}
               </Button>
             </form>
           </CardContent>
