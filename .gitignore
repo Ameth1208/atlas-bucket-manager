@@ -50,3 +50,6 @@ next-env.d.ts
 
 # Graphify analysis output
 graphify-out/
+data
+uploads
+temp

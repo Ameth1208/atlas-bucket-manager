@@ -1,6 +1,6 @@
 {
   "name": "@atlas/api",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "private": true,
   "description": "Atlas Bucket Manager API (NestJS + Clean Architecture)",
   "scripts": {

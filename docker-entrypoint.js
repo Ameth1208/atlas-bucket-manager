@@ -6,7 +6,7 @@ const webPort = parseInt(process.env.PORT || '3000', 10);
 const apiPort = webPort === 3001 ? 3002 : (process.env.INTERNAL_API_PORT || 3001);
 
 console.log('───────────────────────────────────────────────────');
-console.log(`🚀 Starting Atlas Bucket Manager v2.0.2 (All-in-One)`);
+console.log(`🚀 Starting Atlas Bucket Manager v2.0.3 (All-in-One)`);
 console.log(`   • Web UI listening on: http://0.0.0.0:${webPort}`);
 console.log(`   • API Server on:       http://127.0.0.1:${apiPort}`);
 console.log('───────────────────────────────────────────────────');

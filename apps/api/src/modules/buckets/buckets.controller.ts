@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { BucketsService } from './buckets.service';
 import {
@@ -16,13 +17,10 @@ import {
   UpdateBucketPolicyDto,
 } from './dto/bucket.dto';
 import { CurrentUser, AuthUser } from '../../common/decorators/current-user.decorator';
-import { UseGuards } from '@nestjs/common';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @Controller('buckets')
-@UseGuards(JwtAuthGuard)
 export class BucketsController {
   constructor(private readonly buckets: BucketsService) {}
 

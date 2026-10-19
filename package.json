@@ -1,6 +1,6 @@
 {
   "name": "atlas-bucket-manager",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "private": true,
   "description": "Multi-Cloud Storage Manager for Buckets (MinIO & S3).",
   "author": "Ameth Galarcio <https://amethgm.com>",
