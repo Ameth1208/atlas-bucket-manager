@@ -4,7 +4,7 @@
 services:
   # ── API Backend (NestJS + SQLite) ─────────────────────────────
   atlas-api:
-    image: ghcr.io/ameth1208/atlas-bucket-manager-api:2.0.0
+    image: ghcr.io/ameth1208/atlas-bucket-manager-api:2.0.1
     container_name: atlas-api
     expose:
       - "3001"
@@ -30,7 +30,7 @@ services:
 
   # ── Frontend Web (Named minio-manager for Dokploy/Coolify domain routing) ──
   minio-manager:
-    image: ghcr.io/ameth1208/atlas-bucket-manager-web:2.0.0
+    image: ghcr.io/ameth1208/atlas-bucket-manager-web:2.0.1
     container_name: minio-manager
     ports:
       - "${PORT:-3000}:3000"

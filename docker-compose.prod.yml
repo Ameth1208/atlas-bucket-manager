@@ -5,7 +5,7 @@
 
 services:
   atlas-api:
-    image: ghcr.io/ameth1208/atlas-bucket-manager-api:${IMAGE_TAG:-2.0.0}
+    image: ghcr.io/ameth1208/atlas-bucket-manager-api:${IMAGE_TAG:-2.0.1}
     container_name: atlas-api
     expose:
       - "3001"
@@ -30,7 +30,7 @@ services:
       start_period: 15s
 
   minio-manager:
-    image: ghcr.io/ameth1208/atlas-bucket-manager-web:${IMAGE_TAG:-2.0.0}
+    image: ghcr.io/ameth1208/atlas-bucket-manager-web:${IMAGE_TAG:-2.0.1}
     container_name: minio-manager
     ports:
       - "${PORT:-3000}:3000"
