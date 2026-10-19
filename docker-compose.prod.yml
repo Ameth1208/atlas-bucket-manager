@@ -1,8 +1,7 @@
 # Docker Compose - Production (single instance, published images)
-# Usage: docker-compose -f docker-compose.prod.yml up -d
+# Usage: docker compose -f docker-compose.prod.yml up -d
 #
 # Pulls the prebuilt API + Client images from GHCR.
-# Set IMAGE_TAG to pull a specific release (default: 2.0.0).
 
 services:
   atlas-api:
@@ -10,12 +9,12 @@ services:
     container_name: atlas-api
     expose:
       - "3001"
-    env_file:
-      - .env
     environment:
       - NODE_ENV=production
       - PORT=3001
       - DB_PATH=/app/apps/api/data
+      - JWT_SECRET=${JWT_SECRET:-atlas-secure-key-change-me}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://manager.amethgm.com}
     volumes:
       - atlas_api_data:/app/apps/api/data
       - atlas_api_uploads:/app/apps/api/uploads
@@ -28,10 +27,11 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
 
-  atlas-web:
+  minio-manager:
     image: ghcr.io/ameth1208/atlas-bucket-manager-web:${IMAGE_TAG:-2.0.0}
-    container_name: atlas-web
+    container_name: minio-manager
     ports:
       - "${PORT:-3000}:3000"
     environment:

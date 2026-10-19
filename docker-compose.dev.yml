@@ -1,0 +1,50 @@
+services:
+  atlas-api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: atlas-api:local
+    container_name: atlas-api
+    expose:
+      - "3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DB_PATH=/app/apps/api/data
+      - CORS_ORIGIN=http://localhost:3000
+    volumes:
+      - atlas_api_data:/app/apps/api/data
+      - atlas_api_uploads:/app/apps/api/uploads
+      - atlas_api_temp:/app/apps/api/temp
+    networks:
+      - atlas-net
+    restart: unless-stopped
+
+  atlas-web:
+    build:
+      context: .
+      dockerfile: apps/client/Dockerfile
+    image: atlas-web:local
+    container_name: atlas-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - API_URL=http://atlas-api:3001
+    depends_on:
+      - atlas-api
+    networks:
+      - atlas-net
+    restart: unless-stopped
+
+volumes:
+  atlas_api_data:
+    driver: local
+  atlas_api_uploads:
+    driver: local
+  atlas_api_temp:
+    driver: local
+
+networks:
+  atlas-net:
+    driver: bridge
