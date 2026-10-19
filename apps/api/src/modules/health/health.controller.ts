@@ -16,7 +16,9 @@ export class HealthController {
   check() {
     return this.health.check([
       async () => {
-        // simple sqlite ping
+        if (!this.database?.db) {
+          throw new Error('Database connection not established');
+        }
         this.database.db.prepare('SELECT 1').get();
         return { database: { status: 'up' } };
       },
