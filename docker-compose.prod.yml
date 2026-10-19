@@ -2,11 +2,11 @@
 # Usage: docker-compose -f docker-compose.prod.yml up -d
 #
 # Pulls the prebuilt API + Client images from GHCR.
-# Set IMAGE_TAG to pull a specific release (default: latest).
+# Set IMAGE_TAG to pull a specific release (default: 2.0.0).
 
 services:
   atlas-api:
-    image: ghcr.io/ameth1208/atlas-bucket-manager-api:${IMAGE_TAG:-latest}
+    image: ghcr.io/ameth1208/atlas-bucket-manager-api:${IMAGE_TAG:-2.0.0}
     container_name: atlas-api
     expose:
       - "3001"
@@ -30,7 +30,7 @@ services:
       retries: 3
 
   atlas-web:
-    image: ghcr.io/ameth1208/atlas-bucket-manager-web:${IMAGE_TAG:-latest}
+    image: ghcr.io/ameth1208/atlas-bucket-manager-web:${IMAGE_TAG:-2.0.0}
     container_name: atlas-web
     ports:
       - "${PORT:-3000}:3000"
