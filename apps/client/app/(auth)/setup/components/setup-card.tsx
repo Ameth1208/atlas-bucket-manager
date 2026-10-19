@@ -12,7 +12,7 @@ export function SetupCard() {
 
   return (
     <div className="relative w-full max-w-[440px]">
-      <div className="relative rounded-[18px] border border-border bg-card overflow-hidden">
+      <div className="relative rounded-[20px] border border-border/80 bg-card shadow-[0_8px_32px_rgba(0,0,0,0.06)] overflow-hidden">
         <div className="px-4 py-5 sm:px-8 sm:py-10">
           <div className="flex justify-center mb-4 sm:mb-6">
             <Logo size="sm" showText />

@@ -10,10 +10,10 @@ export function QuotaBar({ used, limit, compact }: QuotaBarProps) {
 
   return (
     <div
-      className={`w-full rounded-full overflow-hidden bg-muted ${compact ? 'h-[3px]' : 'h-1'}`}
+      className={`w-full rounded-full overflow-hidden bg-muted/80 ${compact ? 'h-1' : 'h-1.5'}`}
     >
       <div
-        className={`h-full rounded-full transition-all duration-300 ${colorClass}`}
+        className={`h-full rounded-full transition-all duration-500 ease-out ${colorClass}`}
         style={{ width: `${pct}%` }}
       />
     </div>

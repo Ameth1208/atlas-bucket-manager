@@ -36,7 +36,7 @@ export function FileTypeChart({ data, className }: FileTypeChartProps) {
     <Card className={cn('h-full bg-card border-border', className)}>
       <CardContent className="h-full flex flex-col p-4">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-7 h-7 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
             <FileType size={13} className="text-primary" />
           </div>
           <div>

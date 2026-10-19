@@ -12,14 +12,14 @@ interface ActivityPanelProps {
 export function ActivityPanel({ activity }: ActivityPanelProps) {
   const { t } = useI18n();
   return (
-    <div className="flex-1 min-h-0 bg-card border border-border rounded-md flex flex-col">
-      <div className="flex items-center justify-between px-5 py-3 border-b border-border">
+    <div className="flex-1 min-h-0 bg-card border border-border/80 rounded-[18px] shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/70">
         <h2 className="text-[15px] font-semibold text-foreground tracking-[-0.2px]">
           {t.dashboardRecentActivity}
         </h2>
         <Link
           href="/activity"
-          className="text-[12px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-0.5"
+          className="text-[12px] font-medium text-primary hover:text-primary-focus transition-colors flex items-center gap-1"
         >
           {t.dashboardViewAll} <ArrowRight size={12} />
         </Link>

@@ -25,7 +25,7 @@ export class AuthService {
     return this.users.count() > 0;
   }
 
-  setup(dto: SetupDto): Promise<AuthResult> {
+  async setup(dto: SetupDto): Promise<AuthResult> {
     if (this.isSetupComplete()) {
       throw new ConflictException('Already set up');
     }
@@ -33,7 +33,7 @@ export class AuthService {
     return this.buildResult(user);
   }
 
-  login(dto: LoginDto): Promise<AuthResult> {
+  async login(dto: LoginDto): Promise<AuthResult> {
     const user = this.users.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException('Invalid credentials');
     if (!bcrypt.compareSync(dto.password, user.passwordHash)) {

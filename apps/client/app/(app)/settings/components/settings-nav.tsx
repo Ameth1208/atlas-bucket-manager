@@ -20,10 +20,10 @@ export function SettingsNav({ sections, active, onSelect }: SettingsNavProps) {
           aria-current={active === s.id ? 'page' : undefined}
           onClick={() => onSelect(s.id)}
           className={cn(
-            'group relative flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all duration-200',
+            'group relative flex items-center gap-3 px-3.5 py-2 rounded-xl text-[13px] font-medium transition-all duration-150',
             active === s.id
-              ? 'bg-foreground text-background'
-              : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
+              ? 'bg-primary text-primary-foreground shadow-xs font-semibold'
+              : 'text-muted-foreground hover:bg-muted/70 hover:text-foreground'
           )}
         >
           <s.icon

@@ -62,18 +62,18 @@ export function BucketCard({ bucket }: BucketCardProps) {
   return (
     <Card
       className={cn(
-        'cursor-pointer group relative overflow-hidden border-border bg-card hover:shadow-sm transition-all duration-300'
+        'cursor-pointer group relative overflow-hidden border-border/70 bg-card hover:border-primary/40 hover:shadow-[0_8px_30px_rgba(0,102,204,0.06)] transition-all duration-300'
       )}
       onClick={() => router.push(`/buckets/${encodeURIComponent(bucket.name)}?provider=${bucket.providerId}`)}
     >
-      <CardContent className="p-5">
+      <CardContent className="p-5 sm:p-6">
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-md flex items-center justify-center shrink-0 bg-muted border border-border">
-            <Database size={17} className="text-muted-foreground" strokeWidth={1.8} />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-muted/80 border border-border/60 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
+            <Database size={18} className="text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.8} />
           </div>
 
           <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-semibold text-foreground truncate tracking-[-0.2px]">{bucket.name}</p>
+            <p className="text-[14.5px] font-semibold text-foreground truncate tracking-[-0.2px] group-hover:text-primary transition-colors">{bucket.name}</p>
             <p className="text-[12px] text-muted-foreground truncate mt-0.5">{bucket.providerName || bucket.providerId}</p>
           </div>
 
@@ -84,7 +84,7 @@ export function BucketCard({ bucket }: BucketCardProps) {
               e.stopPropagation();
               favMutation.mutate();
             }}
-            className="shrink-0 size-6 grid place-items-center rounded-md text-muted-foreground hover:text-warning transition-colors"
+            className="shrink-0 size-7 grid place-items-center rounded-full text-muted-foreground hover:text-warning hover:bg-muted/70 transition-colors"
           >
             <Star
               size={14}
@@ -93,7 +93,7 @@ export function BucketCard({ bucket }: BucketCardProps) {
             />
           </button>
 
-          <Badge variant={bucket.isPublic ? 'success' : 'secondary'} className="shrink-0 gap-1 h-5 text-[11px]">
+          <Badge variant={bucket.isPublic ? 'success' : 'secondary'} className="shrink-0 gap-1 h-5 text-[11px] rounded-full">
             {bucket.isPublic ? <Globe size={10} /> : <Lock size={10} />}
             {bucket.isPublic ? t.bucketBadgePublic : t.bucketBadgePrivate}
           </Badge>

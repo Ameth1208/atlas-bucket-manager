@@ -16,17 +16,17 @@ export function Toolbar({ crumbs = [] }: ToolbarProps) {
   const { user, setCreateBucketOpen, setConnectProviderOpen } = useAppStore();
 
   return (
-    <div className="flex items-center gap-2 px-4 h-12 border-b border-border bg-background/80 backdrop-blur shrink-0">
-      <div className="flex items-center gap-1 flex-1 min-w-0 text-[14px] tracking-[-0.224px]">
+    <div className="flex items-center gap-2 px-4 sm:px-6 h-[52px] border-b border-border/70 bg-background/80 backdrop-blur-xl shrink-0 sticky top-0 z-30">
+      <div className="flex items-center gap-1 flex-1 min-w-0 text-[13.5px] tracking-[-0.224px]">
         {crumbs.map((c, i) => (
           <span key={c.href + '-' + c.label} className="flex items-center gap-1">
-            {i > 0 && <ChevronRight size={12} className="text-muted-foreground/50" />}
+            {i > 0 && <ChevronRight size={12} className="text-muted-foreground/40" />}
             <button
               type="button"
               onClick={() => c.href && router.push(c.href)}
               className={i === crumbs.length - 1
-                ? 'font-medium text-foreground cursor-default'
-                : 'text-muted-foreground hover:text-foreground transition-colors cursor-pointer'
+                ? 'font-medium text-foreground cursor-default px-2 py-0.5 rounded-full'
+                : 'text-muted-foreground hover:text-foreground transition-colors cursor-pointer px-2 py-0.5 rounded-full hover:bg-muted/60'
               }
             >
               {c.label}

@@ -35,7 +35,7 @@ export function LoginView() {
               </p>
               <Link
                 href="/setup"
-                className="w-full inline-flex items-center justify-center gap-1.5 h-9 px-2.5 rounded-[8px] border border-border bg-muted text-[13px] font-medium hover:bg-background transition-colors"
+                className="w-full inline-flex items-center justify-center gap-1.5 h-10 px-4 rounded-full border border-border/80 bg-card text-[13px] font-medium text-foreground hover:bg-muted hover:border-border-strong active:scale-[0.98] transition-all"
               >
                 <UserPlus size={15} /> {t.authLoginSetupCta}
               </Link>

@@ -25,7 +25,7 @@ export function BucketsIndexToolbar({
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t.bucketsIndexSearchPh}
-          className="w-full pl-9 pr-3 py-2 bg-muted border border-border rounded-md text-[13px] outline-none placeholder:text-muted-foreground/60 focus:border-border-strong transition-colors"
+          className="w-full pl-9 pr-8 py-1.5 h-9 bg-muted/60 hover:bg-muted focus:bg-background border border-border/80 rounded-full text-[13px] outline-none placeholder:text-muted-foreground/60 focus:border-primary-focus focus:ring-2 focus:ring-primary-focus/20 transition-all"
         />
         {search && (
           <button

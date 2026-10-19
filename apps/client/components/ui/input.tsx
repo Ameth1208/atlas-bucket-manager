@@ -36,28 +36,28 @@ function Input({
   const inputId = props.id ?? generatedId;
 
   const isSm = size === 'sm';
-  const fieldHeight = 'h-8';
-  const fieldPadding = isSm ? 'px-2.5' : 'px-3';
-  const textSize = 'text-sm';
+  const fieldHeight = isSm ? 'h-8' : 'h-10';
+  const fieldPadding = isSm ? 'px-2.5' : 'px-3.5';
+  const textSize = isSm ? 'text-[12.5px]' : 'text-[13.5px]';
 
   return (
     <div className={cn('w-full space-y-1.5', className)}>
       {label && (
         <label
           htmlFor={inputId}
-          className="block text-[13px] font-semibold text-foreground tracking-[-0.12px] mb-1.5"
+          className="block text-[13px] font-medium text-foreground tracking-[-0.12px] mb-1"
         >
           {label}
         </label>
       )}
       <div
         className={cn(
-          'relative flex items-center rounded-sm bg-card border transition-all duration-150',
+          'relative flex items-center rounded-xl bg-card border transition-all duration-150 shadow-2xs',
           fieldHeight,
           fieldPadding,
           hasError
-            ? 'border-destructive ring-1 ring-destructive/20'
-            : 'border-border hover:border-foreground/25 focus-within:border-foreground/40 focus-within:ring-1 focus-within:ring-ring/10',
+            ? 'border-destructive ring-2 ring-destructive/20'
+            : 'border-border/80 hover:border-border-strong focus-within:border-primary-focus focus-within:ring-2 focus-within:ring-primary-focus/20',
         )}
       >
         {Icon && (
@@ -89,7 +89,7 @@ function Input({
             onClick={() => setShowPassword((v) => !v)}
             aria-label={showPassword ? t.uiHidePassword : t.uiShowPassword}
             tabIndex={-1}
-            className="p-1 text-muted-foreground hover:text-foreground transition-colors"
+            className="p-1 rounded-full cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary-focus"
           >
             {showPassword ? (
               <EyeOff size={14} strokeWidth={1.8} />

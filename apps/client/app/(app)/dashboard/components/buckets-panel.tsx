@@ -13,8 +13,8 @@ interface BucketsPanelProps {
 export function BucketsPanel({ search, setSearch, bucketsCount }: BucketsPanelProps) {
   const { t, tx } = useI18n();
   return (
-    <div className="lg:col-span-2 flex flex-col min-h-0 bg-card border border-border rounded-md">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-border">
+    <div className="lg:col-span-2 flex flex-col min-h-0 bg-card border border-border/80 rounded-[18px] shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-4 border-b border-border/70">
         <div>
           <h2 className="text-[15px] font-semibold text-foreground tracking-[-0.2px]">{t.dashboardBucketsTitle}</h2>
           <p className="text-[12px] text-muted-foreground">
@@ -28,7 +28,7 @@ export function BucketsPanel({ search, setSearch, bucketsCount }: BucketsPanelPr
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={t.dashboardBucketsSearchPh}
-            className="w-full pl-9 pr-3 py-2 bg-muted border border-border rounded-md text-[13px] outline-none placeholder:text-muted-foreground/60 focus:border-border-strong transition-colors"
+            className="w-full pl-9 pr-8 py-1.5 h-9 bg-muted/60 hover:bg-muted focus:bg-background border border-border/80 rounded-full text-[13px] outline-none placeholder:text-muted-foreground/60 focus:border-primary-focus focus:ring-2 focus:ring-primary-focus/20 transition-all"
           />
           {search && (
             <button

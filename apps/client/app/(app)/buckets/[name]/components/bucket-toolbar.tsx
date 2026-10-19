@@ -61,16 +61,16 @@ export function BucketToolbar() {
       </div>
 
       <div className="flex items-center gap-1.5 flex-wrap">
-        <div className="hidden md:flex items-center gap-0.5 p-0.5 rounded-md bg-muted border border-border">
+        <div className="hidden md:flex items-center gap-0.5 p-1 rounded-full bg-muted/70 border border-border/70">
           {FILTERS.map(f => (
             <button
               type="button"
               key={f.value}
               onClick={() => setFilter(f.value)}
               className={cn(
-                'px-2.5 py-1 text-[12px] font-medium rounded-md transition-colors',
+                'px-3 py-1 text-[12px] font-medium rounded-full transition-all',
                 filter === f.value
-                  ? 'bg-card text-foreground shadow-sm border border-border'
+                  ? 'bg-card text-foreground shadow-2xs border border-border/60 font-semibold'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
@@ -79,14 +79,14 @@ export function BucketToolbar() {
           ))}
         </div>
 
-        <div className="flex items-center gap-0.5 p-0.5 rounded-md bg-muted border border-border">
+        <div className="flex items-center gap-0.5 p-1 rounded-full bg-muted/70 border border-border/70">
           <button
             type="button"
             onClick={() => setLayout('grid')}
             className={cn(
-              'w-7 h-7 flex items-center justify-center rounded-md transition-colors',
+              'w-7 h-7 flex items-center justify-center rounded-full transition-all',
               layout === 'grid'
-                ? 'bg-card text-foreground shadow-sm border border-border'
+                ? 'bg-card text-foreground shadow-2xs border border-border/60'
                 : 'text-muted-foreground hover:text-foreground'
             )}
             aria-label={t.bucketLayoutGrid}
@@ -97,9 +97,9 @@ export function BucketToolbar() {
             type="button"
             onClick={() => setLayout('list')}
             className={cn(
-              'w-7 h-7 flex items-center justify-center rounded-md transition-colors',
+              'w-7 h-7 flex items-center justify-center rounded-full transition-all',
               layout === 'list'
-                ? 'bg-card text-foreground shadow-sm border border-border'
+                ? 'bg-card text-foreground shadow-2xs border border-border/60'
                 : 'text-muted-foreground hover:text-foreground'
             )}
             aria-label={t.bucketLayoutList}

@@ -36,9 +36,9 @@ export function Modal({ open, onClose, title, description, width = '520px', chil
             type="button"
             aria-label="Cerrar"
             onClick={onClose}
-            className="size-7 rounded-lg hover:bg-muted flex items-center justify-center transition-colors"
+            className="size-7 rounded-full hover:bg-muted/80 text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors"
           >
-            <X size={14} className="text-muted-foreground" aria-hidden="true" />
+            <X size={14} aria-hidden="true" />
           </button>
         </div>
         <div className="px-6 py-5">
