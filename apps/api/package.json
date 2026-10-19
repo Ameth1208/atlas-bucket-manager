@@ -1,6 +1,6 @@
 {
   "name": "@atlas/api",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": true,
   "description": "Atlas Bucket Manager API (NestJS + Clean Architecture)",
   "scripts": {
@@ -31,6 +31,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.7",
+    "express": "^4.21.2",
     "minio": "^8.0.6",
     "multer": "^1.4.5-lts.1",
     "passport": "^0.7.0",
@@ -61,13 +62,19 @@
     "typescript": "^5.9.3"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "json", "ts"],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
-    "collectCoverageFrom": ["**/*.(t|j)s"],
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }

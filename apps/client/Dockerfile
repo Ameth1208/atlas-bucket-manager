@@ -36,10 +36,11 @@ ENV NODE_ENV=production
 RUN addgroup -g 1001 -S atlas && adduser -S -u 1001 atlas
 
 COPY --from=builder --chown=atlas:atlas /app/apps/client/.next/standalone ./
-COPY --from=builder --chown=atlas:atlas /app/apps/client/.next/static ./.next/static
-COPY --from=builder --chown=atlas:atlas /app/apps/client/public ./public
+COPY --from=builder --chown=atlas:atlas /app/apps/client/.next/static ./apps/client/.next/static
+COPY --from=builder --chown=atlas:atlas /app/apps/client/public ./apps/client/public
 
 USER atlas
+WORKDIR /app/apps/client
 EXPOSE 3000
 
 ENV PORT=3000

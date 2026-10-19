@@ -1,62 +1,27 @@
-# Atlas Bucket Manager - Production Compose
-# Pulls prebuilt images from GHCR (no build needed on the host/VPS)
+# Atlas Bucket Manager - Production Compose (All-in-One v2.0.2)
+# Single self-contained container with both API and Web UI on port 3000
 
 services:
-  # ── API Backend (NestJS + SQLite) ─────────────────────────────
-  atlas-api:
-    image: ghcr.io/ameth1208/atlas-bucket-manager-api:2.0.1
-    container_name: atlas-api
-    expose:
-      - "3001"
-    environment:
-      - NODE_ENV=production
-      - PORT=3001
-      - DB_PATH=/app/apps/api/data
-      - JWT_SECRET=${JWT_SECRET:-atlas-secure-key-change-me}
-      - CORS_ORIGIN=${CORS_ORIGIN:-https://manager.amethgm.com}
-    volumes:
-      - atlas_api_data:/app/apps/api/data
-      - atlas_api_uploads:/app/apps/api/uploads
-      - atlas_api_temp:/app/apps/api/temp
-    networks:
-      - atlas-net
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "sh", "-c", "curl -f http://localhost:3001/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
-
-  # ── Frontend Web (Named minio-manager for Dokploy/Coolify domain routing) ──
   minio-manager:
-    image: ghcr.io/ameth1208/atlas-bucket-manager-web:2.0.1
+    image: ghcr.io/ameth1208/atlas-bucket-manager:2.0.2
     container_name: minio-manager
     ports:
       - "${PORT:-3000}:3000"
     environment:
       - NODE_ENV=production
-      - API_URL=http://atlas-api:3001
-    depends_on:
-      atlas-api:
-        condition: service_healthy
-    networks:
-      - atlas-net
+      - PORT=3000
+      - JWT_SECRET=${JWT_SECRET:-atlas-secure-key-change-me}
+      - CORS_ORIGIN=${CORS_ORIGIN:-https://manager.amethgm.com}
+    volumes:
+      - atlas_data:/app/data
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "sh", "-c", "curl -f http://localhost:3000 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
 
 volumes:
-  atlas_api_data:
+  atlas_data:
     driver: local
-  atlas_api_uploads:
-    driver: local
-  atlas_api_temp:
-    driver: local
-
-networks:
-  atlas-net:
-    driver: bridge
