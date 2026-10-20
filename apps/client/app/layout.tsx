@@ -6,6 +6,15 @@ import { Toaster } from 'sonner';
 export const metadata: Metadata = {
   title: 'Atlas Bucket Manager v2.0.5',
   description: 'Multi-cloud storage manager v2.0.5',
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32' },
+    ],
+    apple: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
