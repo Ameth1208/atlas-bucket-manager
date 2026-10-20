@@ -8,6 +8,7 @@ import { useAppStore } from '@/lib/store';
 import { useBuckets } from '@/hooks/use-buckets';
 import { useProviders } from '@/hooks/use-providers';
 import { Logo } from '@/components/ui/logo';
+import { AtlasLogo } from '@/components/ui/atlas-logo';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { UserMenu } from './user-menu';
@@ -105,10 +106,10 @@ export function AppSidebar() {
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="px-4 py-3.5 border-b border-sidebar-border/30">
         <div className="flex items-center gap-2.5">
-          <Database size={20} className="text-[#007aff] shrink-0" strokeWidth={2.2} />
+          <AtlasLogo size={22} className="shrink-0" />
           <div className="min-w-0 flex-1">
             <span className="text-[13.5px] font-semibold text-sidebar-foreground tracking-[-0.2px] block leading-tight">Atlas</span>
-            <span className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider block">Storage</span>
+            <span className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider block">Bucket Manager</span>
           </div>
         </div>
       </SidebarHeader>

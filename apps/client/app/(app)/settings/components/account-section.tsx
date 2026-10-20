@@ -15,6 +15,7 @@ import { AvatarGrid } from './avatar-grid';
 import { Spinner } from './spinner';
 import { SettingsInput } from './settings-input';
 import { getRoleLabel } from '../lib/role-utils';
+import { AtlasLogo } from '@/components/ui/atlas-logo';
 
 export function AccountSection() {
   const { t } = useI18n();
@@ -198,7 +199,7 @@ export function AccountSection() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3.5">
-              <Database size={22} className="text-[#007aff] shrink-0" strokeWidth={2} />
+              <AtlasLogo size={28} className="shrink-0" />
               <div>
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold text-foreground">Atlas Bucket Manager</p>

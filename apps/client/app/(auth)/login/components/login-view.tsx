@@ -1,11 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Lock } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { useI18n } from '@/lib/i18n';
 import { LoginForm } from './login-form';
+import { AtlasLogo } from '@/components/ui/atlas-logo';
 
 export function LoginView() {
   const { t } = useI18n();
@@ -19,15 +19,9 @@ export function LoginView() {
 
       {/* Center column: Authentic Apple Sign-In layout */}
       <div className="w-full max-w-[340px] flex flex-col items-center my-auto">
-        {/* Apple Squircle App Icon */}
-        <div className="w-[68px] h-[68px] rounded-[18px] bg-gradient-to-b from-[#1882ff] via-[#0066eb] to-[#004fbf] shadow-[0_10px_28px_rgba(0,102,235,0.38),inset_0_1px_1px_rgba(255,255,255,0.45),inset_0_-1px_1px_rgba(0,0,0,0.25)] flex items-center justify-center mb-5 shrink-0">
-          <Image
-            alt="Atlas Logo"
-            src="/logo.svg"
-            width={40}
-            height={40}
-            className="w-9 h-9 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
-          />
+        {/* Atlas Titan Logo */}
+        <div className="mb-5 flex items-center justify-center">
+          <AtlasLogo size={68} className="drop-shadow-[0_4px_24px_rgba(10,132,255,0.45)]" />
         </div>
 
         {/* Headings */}
