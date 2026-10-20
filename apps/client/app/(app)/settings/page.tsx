@@ -60,7 +60,7 @@ export default function SettingsPage() {
           <SettingsNav sections={SECTIONS} active={section} onSelect={setSection} />
           <div className="mt-auto pt-4 px-3 border-t border-border/40 text-[11px] text-muted-foreground/60 flex items-center justify-between">
             <span>Atlas Manager</span>
-            <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-full bg-muted border border-border">v2.0.3</span>
+            <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-full bg-muted border border-border">v2.0.4</span>
           </div>
         </aside>
 

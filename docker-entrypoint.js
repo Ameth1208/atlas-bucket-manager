@@ -6,7 +6,7 @@ const webPort = parseInt(process.env.PORT || '3000', 10);
 const apiPort = webPort === 3001 ? 3002 : (process.env.INTERNAL_API_PORT || 3001);
 
 console.log('───────────────────────────────────────────────────');
-console.log(`🚀 Starting Atlas Bucket Manager v2.0.3 (All-in-One)`);
+console.log(`🚀 Starting Atlas Bucket Manager v2.0.4 (All-in-One)`);
 console.log(`   • Web UI listening on: http://0.0.0.0:${webPort}`);
 console.log(`   • API Server on:       http://127.0.0.1:${apiPort}`);
 console.log('───────────────────────────────────────────────────');
@@ -36,6 +36,25 @@ if (!fs.existsSync(webServerPath)) {
   if (fs.existsSync(altPath)) {
     webServerPath = altPath;
     webCwd = path.dirname(altPath);
+  }
+}
+
+// Ensure standalone Next.js rewrites point to the active API port
+const targetApiUrl = `http://127.0.0.1:${apiPort}`;
+const filesToPatch = [
+  webServerPath,
+  path.join(webCwd, '.next/routes-manifest.json'),
+  path.join(webCwd, '.next/required-server-files.json'),
+];
+for (const file of filesToPatch) {
+  if (fs.existsSync(file)) {
+    try {
+      let content = fs.readFileSync(file, 'utf8');
+      if (content.includes('http://localhost:3001') && targetApiUrl !== 'http://localhost:3001') {
+        content = content.split('http://localhost:3001').join(targetApiUrl);
+        fs.writeFileSync(file, content, 'utf8');
+      }
+    } catch {}
   }
 }
 
