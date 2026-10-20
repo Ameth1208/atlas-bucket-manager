@@ -531,6 +531,43 @@ export interface Dictionary {
   activityTimeDay: string;
   activityLiveTag: string;
 
+  // Activity actions & groups
+  activityActionCreate: string;
+  activityActionUpload: string;
+  activityActionDelete: string;
+  activityActionDeleteBucket: string;
+  activityActionClone: string;
+  activityActionFolder: string;
+  activityActionPolicy: string;
+  activityActionShare: string;
+  activityActionProvider: string;
+  activityActionWebhook: string;
+  activityActionUser: string;
+
+  activityActionLabelCreate: string;
+  activityActionLabelUpload: string;
+  activityActionLabelDelete: string;
+  activityActionLabelDeleteBucket: string;
+  activityActionLabelClone: string;
+  activityActionLabelFolder: string;
+  activityActionLabelPolicy: string;
+  activityActionLabelShare: string;
+  activityActionLabelProvider: string;
+  activityActionLabelWebhook: string;
+  activityActionLabelUser: string;
+
+  activityGroupStorage: string;
+  activityGroupTeam: string;
+  activityGroupIntegrations: string;
+
+  // Pagination
+  paginationPrev: string;
+  paginationNext: string;
+  paginationPage: string;
+  paginationOf: string;
+  paginationShowing: string;
+  paginationRowsPerPage: string;
+
   // API keys
   apiKeysTitle: string;
   apiKeysSubtitle: string;

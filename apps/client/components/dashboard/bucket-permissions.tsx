@@ -69,7 +69,7 @@ export function BucketPermissions({
   );
 }
 
-function PermissionsBody({
+export function PermissionsBody({
   initialLimit,
   isPublic,
   onTogglePublic,

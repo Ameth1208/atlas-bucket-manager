@@ -85,7 +85,7 @@ export function BucketHeader({ bucket }: BucketHeaderProps) {
         </span>
       </div>
 
-      <Card>
+      <Card className="bg-card/75 backdrop-blur-2xl border border-white/[0.08] rounded-[18px] overflow-hidden shadow-sm">
         <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-border">
           {statsData.map((stat) => (
             <div

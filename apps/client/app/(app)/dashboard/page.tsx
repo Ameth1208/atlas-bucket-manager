@@ -34,9 +34,9 @@ export default function DashboardPage() {
     <div className="flex flex-col h-full overflow-hidden bg-background">
       <Toolbar crumbs={[{ label: 'Atlas', href: '/dashboard' }, { label: t.dashboardTitle }]} />
 
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <div className="h-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex flex-col h-full gap-4">
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex flex-col gap-5 sm:gap-6">
             <DashboardHeader
               onConnectProvider={() => setConnectProviderOpen(true)}
               onCreateBucket={() => setCreateBucketOpen(true)}
@@ -51,11 +51,16 @@ export default function DashboardPage() {
               activity={activity}
             />
 
-            <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <BucketsPanel search={search} setSearch={setSearch} bucketsCount={buckets.length} />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+              <BucketsPanel
+                search={search}
+                setSearch={setSearch}
+                bucketsCount={buckets.length}
+                className="lg:col-span-2 min-h-[420px] lg:min-h-[540px]"
+              />
 
-              <div className="flex flex-col min-h-0 gap-4">
-                <div className="h-[280px] shrink-0">
+              <div className="flex flex-col gap-5">
+                <div className="min-h-[280px]">
                   <FileTypeChart data={fileTypes} />
                 </div>
 

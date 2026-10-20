@@ -12,21 +12,21 @@ interface ActivityPanelProps {
 export function ActivityPanel({ activity }: ActivityPanelProps) {
   const { t } = useI18n();
   return (
-    <div className="flex-1 min-h-0 bg-card border border-border/80 rounded-[18px] shadow-[0_2px_12px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/70">
+    <div className="flex-1 min-h-[300px] bg-card/75 backdrop-blur-2xl border border-white/[0.08] rounded-[20px] shadow-sm overflow-hidden flex flex-col">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border/60">
         <h2 className="text-[15px] font-semibold text-foreground tracking-[-0.2px]">
           {t.dashboardRecentActivity}
         </h2>
         <Link
           href="/activity"
-          className="text-[12px] font-medium text-primary hover:text-primary-focus transition-colors flex items-center gap-1"
+          className="text-[12px] font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
         >
           {t.dashboardViewAll} <ArrowRight size={12} />
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto">
         {activity.length > 0 ? (
-          <Card className="border-0 shadow-none rounded-none">
+          <Card className="border-0 shadow-none rounded-none bg-transparent">
             {activity.slice(0, 10).map((a, i) => (
               <ActivityItem
                 key={a.id}

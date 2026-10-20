@@ -539,6 +539,43 @@ export const en: Dictionary = {
   activityTimeDay: '{n}d ago',
   activityLiveTag: 'live',
 
+  // Activity actions & groups
+  activityActionCreate: 'Create',
+  activityActionUpload: 'Upload',
+  activityActionDelete: 'Delete',
+  activityActionDeleteBucket: 'Delete bucket',
+  activityActionClone: 'Clone',
+  activityActionFolder: 'Folder',
+  activityActionPolicy: 'Policy',
+  activityActionShare: 'Share',
+  activityActionProvider: 'Provider',
+  activityActionWebhook: 'Webhook',
+  activityActionUser: 'User',
+
+  activityActionLabelCreate: 'created',
+  activityActionLabelUpload: 'uploaded',
+  activityActionLabelDelete: 'deleted',
+  activityActionLabelDeleteBucket: 'deleted bucket',
+  activityActionLabelClone: 'cloned',
+  activityActionLabelFolder: 'created folder',
+  activityActionLabelPolicy: 'changed policy of',
+  activityActionLabelShare: 'shared',
+  activityActionLabelProvider: 'configured provider',
+  activityActionLabelWebhook: 'managed webhook',
+  activityActionLabelUser: 'managed user',
+
+  activityGroupStorage: 'Storage',
+  activityGroupTeam: 'Team',
+  activityGroupIntegrations: 'Integrations',
+
+  // Pagination
+  paginationPrev: 'Previous',
+  paginationNext: 'Next',
+  paginationPage: 'Page',
+  paginationOf: 'of',
+  paginationShowing: 'Showing',
+  paginationRowsPerPage: 'Rows per page',
+
   // API keys
   apiKeysTitle: 'API keys',
   apiKeysSubtitle: 'Tools',

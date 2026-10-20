@@ -28,7 +28,7 @@ export function BucketBrowser({ bucket, crumbs }: BucketBrowserProps) {
     <div className="flex flex-col h-full overflow-hidden bg-background">
       <div className="shrink-0 bg-background border-b border-border">
         <Toolbar crumbs={crumbs} />
-        <div className="px-6 pt-6 pb-5 space-y-5 max-w-[1600px] mx-auto w-full">
+        <div className="px-3 sm:px-6 pt-3 sm:pt-6 pb-3 sm:pb-5 space-y-3 sm:space-y-5 max-w-[1600px] mx-auto w-full">
           <BucketHeader bucket={bucket} />
           <BucketToolbar />
         </div>
@@ -42,7 +42,7 @@ export function BucketBrowser({ bucket, crumbs }: BucketBrowserProps) {
       )}
 
       <div className="flex-1 overflow-y-auto">
-        <div className="px-6 max-w-[1600px] mx-auto w-full">
+        <div className="px-3 sm:px-6 max-w-[1600px] mx-auto w-full">
           <PathBreadcrumb />
           <div className="pt-2 pb-10">
             {isLoading ? (

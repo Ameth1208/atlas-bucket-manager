@@ -1,5 +1,5 @@
 'use client';
-import { Plus, Cloud, ChevronRight } from 'lucide-react';
+import { Plus, Cloud, ChevronRight, Menu } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { MemojiAvatar } from '@/components/ui/memoji-avatar';
 import { Button } from '@/components/ui/button';
@@ -18,7 +18,12 @@ export function Toolbar({ crumbs = [] }: ToolbarProps) {
 
   return (
     <div className="flex items-center gap-2 px-3 sm:px-6 h-[52px] border-b border-border/70 bg-background/80 backdrop-blur-xl shrink-0 sticky top-0 z-30">
-      <SidebarTrigger className="md:hidden -ml-1 mr-0.5 text-muted-foreground hover:text-foreground shrink-0" />
+      <SidebarTrigger
+        className="md:hidden -ml-1 mr-1 text-muted-foreground hover:text-foreground shrink-0 size-8 rounded-[8px]"
+        aria-label="Menu"
+      >
+        <Menu size={18} strokeWidth={2} />
+      </SidebarTrigger>
       <div className="flex items-center gap-1 flex-1 min-w-0 text-[13.5px] tracking-[-0.224px]">
         {crumbs.map((c, i) => (
           <span key={c.href + '-' + c.label} className="flex items-center gap-1">

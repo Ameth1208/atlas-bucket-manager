@@ -539,6 +539,43 @@ export const pt: Dictionary = {
   activityTimeDay: 'há {n}d',
   activityLiveTag: 'ao vivo',
 
+  // Activity actions & groups
+  activityActionCreate: 'Criar',
+  activityActionUpload: 'Enviar',
+  activityActionDelete: 'Excluir',
+  activityActionDeleteBucket: 'Excluir bucket',
+  activityActionClone: 'Clonar',
+  activityActionFolder: 'Pasta',
+  activityActionPolicy: 'Política',
+  activityActionShare: 'Compartilhar',
+  activityActionProvider: 'Provedor',
+  activityActionWebhook: 'Webhook',
+  activityActionUser: 'Usuário',
+
+  activityActionLabelCreate: 'criou',
+  activityActionLabelUpload: 'enviou',
+  activityActionLabelDelete: 'excluiu',
+  activityActionLabelDeleteBucket: 'excluiu o bucket',
+  activityActionLabelClone: 'clonou',
+  activityActionLabelFolder: 'criou pasta',
+  activityActionLabelPolicy: 'alterou política de',
+  activityActionLabelShare: 'compartilhou',
+  activityActionLabelProvider: 'configurou provedor',
+  activityActionLabelWebhook: 'gerenciou webhook',
+  activityActionLabelUser: 'gerenciou usuário',
+
+  activityGroupStorage: 'Armazenamento',
+  activityGroupTeam: 'Equipe',
+  activityGroupIntegrations: 'Integrações',
+
+  // Pagination
+  paginationPrev: 'Anterior',
+  paginationNext: 'Próximo',
+  paginationPage: 'Página',
+  paginationOf: 'de',
+  paginationShowing: 'Mostrando',
+  paginationRowsPerPage: 'Linhas por página',
+
   // Chaves de API
   apiKeysTitle: 'Chaves de API',
   apiKeysSubtitle: 'Ferramentas',

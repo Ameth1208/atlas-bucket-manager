@@ -1,6 +1,5 @@
 'use client';
 
-import { DashboardHeader } from '@/components/dashboard/dashboard-header';
 import { Toolbar } from '@/components/layout/toolbar';
 import { ActivityTable } from './components/activity-table';
 import { ActivityFiltersBar } from './components/activity-filters-bar';
@@ -16,11 +15,18 @@ export default function ActivityPage() {
       <Toolbar crumbs={[{ label: 'Atlas', href: '/dashboard' }, { label: t.activityTitle }]} />
 
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-        <div className="flex items-end justify-between mb-6 sm:mb-8">
-          <DashboardHeader title={t.activityTitle} subtitle={t.activitySubtitle} />
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full animate-pulse bg-success" />
-            <span className="text-[12px] text-muted-foreground">{t.activityLiveTag}</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8">
+          <div>
+            <h1 className="text-[26px] sm:text-[32px] font-bold text-foreground tracking-tight leading-tight">
+              {t.activityTitle}
+            </h1>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+              {t.activitySubtitle}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-card/60 border border-white/[0.08] backdrop-blur-md shadow-xs self-start sm:self-auto">
+            <span className="size-2 rounded-full animate-pulse bg-[#34c759]" />
+            <span className="text-xs font-medium text-muted-foreground">{t.activityLiveTag}</span>
           </div>
         </div>
 
