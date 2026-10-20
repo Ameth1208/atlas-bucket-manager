@@ -10,6 +10,7 @@ import { ConnectProviderModal, EditProviderModal } from '@/components/modals/con
 import { CreateApiKeyModal } from '@/components/modals/create-api-key';
 import { CreateUserModal } from '@/components/modals/create-user';
 import { CloneProgressDock } from '@/components/dashboard/clone-progress-dock';
+import { CommandPalette } from '@/components/modals/command-palette';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { setUser } = useAppStore();
@@ -38,6 +39,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <CreateApiKeyModal />
         <CreateUserModal />
         <CloneProgressDock />
+        <CommandPalette />
       </SidebarProvider>
     </div>
   );

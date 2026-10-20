@@ -34,6 +34,8 @@ interface AppStore {
   setCreateKeyOpen: (open: boolean) => void;
   createUserOpen: boolean;
   setCreateUserOpen: (open: boolean) => void;
+  commandPaletteOpen: boolean;
+  setCommandPaletteOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppStore>()(
@@ -69,6 +71,8 @@ export const useAppStore = create<AppStore>()(
       setCreateKeyOpen: (open) => set({ createKeyOpen: open }),
       createUserOpen: false,
       setCreateUserOpen: (open) => set({ createUserOpen: open }),
+      commandPaletteOpen: false,
+      setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
     }),
     {
       name: 'atlas-store',

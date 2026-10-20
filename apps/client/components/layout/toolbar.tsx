@@ -1,5 +1,5 @@
 'use client';
-import { Plus, Cloud, ChevronRight, Menu } from 'lucide-react';
+import { Plus, Cloud, ChevronRight, Menu, Search } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { MemojiAvatar } from '@/components/ui/memoji-avatar';
 import { Button } from '@/components/ui/button';
@@ -14,7 +14,7 @@ interface ToolbarProps { crumbs?: Crumb[]; }
 export function Toolbar({ crumbs = [] }: ToolbarProps) {
   const router = useRouter();
   const { t } = useI18n();
-  const { user, setCreateBucketOpen, setConnectProviderOpen } = useAppStore();
+  const { user, setCreateBucketOpen, setConnectProviderOpen, setCommandPaletteOpen } = useAppStore();
 
   return (
     <div className="flex items-center gap-2 px-3 sm:px-6 h-[52px] border-b border-border/70 bg-background/80 backdrop-blur-xl shrink-0 sticky top-0 z-30">
@@ -43,6 +43,30 @@ export function Toolbar({ crumbs = [] }: ToolbarProps) {
       </div>
 
       <div className="flex items-center gap-1 shrink-0">
+        <button
+          type="button"
+          onClick={() => setCommandPaletteOpen(true)}
+          className="hidden sm:flex items-center gap-2 h-8 px-3 rounded-full bg-muted/40 hover:bg-muted/70 border border-border/60 text-xs text-muted-foreground hover:text-foreground transition-all cursor-pointer mr-1"
+          aria-label="Buscar o ejecutar comandos"
+        >
+          <Search size={13} className="text-muted-foreground/70" />
+          <span className="text-[12px]">Buscar...</span>
+          <kbd className="font-mono text-[10px] px-1.5 py-0.5 rounded-[5px] bg-background border border-border/70 text-muted-foreground font-semibold">
+            ⌘K
+          </kbd>
+        </button>
+
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => setCommandPaletteOpen(true)}
+          title="Buscar (⌘K)"
+          aria-label="Buscar"
+          className="sm:hidden"
+        >
+          <Search size={15} />
+        </Button>
         <Button
           type="button"
           variant="ghost"
