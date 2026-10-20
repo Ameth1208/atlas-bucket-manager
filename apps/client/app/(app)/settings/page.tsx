@@ -90,7 +90,7 @@ export default function SettingsPage() {
               <span className="truncate font-medium">Atlas</span>
             </div>
             <span className="font-mono text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#007aff]/10 text-[#007aff] border border-[#007aff]/20">
-              v2.0.4
+              v2.0.5
             </span>
           </div>
         </aside>

@@ -55,7 +55,7 @@ export function LoginView() {
           <span>Credenciales y datos procesados de forma local y privada.</span>
         </div>
         <p className="text-[10.5px] text-[#48484a] tracking-wide">
-          Atlas Bucket Manager &bull; v2.0.4
+          Atlas Bucket Manager &bull; v2.0.5
         </p>
       </footer>
     </main>

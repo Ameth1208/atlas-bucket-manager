@@ -13,19 +13,19 @@ export function AtlasLogo({ size = 24, className, withGlow = true }: AtlasLogoPr
     <svg
       width={size}
       height={size}
-      viewBox="0 0 64 64"
+      viewBox="0 0 48 48"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={cn('shrink-0 select-none', className)}
     >
       <defs>
-        <linearGradient id="atlasBustGrad" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+        <linearGradient id="globeGrad" x1="6" y1="6" x2="42" y2="42" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#38bdf8" />
           <stop offset="50%" stopColor="#0a84ff" />
           <stop offset="100%" stopColor="#0051c7" />
         </linearGradient>
         {withGlow && (
-          <radialGradient id="atlasBustGlow" cx="50%" cy="30%" r="48%">
+          <radialGradient id="globeGlow" cx="50%" cy="50%" r="50%">
             <stop offset="0%" stopColor="#0a84ff" stopOpacity="0.32" />
             <stop offset="100%" stopColor="#0a84ff" stopOpacity="0" />
           </radialGradient>
@@ -33,41 +33,36 @@ export function AtlasLogo({ size = 24, className, withGlow = true }: AtlasLogoPr
       </defs>
 
       {/* Ambient celestial glow */}
-      {withGlow && <circle cx="32" cy="19" r="16" fill="url(#atlasBustGlow)" />}
+      {withGlow && <circle cx="24" cy="24" r="20" fill="url(#globeGlow)" />}
 
-      {/* ── The Celestial Storage Globe (World of Buckets) ── */}
-      <circle cx="32" cy="19" r="12" stroke="url(#atlasBustGrad)" strokeWidth="2.4" />
-      <ellipse cx="32" cy="14" rx="9" ry="2.6" stroke="url(#atlasBustGrad)" strokeWidth="1.6" opacity="0.8" />
-      <ellipse cx="32" cy="19" rx="11.5" ry="3.4" stroke="url(#atlasBustGrad)" strokeWidth="2.2" />
-      <ellipse cx="32" cy="24" rx="9" ry="2.6" stroke="url(#atlasBustGrad)" strokeWidth="1.6" opacity="0.8" />
-      <line x1="32" y1="7" x2="32" y2="31" stroke="url(#atlasBustGrad)" strokeWidth="1.4" opacity="0.45" />
+      {/* Outer World Sphere */}
+      <circle cx="24" cy="24" r="18" stroke="url(#globeGrad)" strokeWidth="3" />
 
-      {/* ── The Titan Atlas (Half-Body / Bust) ── */}
-      {/* Head: strong and focused beneath the world */}
-      <circle cx="32" cy="33.5" r="4.3" fill="url(#atlasBustGrad)" />
+      {/* Equator */}
+      <line x1="6" y1="24" x2="42" y2="24" stroke="url(#globeGrad)" strokeWidth="2.2" strokeLinecap="round" />
 
-      {/* Left Arm & Hand reaching up to hold the globe */}
+      {/* Central Meridian */}
+      <line x1="24" y1="6" x2="24" y2="42" stroke="url(#globeGrad)" strokeWidth="2.2" strokeLinecap="round" />
+
+      {/* Curved Meridian */}
+      <ellipse cx="24" cy="24" rx="8.5" ry="18" stroke="url(#globeGrad)" strokeWidth="2.2" />
+
+      {/* Upper Latitude */}
       <path
-        d="M21 42 C14 36 13 27 16.5 20.5"
-        stroke="url(#atlasBustGrad)"
-        strokeWidth="3.6"
+        d="M9.5 15 C14 17.5, 34 17.5, 38.5 15"
+        stroke="url(#globeGrad)"
+        strokeWidth="2"
         strokeLinecap="round"
+        opacity="0.85"
       />
-      <circle cx="16.5" cy="20.5" r="2.2" fill="url(#atlasBustGrad)" />
 
-      {/* Right Arm & Hand reaching up to hold the globe */}
+      {/* Lower Latitude */}
       <path
-        d="M43 42 C50 36 51 27 47.5 20.5"
-        stroke="url(#atlasBustGrad)"
-        strokeWidth="3.6"
+        d="M9.5 33 C14 30.5, 34 30.5, 38.5 33"
+        stroke="url(#globeGrad)"
+        strokeWidth="2"
         strokeLinecap="round"
-      />
-      <circle cx="47.5" cy="20.5" r="2.2" fill="url(#atlasBustGrad)" />
-
-      {/* Broad Muscular Torso & Shoulders (Half Body) */}
-      <path
-        d="M21 41 C24 38.5 27 38 32 38 C37 38 40 38.5 43 41 L41 55 C38 58 35 58.5 32 58.5 C29 58.5 26 58 23 55 Z"
-        fill="url(#atlasBustGrad)"
+        opacity="0.85"
       />
     </svg>
   );

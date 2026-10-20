@@ -204,7 +204,7 @@ export function AccountSection() {
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold text-foreground">Atlas Bucket Manager</p>
                   <span className="font-mono text-[10.5px] font-semibold px-2 py-0.5 rounded-full bg-[#007aff]/15 text-[#007aff] border border-[#007aff]/30">
-                    v2.0.4
+                    v2.0.5
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5">

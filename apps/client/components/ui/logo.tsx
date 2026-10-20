@@ -27,7 +27,7 @@ export function Logo({ size = 'md', showText = false, className }: LogoProps) {
         <div>
           <div className="flex items-center gap-2">
             <p className="text-sm font-semibold text-foreground">Atlas</p>
-            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">v2.0.4</span>
+            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">v2.0.5</span>
           </div>
           <p className="text-xs text-muted-foreground">{t.uiLogoTagline}</p>
         </div>

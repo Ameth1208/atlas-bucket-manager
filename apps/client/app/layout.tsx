@@ -4,8 +4,8 @@ import { Providers } from '@/components/providers';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
-  title: 'Atlas Bucket Manager v2.0.4',
-  description: 'Multi-cloud storage manager v2.0.4',
+  title: 'Atlas Bucket Manager v2.0.5',
+  description: 'Multi-cloud storage manager v2.0.5',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
