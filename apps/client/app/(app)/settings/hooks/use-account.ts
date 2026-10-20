@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
@@ -18,6 +18,14 @@ export function useAccount() {
   const [avatarSeed, setAvatarSeed] = useState(user?.avatarSeed || user?.email || 'user');
   const [notifications, setNotifications] = useState({ email: true, activity: false, digest: false });
 
+  // Sync state whenever user loads from /me or updates
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setAvatarSeed(user.avatarSeed || user.email || 'user');
+    }
+  }, [user?.id, user?.name, user?.avatarSeed, user?.email]);
+
   const updateMutation = useMutation({
     mutationFn: (body: Partial<Pick<User, 'name' | 'avatarSeed'>>) => api.users.update(user!.id, body),
     onSuccess: async (updated) => {
@@ -28,6 +36,23 @@ export function useAccount() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const handleSelectAvatar = async (seed: string) => {
+    setAvatarSeed(seed);
+    if (user) {
+      // 1. Immediately update local store so sidebar, toolbar, user menu reflect it instantly
+      const updated = { ...user, avatarSeed: seed };
+      setUser(updated);
+      // 2. Persist to SQLite
+      try {
+        await api.users.update(user.id, { avatarSeed: seed });
+        await qc.invalidateQueries({ queryKey: ['me'] });
+        toast.success(t.settingsProfileUpdated);
+      } catch (e: any) {
+        toast.error(e?.message || 'Error updating avatar');
+      }
+    }
+  };
+
   const dirty = name !== user?.name || avatarSeed !== (user?.avatarSeed || user?.email || 'user');
 
   return {
@@ -36,6 +61,7 @@ export function useAccount() {
     setName,
     avatarSeed,
     setAvatarSeed,
+    handleSelectAvatar,
     notifications,
     setNotifications,
     theme,

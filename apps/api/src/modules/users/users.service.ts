@@ -30,6 +30,7 @@ export class UsersService {
       name: user.name,
       email: user.email,
       role: user.role,
+      avatarSeed: user.avatarSeed,
       createdAt: user.createdAt,
     };
   }

@@ -91,7 +91,7 @@ function WebhooksTab({ t }: { t: Dictionary }) {
   };
 
   return (
-    <Card className="border-border/60 rounded-md">
+    <Card className="rounded-[20px] bg-card/75 backdrop-blur-2xl border border-white/[0.08] shadow-sm overflow-hidden">
       <CardContent className="p-6 space-y-5">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-md bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/10 flex items-center justify-center">
@@ -226,7 +226,7 @@ function NotificationsTab({ t }: { t: Dictionary }) {
 
   if (isLoading || !prefs) {
     return (
-      <Card className="border-border/60 rounded-md">
+      <Card className="rounded-[20px] bg-card/75 backdrop-blur-2xl border border-white/[0.08] shadow-sm overflow-hidden">
         <CardContent className="p-6">
           <p className="text-xs text-muted-foreground">{t.settingsLoading}</p>
         </CardContent>
@@ -235,7 +235,7 @@ function NotificationsTab({ t }: { t: Dictionary }) {
   }
 
   return (
-    <Card className="border-border/60 rounded-md">
+    <Card className="rounded-[20px] bg-card/75 backdrop-blur-2xl border border-white/[0.08] shadow-sm overflow-hidden">
       <CardContent className="p-6 space-y-5">
         <div className="flex items-center gap-2.5">
           <div className="w-10 h-10 rounded-md bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/10 flex items-center justify-center">

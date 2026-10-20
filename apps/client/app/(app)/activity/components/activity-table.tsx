@@ -45,7 +45,7 @@ export function ActivityTable({ entries, isLoading }: ActivityTableProps) {
   const timeZone = 'UTC';
   if (isLoading) {
     return (
-      <Card className="border-border overflow-hidden">
+      <Card className="border border-white/[0.08] bg-card/60 backdrop-blur-2xl rounded-[18px] overflow-hidden shadow-sm">
         <div className="grid grid-cols-[110px_1.2fr_140px_2fr_140px] gap-3 px-4 py-2.5 border-b border-border bg-muted/30">
           <Skeleton className="h-3 w-12" />
           <Skeleton className="h-3 w-16" />
@@ -109,7 +109,7 @@ export function ActivityTable({ entries, isLoading }: ActivityTableProps) {
             <div>
               <span
                 className={cn(
-                  'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ring-1 ring-inset',
+                  'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium', 
                   actionMeta.badge,
                 )}
               >

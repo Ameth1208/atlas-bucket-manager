@@ -27,9 +27,10 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
   SidebarSeparator,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { toast } from 'sonner';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
@@ -54,6 +55,13 @@ export function AppSidebar() {
   const router = useRouter();
   const { t, tx } = useI18n();
   const { user, setUser } = useAppStore();
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  useEffect(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [pathname, isMobile, setOpenMobile]);
   const [providersOpen, setProvidersOpen] = useState<Record<string, boolean>>({});
   const [deleteProviderTarget, setDeleteProviderTarget] = useState<{ id: string; name: string } | null>(null);
 
@@ -94,22 +102,15 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="none" className="h-dvh border-r border-sidebar-border bg-sidebar">
-      <SidebarHeader className="px-4 pt-4 pb-2.5 space-y-3">
-        {/* macOS Window Controls */}
-        <div className="flex items-center gap-2">
-          <span className="size-3 rounded-full bg-[#ff5f57] border border-[#e0443e]/40 shadow-xs inline-block" />
-          <span className="size-3 rounded-full bg-[#febc2e] border border-[#d89e24]/40 shadow-xs inline-block" />
-          <span className="size-3 rounded-full bg-[#28c840] border border-[#1aab29]/40 shadow-xs inline-block" />
-        </div>
-
-        <div className="flex items-center gap-2.5 pt-0.5">
-          <div className="size-7 rounded-[8px] bg-gradient-to-b from-[#1882ff] to-[#0051c7] flex items-center justify-center shrink-0 shadow-xs">
-            <Database size={14} className="text-white" />
+    <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
+      <SidebarHeader className="px-4 py-3.5 border-b border-sidebar-border/30">
+        <div className="flex items-center gap-2.5">
+          <div className="size-8 rounded-[9px] bg-gradient-to-b from-[#1882ff] to-[#0051c7] flex items-center justify-center shrink-0 shadow-sm shadow-[#0051c7]/30 ring-1 ring-white/20">
+            <Database size={15} className="text-white" />
           </div>
           <div className="min-w-0 flex-1">
-            <span className="text-[13.5px] font-semibold text-white tracking-[-0.2px] block leading-tight">Atlas</span>
-            <span className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider block">Storage</span>
+            <span className="text-[13.5px] font-semibold text-sidebar-foreground tracking-[-0.2px] block leading-tight">Atlas</span>
+            <span className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider block">Storage</span>
           </div>
         </div>
       </SidebarHeader>

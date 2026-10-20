@@ -188,7 +188,7 @@ function InviteForm({
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
   return (
-    <Card className="border-border/60 rounded-md mb-6">
+    <Card className="rounded-[20px] bg-card/75 backdrop-blur-2xl border border-white/[0.08] shadow-sm overflow-hidden mb-6">
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -308,7 +308,7 @@ function MembersTab({
   query,
 }: MembersTabProps) {
   return (
-    <Card className="border-border/60 rounded-md">
+    <Card className="rounded-[20px] bg-card/75 backdrop-blur-2xl border border-white/[0.08] shadow-sm overflow-hidden">
       <CardContent className="p-0">
         {filtered.length === 0 ? (
           <div className="py-12 text-center">
@@ -415,7 +415,7 @@ interface InvitesTabProps {
 
 function InvitesTab({ t, pendingInvites, revokeInviteMutation, formatDate }: InvitesTabProps) {
   return (
-    <Card className="border-border/60 rounded-md">
+    <Card className="rounded-[20px] bg-card/75 backdrop-blur-2xl border border-white/[0.08] shadow-sm overflow-hidden">
       <CardContent className="p-0">
         {pendingInvites.length === 0 ? (
           <div className="py-12 text-center">
