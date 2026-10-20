@@ -26,29 +26,26 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
-        <button
-          type="button"
-          aria-label={t.languageLabel}
-          aria-haspopup="listbox"
-          aria-expanded={open}
-          className={`inline-flex items-center gap-1.5 h-8 pl-1.5 pr-2.5 rounded-full border border-black/[0.08] bg-canvas text-foreground hover:border-black/[0.15] hover:shadow-[0_2px_6px_rgba(0,0,0,0.06)] active:scale-95 transition-all duration-150 ${className}`}
-        >
-          <span className="inline-block w-5 h-3.5 rounded-[2px] overflow-hidden ring-1 ring-black/[0.08]">
-            <Flag
-              code={LOCALE_META[locale].flagCode}
-              style={{ width: '100%', height: '100%', display: 'block' }}
-            />
-          </span>
-          <span className="text-[12px] font-semibold tracking-wide uppercase text-foreground/80">
-            {locale}
-          </span>
-          <ChevronDown
-            size={11}
-            strokeWidth={2.5}
-            className={`text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+      <PopoverTrigger
+        aria-label={t.languageLabel}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className={`inline-flex items-center gap-1.5 h-8 pl-2 pr-2.5 rounded-full border border-white/[0.08] bg-canvas text-foreground hover:border-white/[0.15] hover:shadow-[0_2px_6px_rgba(0,0,0,0.06)] active:scale-95 transition-all duration-150 cursor-pointer ${className}`}
+      >
+        <span className="inline-block w-5 h-3.5 rounded-[2px] overflow-hidden ring-1 ring-white/[0.08]">
+          <Flag
+            code={LOCALE_META[locale].flagCode}
+            style={{ width: '100%', height: '100%', display: 'block' }}
           />
-        </button>
+        </span>
+        <span className="text-[12px] font-semibold tracking-wide uppercase text-foreground/80">
+          {locale}
+        </span>
+        <ChevronDown
+          size={11}
+          strokeWidth={2.5}
+          className={`text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
       </PopoverTrigger>
       <PopoverContent
         align="end"
@@ -67,13 +64,13 @@ export function LanguageSwitcher({ className = '' }: { className?: string }) {
                   setLocale(l);
                   setOpen(false);
                 }}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13px] transition-colors ${
+                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[13px] transition-colors cursor-pointer ${
                   active
                     ? 'bg-secondary text-foreground'
                     : 'text-popover-foreground hover:bg-muted'
                 }`}
               >
-                <span className="inline-block w-5 h-3.5 rounded-[2px] overflow-hidden ring-1 ring-black/[0.08] shrink-0">
+                <span className="inline-block w-5 h-3.5 rounded-[2px] overflow-hidden ring-1 ring-white/[0.08] shrink-0">
                   <Flag
                     code={LOCALE_META[l].flagCode}
                     style={{ width: '100%', height: '100%', display: 'block' }}

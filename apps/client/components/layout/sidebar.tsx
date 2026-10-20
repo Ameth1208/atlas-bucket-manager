@@ -94,16 +94,31 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="none" className='h-dvh border-r border-border'>
-      <SidebarHeader className="px-4 py-4">
-        <Logo size="sm" showText />
+    <Sidebar collapsible="none" className="h-dvh border-r border-sidebar-border bg-sidebar">
+      <SidebarHeader className="px-4 pt-4 pb-2.5 space-y-3">
+        {/* macOS Window Controls */}
+        <div className="flex items-center gap-2">
+          <span className="size-3 rounded-full bg-[#ff5f57] border border-[#e0443e]/40 shadow-xs inline-block" />
+          <span className="size-3 rounded-full bg-[#febc2e] border border-[#d89e24]/40 shadow-xs inline-block" />
+          <span className="size-3 rounded-full bg-[#28c840] border border-[#1aab29]/40 shadow-xs inline-block" />
+        </div>
+
+        <div className="flex items-center gap-2.5 pt-0.5">
+          <div className="size-7 rounded-[8px] bg-gradient-to-b from-[#1882ff] to-[#0051c7] flex items-center justify-center shrink-0 shadow-xs">
+            <Database size={14} className="text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <span className="text-[13.5px] font-semibold text-white tracking-[-0.2px] block leading-tight">Atlas</span>
+            <span className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider block">Storage</span>
+          </div>
+        </div>
       </SidebarHeader>
 
-      <SidebarSeparator />
+      
 
       <SidebarContent className="px-2 py-3">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">
+          <SidebarGroupLabel className="text-[11px] font-semibold tracking-wider text-muted-foreground/60 px-2.5 mb-1.5 select-none uppercase">
             {t.sidebarGroupSources}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -129,7 +144,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">
+          <SidebarGroupLabel className="text-[11px] font-semibold tracking-wider text-muted-foreground/60 px-2.5 mb-1.5 select-none uppercase">
             {t.sidebarGroupProviders}
           </SidebarGroupLabel>
           <SidebarGroupAction
@@ -199,7 +214,7 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/80 px-2 mb-1">
+          <SidebarGroupLabel className="text-[11px] font-semibold tracking-wider text-muted-foreground/60 px-2.5 mb-1.5 select-none uppercase">
             {t.sidebarGroupTools}
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -225,7 +240,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarSeparator />
+      
 
       <SidebarFooter className="p-3">
         <UserMenu

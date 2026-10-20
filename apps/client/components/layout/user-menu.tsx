@@ -26,8 +26,8 @@ export function UserMenu({ name, role, avatarSeed, onLogout }: UserMenuProps) {
         aria-label={t.sidebarUserMenu}
         title={t.sidebarUserMenu}
         className={cn(
-          'group w-full flex items-center gap-1.5 py-1.5 pl-2 pr-4 rounded-full bg-secondary border border-border text-left cursor-pointer transition-colors',
-          'hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 data-[popup-open]:bg-muted'
+          'group w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-[10px] hover:bg-white/[0.06] text-left cursor-pointer transition-colors border-0',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 data-[popup-open]:bg-white/[0.08]'
         )}
       >
         <MemojiAvatar name={avatarSeed} size={32} className="rounded-full shrink-0 w-8 h-8" />

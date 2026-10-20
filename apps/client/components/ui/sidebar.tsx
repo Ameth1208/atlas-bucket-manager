@@ -460,7 +460,7 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button group/menu-button relative flex w-full items-center gap-2 overflow-hidden rounded-xl p-2 text-left text-[13px] leading-tight text-sidebar-foreground ring-sidebar-ring outline-hidden transition-all duration-150 group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent/80 focus-visible:ring-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-sidebar-accent data-active:shadow-2xs data-active:font-medium data-active:text-primary data-active:before:absolute data-active:before:left-0 data-active:before:top-1.5 data-active:before:bottom-1.5 data-active:before:w-[2.5px] data-active:before:rounded-full data-active:before:bg-primary [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-sidebar-foreground/50 data-active:[&_svg]:text-primary [&>span:last-child]:truncate",
+  "peer/menu-button group/menu-button relative flex w-full items-center gap-2.5 overflow-hidden rounded-[10px] px-2.5 py-1.5 text-left text-[13px] leading-tight text-sidebar-foreground/80 ring-sidebar-ring outline-hidden transition-all duration-150 group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-white/[0.06] hover:text-sidebar-foreground focus-visible:ring-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-active:bg-primary data-active:text-white data-active:font-medium data-active:shadow-xs [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:text-sidebar-foreground/60 data-active:[&_svg]:text-white [&>span:last-child]:truncate",
   {
     variants: {
       variant: {
@@ -625,7 +625,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
       data-slot="sidebar-menu-sub"
       data-sidebar="menu-sub"
       className={cn(
-        "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l border-sidebar-border/50 px-2.5 py-0.5 group-data-[collapsible=icon]:hidden",
+        "pl-4 flex min-w-0 flex-col gap-0.5 py-0.5 group-data-[collapsible=icon]:hidden",
         className
       )}
       {...props}
@@ -663,7 +663,7 @@ function SidebarMenuSubButton({
     props: mergeProps<"a">(
       {
         className: cn(
-          "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-sidebar-foreground ring-sidebar-ring outline-hidden group-data-[collapsible=icon]:hidden hover:bg-sidebar-accent focus-visible:ring-2 active:bg-sidebar-accent disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-[13px] data-[size=sm]:text-[11px] data-active:bg-sidebar-accent data-active:text-primary data-active:font-medium data-active:before:absolute data-active:before:left-0 data-active:before:top-1.5 data-active:before:bottom-1.5 data-active:before:w-[2px] data-active:before:rounded-full data-active:before:bg-primary data-active:hover:bg-sidebar-accent [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-sidebar-foreground/50 data-active:[&>svg]:text-primary",
+          "flex h-7.5 min-w-0 items-center gap-2 overflow-hidden rounded-[8px] px-2.5 text-sidebar-foreground/70 ring-sidebar-ring outline-hidden group-data-[collapsible=icon]:hidden hover:bg-white/[0.06] hover:text-sidebar-foreground focus-visible:ring-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[size=md]:text-[12.5px] data-[size=sm]:text-[11px] data-active:bg-white/[0.1] data-active:text-sidebar-foreground data-active:font-medium [&>span:last-child]:truncate [&>svg]:size-3.5 [&>svg]:shrink-0 [&>svg]:text-sidebar-foreground/50 data-active:[&>svg]:text-sidebar-foreground",
           className
         ),
       },
