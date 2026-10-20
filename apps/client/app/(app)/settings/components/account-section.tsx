@@ -126,9 +126,7 @@ export function AccountSection() {
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
             <div className="flex items-center gap-3.5">
-              <div className="size-10 rounded-[12px] bg-gradient-to-b from-[#af52de] to-[#7b1fa2] flex items-center justify-center shrink-0 shadow-sm shadow-[#7b1fa2]/20 ring-1 ring-white/20">
-                <Palette size={18} className="text-white" />
-              </div>
+              <Palette size={22} className="text-[#af52de] shrink-0" strokeWidth={2} />
               <div>
                 <p className="text-sm font-semibold text-foreground">{t.settingsTheme}</p>
                 <p className="text-xs text-muted-foreground">{t.settingsThemeDesc}</p>
@@ -160,9 +158,7 @@ export function AccountSection() {
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-5">
             <div className="flex items-center gap-3.5">
-              <div className="size-10 rounded-[12px] bg-gradient-to-b from-[#ff9500] to-[#e65100] flex items-center justify-center shrink-0 shadow-sm shadow-[#ff9500]/20 ring-1 ring-white/20">
-                <Bell size={18} className="text-white" />
-              </div>
+              <Bell size={22} className="text-[#ff9500] shrink-0" strokeWidth={2} />
               <div>
                 <p className="text-sm font-semibold text-foreground">{t.settingsNotificationsTitle}</p>
                 <p className="text-xs text-muted-foreground">{t.settingsNotificationsDesc}</p>
@@ -202,9 +198,7 @@ export function AccountSection() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3.5">
-              <div className="size-10 rounded-[12px] bg-gradient-to-b from-[#1882ff] to-[#0051c7] flex items-center justify-center shrink-0 shadow-sm shadow-[#0051c7]/20 ring-1 ring-white/20">
-                <Database size={18} className="text-white" />
-              </div>
+              <Database size={22} className="text-[#007aff] shrink-0" strokeWidth={2} />
               <div>
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold text-foreground">Atlas Bucket Manager</p>

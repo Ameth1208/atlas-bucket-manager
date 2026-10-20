@@ -68,9 +68,7 @@ export function BucketCard({ bucket }: BucketCardProps) {
     >
       <CardContent className="p-5 sm:p-6">
         <div className="flex items-start gap-3 mb-4">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-muted/80 border border-border/60 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors">
-            <Database size={18} className="text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.8} />
-          </div>
+          <Database size={20} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0 mt-0.5" strokeWidth={1.8} />
 
           <div className="flex-1 min-w-0">
             <p className="text-[14.5px] font-semibold text-foreground truncate tracking-[-0.2px] group-hover:text-primary transition-colors">{bucket.name}</p>

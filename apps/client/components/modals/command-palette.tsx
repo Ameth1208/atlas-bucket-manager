@@ -30,7 +30,7 @@ interface CommandItem {
   title: string;
   subtitle?: string;
   icon: any;
-  iconBg: string;
+  iconColor: string;
   category: 'nav' | 'buckets' | 'actions';
   action: () => void;
 }
@@ -86,7 +86,7 @@ export function CommandPalette() {
         title: t.sidebarNavDashboard || 'Dashboard',
         subtitle: 'Panel principal y estadísticas',
         icon: Home,
-        iconBg: 'bg-gradient-to-b from-[#007aff] to-[#0051c7]',
+        iconColor: 'text-[#007aff]',
         category: 'nav',
         action: () => {
           router.push('/dashboard');
@@ -98,7 +98,7 @@ export function CommandPalette() {
         title: t.sidebarNavFavorites || 'Favoritos',
         subtitle: 'Tus buckets destacados',
         icon: Star,
-        iconBg: 'bg-gradient-to-b from-[#ff9500] to-[#e65100]',
+        iconColor: 'text-[#ff9500]',
         category: 'nav',
         action: () => {
           router.push('/favorites');
@@ -110,7 +110,7 @@ export function CommandPalette() {
         title: t.sidebarNavActivity || 'Actividad',
         subtitle: 'Registro de eventos en tiempo real',
         icon: Activity,
-        iconBg: 'bg-gradient-to-b from-[#34c759] to-[#248a3d]',
+        iconColor: 'text-[#34c759]',
         category: 'nav',
         action: () => {
           router.push('/activity');
@@ -122,7 +122,7 @@ export function CommandPalette() {
         title: t.apiKeysTitle || 'Claves de API',
         subtitle: 'Tokens de acceso programático',
         icon: Key,
-        iconBg: 'bg-gradient-to-b from-[#5856d6] to-[#3634a3]',
+        iconColor: 'text-[#5856d6]',
         category: 'nav',
         action: () => {
           router.push('/api-keys');
@@ -134,7 +134,7 @@ export function CommandPalette() {
         title: t.sidebarNavSettings || 'Ajustes',
         subtitle: 'Perfil, equipo y preferencias',
         icon: Settings,
-        iconBg: 'bg-gradient-to-b from-[#8e8e93] to-[#636366]',
+        iconColor: 'text-[#8e8e93]',
         category: 'nav',
         action: () => {
           router.push('/settings');
@@ -148,7 +148,7 @@ export function CommandPalette() {
       title: b.name,
       subtitle: `${b.providerName || 'S3'} · ${b.limit ? 'Con cuota' : 'Sin límite'}`,
       icon: Database,
-      iconBg: 'bg-gradient-to-b from-[#007aff] to-[#0051c7]',
+      iconColor: 'text-[#007aff]',
       category: 'buckets',
       action: () => {
         router.push(`/buckets/${encodeURIComponent(b.name)}?provider=${b.providerId}`);
@@ -162,7 +162,7 @@ export function CommandPalette() {
         title: t.toolbarNewBucketTitle || 'Crear nuevo bucket',
         subtitle: 'Almacenamiento S3 / MinIO',
         icon: Plus,
-        iconBg: 'bg-gradient-to-b from-[#007aff] to-[#0051c7]',
+        iconColor: 'text-[#007aff]',
         category: 'actions',
         action: () => {
           setCommandPaletteOpen(false);
@@ -174,7 +174,7 @@ export function CommandPalette() {
         title: t.toolbarConnectProviderTitle || 'Conectar proveedor',
         subtitle: 'AWS S3, MinIO, Wasabi, Cloudflare R2',
         icon: Cloud,
-        iconBg: 'bg-gradient-to-b from-[#34c759] to-[#248a3d]',
+        iconColor: 'text-[#34c759]',
         category: 'actions',
         action: () => {
           setCommandPaletteOpen(false);
@@ -186,7 +186,7 @@ export function CommandPalette() {
         title: t.apiKeysCreate || 'Crear clave de API',
         subtitle: 'Nuevo token para scripts o SDK',
         icon: Key,
-        iconBg: 'bg-gradient-to-b from-[#5856d6] to-[#3634a3]',
+        iconColor: 'text-[#5856d6]',
         category: 'actions',
         action: () => {
           setCommandPaletteOpen(false);
@@ -198,7 +198,7 @@ export function CommandPalette() {
         title: theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro',
         subtitle: `Actualmente en modo ${theme === 'dark' ? 'oscuro' : 'claro'}`,
         icon: theme === 'dark' ? Sun : Moon,
-        iconBg: 'bg-gradient-to-b from-[#ff9500] to-[#e65100]',
+        iconColor: 'text-[#ff9500]',
         category: 'actions',
         action: () => {
           setTheme(theme === 'dark' ? 'light' : 'dark');
@@ -210,7 +210,7 @@ export function CommandPalette() {
         title: lang === 'es' ? 'Switch to English' : 'Cambiar a Español',
         subtitle: `Idioma actual: ${lang === 'es' ? 'Español' : 'English'}`,
         icon: Languages,
-        iconBg: 'bg-gradient-to-b from-[#af52de] to-[#7b1fa2]',
+        iconColor: 'text-[#af52de]',
         category: 'actions',
         action: () => {
           toggleLang();
@@ -342,14 +342,14 @@ export function CommandPalette() {
                   )}
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div
+                    <Icon
+                      size={18}
+                      strokeWidth={2}
                       className={cn(
-                        'size-8 rounded-[9px] flex items-center justify-center shrink-0 shadow-xs ring-1 ring-white/20 text-white',
-                        item.iconBg
+                        'shrink-0 transition-transform group-hover:scale-105',
+                        item.iconColor
                       )}
-                    >
-                      <Icon size={15} strokeWidth={2.2} />
-                    </div>
+                    />
                     <div className="min-w-0">
                       <p className="text-[13.5px] font-semibold text-foreground truncate">
                         {item.title}

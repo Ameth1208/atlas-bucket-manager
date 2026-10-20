@@ -44,9 +44,7 @@ export function SecuritySection() {
       <Card className="rounded-[20px] bg-card/75 backdrop-blur-2xl border border-white/[0.08] shadow-sm overflow-hidden">
         <CardContent className="p-6">
           <div className="flex items-center gap-3.5 mb-6">
-            <div className="size-10 rounded-[12px] bg-gradient-to-b from-[#ff3b30] to-[#d70015] flex items-center justify-center shrink-0 shadow-sm shadow-[#ff3b30]/20 ring-1 ring-white/20">
-              <KeyRound size={18} className="text-white" />
-            </div>
+            <KeyRound size={22} className="text-[#ff3b30] shrink-0" strokeWidth={2} />
             <div>
               <p className="text-sm font-semibold text-foreground">{t.settingsPasswordChange}</p>
               <p className="text-xs text-muted-foreground">{t.settingsPasswordHint}</p>
@@ -100,9 +98,7 @@ export function SecuritySection() {
       <Card className="rounded-[20px] bg-rose-500/[0.04] backdrop-blur-2xl border border-rose-500/20 shadow-sm overflow-hidden mt-6">
         <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-6 px-6">
           <div className="flex items-center gap-3.5">
-            <div className="size-10 rounded-[12px] bg-rose-500/15 border border-rose-500/25 flex items-center justify-center shrink-0">
-              <ShieldAlert size={18} className="text-rose-400" />
-            </div>
+            <ShieldAlert size={22} className="text-rose-400 shrink-0" strokeWidth={2} />
             <div>
               <p className="text-sm font-semibold text-rose-300">{t.settingsDangerDelete}</p>
               <p className="text-xs text-muted-foreground">{t.accountDeleteHint}</p>

@@ -105,9 +105,7 @@ export function AppSidebar() {
     <Sidebar collapsible="offcanvas" className="border-r border-sidebar-border bg-sidebar">
       <SidebarHeader className="px-4 py-3.5 border-b border-sidebar-border/30">
         <div className="flex items-center gap-2.5">
-          <div className="size-8 rounded-[9px] bg-gradient-to-b from-[#1882ff] to-[#0051c7] flex items-center justify-center shrink-0 shadow-sm shadow-[#0051c7]/30 ring-1 ring-white/20">
-            <Database size={15} className="text-white" />
-          </div>
+          <Database size={20} className="text-[#007aff] shrink-0" strokeWidth={2.2} />
           <div className="min-w-0 flex-1">
             <span className="text-[13.5px] font-semibold text-sidebar-foreground tracking-[-0.2px] block leading-tight">Atlas</span>
             <span className="text-[10px] font-medium text-muted-foreground/70 uppercase tracking-wider block">Storage</span>
@@ -287,9 +285,7 @@ function ProviderInfoContent({ provider, bucketCount, onEdit, onDelete }: Provid
     <PopoverContent className="w-72 p-0" align="start" side="right" sideOffset={8}>
       <div className="px-4 pt-3.5 pb-3 border-b border-border">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-lg bg-primary-soft text-primary flex items-center justify-center shrink-0">
-            <Database size={16} />
-          </div>
+          <Database size={18} className="text-primary shrink-0" strokeWidth={2} />
           <div className="min-w-0 flex-1">
             <p className="text-[13px] font-semibold text-popover-foreground truncate">{provider.name}</p>
             <p className="text-[11px] text-muted-foreground uppercase tracking-wide">{provider.kind}</p>

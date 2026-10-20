@@ -12,10 +12,10 @@ interface SettingsNavProps {
 }
 
 const SECTION_COLORS: Record<Section, string> = {
-  account: 'from-[#007aff] to-[#0051c7] shadow-[#007aff]/30',
-  team: 'from-[#34c759] to-[#248a3d] shadow-[#34c759]/30',
-  integrations: 'from-[#ff9500] to-[#e65100] shadow-[#ff9500]/30',
-  security: 'from-[#ff3b30] to-[#d70015] shadow-[#ff3b30]/30',
+  account: 'text-[#007aff]',
+  team: 'text-[#34c759]',
+  integrations: 'text-[#ff9500]',
+  security: 'text-[#ff3b30]',
 };
 
 export function SettingsNav({ sections, active, onSelect }: SettingsNavProps) {
@@ -23,7 +23,7 @@ export function SettingsNav({ sections, active, onSelect }: SettingsNavProps) {
     <nav className="flex flex-col gap-1">
       {sections.map((s) => {
         const isSelected = active === s.id;
-        const color = SECTION_COLORS[s.id] || 'from-primary to-primary/80';
+        const iconColor = SECTION_COLORS[s.id] || 'text-primary';
         return (
           <button
             type="button"
@@ -31,21 +31,21 @@ export function SettingsNav({ sections, active, onSelect }: SettingsNavProps) {
             aria-current={isSelected ? 'page' : undefined}
             onClick={() => onSelect(s.id)}
             className={cn(
-              'group relative flex items-center justify-between px-3 py-2.5 rounded-[12px] text-[13px] font-medium transition-all duration-150 cursor-pointer',
+              'group relative flex items-center justify-between px-3.5 py-2.5 rounded-[12px] text-[13px] font-medium transition-all duration-150 cursor-pointer',
               isSelected
                 ? 'bg-white/[0.1] text-foreground font-semibold shadow-xs ring-1 ring-white/10'
                 : 'text-muted-foreground hover:bg-white/[0.05] hover:text-foreground'
             )}
           >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div
+            <div className="flex items-center gap-3 min-w-0">
+              <s.icon
+                size={16}
+                strokeWidth={2.2}
                 className={cn(
-                  'size-7 rounded-[8px] bg-gradient-to-b flex items-center justify-center shrink-0 shadow-xs ring-1 ring-white/20',
-                  color
+                  'shrink-0 transition-colors',
+                  isSelected ? iconColor : 'text-muted-foreground group-hover:text-foreground'
                 )}
-              >
-                <s.icon size={14} className="text-white" strokeWidth={2.2} />
-              </div>
+              />
               <span className="truncate">{s.label}</span>
             </div>
             <ChevronRight

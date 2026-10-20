@@ -64,16 +64,11 @@ export function ObjectList() {
               />
             </div>
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className={cn(
-                'w-8 h-8 rounded-md flex items-center justify-center shrink-0',
-                obj.isFolder ? 'bg-file-image-soft' : 'bg-muted'
-              )}>
-                {obj.isFolder ? (
-                  <Folder size={14} className="text-file-image" strokeWidth={1.8} />
-                ) : (
-                  <File size={14} className="text-muted-foreground" strokeWidth={1.8} />
-                )}
-              </div>
+              {obj.isFolder ? (
+                <Folder size={18} className="text-file-image shrink-0" strokeWidth={1.9} />
+              ) : (
+                <File size={18} className="text-muted-foreground/80 shrink-0" strokeWidth={1.8} />
+              )}
               <span className="text-foreground truncate font-medium">{fileName}</span>
             </div>
             <span className="font-mono text-[12px] text-muted-foreground text-right tabular-nums">

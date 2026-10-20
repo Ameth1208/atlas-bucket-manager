@@ -105,14 +105,7 @@ function ActionRow({ action, checked, count, onToggle, t }: ActionRowProps) {
   return (
     <label className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-muted/60 cursor-pointer transition-colors">
       <Checkbox checked={checked} onCheckedChange={onToggle} />
-      <span
-        className={cn(
-          'inline-flex items-center justify-center size-5 rounded-[6px]',
-          meta.iconBg,
-        )}
-      >
-        <Icon size={11} />
-      </span>
+      <Icon size={14} className={cn('shrink-0', meta.iconColor)} strokeWidth={2} />
       <span className="flex-1 text-[12.5px] text-foreground font-medium">{meta.short}</span>
       <span className="text-[10.5px] tabular-nums text-muted-foreground">{count}</span>
     </label>

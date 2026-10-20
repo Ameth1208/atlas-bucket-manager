@@ -28,10 +28,8 @@ export function ActivityItem({ activity, isLast }: ActivityItemProps) {
   const Icon = meta.icon;
 
   return (
-    <div className={cn('flex items-center gap-3 px-4 py-3 hover:bg-muted/30 transition-colors', !isLast && 'border-b border-border/60')}>
-      <div className={cn('size-8 rounded-[8px] flex items-center justify-center shrink-0 shadow-xs', meta.iconBg)}>
-        <Icon size={14} />
-      </div>
+    <div className={cn('flex items-center gap-3.5 px-4 py-3 hover:bg-muted/30 transition-colors', !isLast && 'border-b border-border/60')}>
+      <Icon size={17} className={cn('shrink-0', meta.iconColor)} strokeWidth={2} />
       <div className="flex-1 min-w-0">
         <p className="text-[13.5px] leading-snug tracking-[-0.2px]">
           <span className="font-medium text-muted-foreground font-mono text-[11px]">{activity.actor}</span>

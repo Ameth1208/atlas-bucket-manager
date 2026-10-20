@@ -24,9 +24,7 @@ export function ApiKeysStats({ active, reads, writes }: ApiKeysStatsProps) {
       {stats.map((s) => (
         <Card key={s.label}>
           <CardContent className="flex items-center gap-3 pt-4 pb-4">
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-muted text-muted-foreground">
-              <s.icon size={16} />
-            </div>
+            <s.icon size={22} className="text-primary shrink-0" strokeWidth={1.9} />
             <div>
               <p className="text-lg font-semibold text-foreground">{s.value}</p>
               <p className="text-xs text-muted-foreground">{s.label}</p>

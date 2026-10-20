@@ -38,9 +38,7 @@ export function WelcomeStep({ onNext }: WelcomeStepProps) {
               key={text}
               className="flex flex-col sm:flex-row items-center sm:items-center text-center sm:text-left gap-2 sm:gap-3 px-2 sm:px-3 py-2 sm:py-2.5 rounded-[11px] bg-muted border border-divider-soft"
             >
-              <div className="shrink-0 size-7 sm:size-8 rounded-[8px] bg-muted text-muted-foreground flex items-center justify-center">
-                <Icon size={15} strokeWidth={1.8} />
-              </div>
+              <Icon size={18} className="text-primary shrink-0" strokeWidth={1.9} />
               <p className="text-[12px] sm:text-[14px] text-ink-muted-80 leading-[1.43] tracking-[-0.224px] text-pretty">
                 {text}
               </p>

@@ -25,9 +25,7 @@ export function DoneStep() {
       </div>
 
       <div className="text-left p-3 sm:p-4 rounded-[14px] sm:rounded-[18px] bg-muted border border-border flex gap-3">
-        <div className="shrink-0 size-8 sm:size-9 rounded-[10px] sm:rounded-[11px] bg-warning/10 text-warning flex items-center justify-center">
-          <Lightbulb size={16} strokeWidth={1.8} />
-        </div>
+        <Lightbulb size={22} className="text-warning shrink-0 mt-0.5" strokeWidth={1.9} />
         <div className="space-y-0.5">
           <p className="text-[14px] sm:text-[15px] font-semibold text-foreground">{t.tipTitle}</p>
           <p className="text-[12px] sm:text-[13px] text-muted-foreground leading-[1.5] text-pretty">

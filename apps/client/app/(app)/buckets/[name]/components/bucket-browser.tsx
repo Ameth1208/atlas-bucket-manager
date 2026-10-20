@@ -86,9 +86,7 @@ export function BucketBrowser({ bucket, crumbs }: BucketBrowserProps) {
       {/* ── Apple Liquid Glass Drag & Drop Overlay ── */}
       {isDraggingOver && (
         <div className="fixed inset-3 sm:inset-6 z-50 rounded-[28px] border-2 border-dashed border-[#007aff] bg-black/65 dark:bg-black/80 backdrop-blur-3xl flex flex-col items-center justify-center pointer-events-none transition-all duration-300 shadow-2xl animate-in fade-in zoom-in-95">
-          <div className="size-20 rounded-[22px] bg-gradient-to-b from-[#007aff] to-[#0051c7] flex items-center justify-center shadow-2xl shadow-[#007aff]/50 ring-2 ring-white/30 text-white animate-bounce">
-            <Upload size={38} strokeWidth={2.2} />
-          </div>
+          <Upload size={54} strokeWidth={2} className="text-[#007aff] animate-bounce drop-shadow-[0_8px_24px_rgba(0,122,255,0.6)]" />
           <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight mt-5">
             Suelta tus archivos para subirlos
           </h2>

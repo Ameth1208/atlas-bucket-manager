@@ -59,10 +59,8 @@ export function BucketHeader({ bucket }: BucketHeaderProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 rounded-lg flex items-center justify-center bg-primary-soft text-primary shrink-0">
-            <Database size={20} strokeWidth={1.8} />
-          </div>
+        <div className="flex items-center gap-3.5 min-w-0">
+          <Database size={26} className="text-primary shrink-0" strokeWidth={1.9} />
           <div className="min-w-0">
             <h1 className="text-[20px] font-semibold tracking-[-0.3px] text-foreground truncate">{bucket.name}</h1>
             <p className="text-[12px] text-muted-foreground truncate">{bucket.providerName}</p>
