@@ -1,4 +1,6 @@
 'use client';
+
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { Plus, Cloud, ChevronRight, Menu, Search } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { MemojiAvatar } from '@/components/ui/memoji-avatar';
@@ -87,6 +89,8 @@ export function Toolbar({ crumbs = [] }: ToolbarProps) {
         >
           <Plus size={14} />
         </Button>
+
+        <ThemeToggle />
 
         <Separator orientation="vertical" className="h-5 mx-1 bg-border" />
 

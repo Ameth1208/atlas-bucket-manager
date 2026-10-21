@@ -1,5 +1,6 @@
 'use client';
 
+import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -133,22 +134,30 @@ export function AccountSection() {
                 <p className="text-xs text-muted-foreground">{t.settingsThemeDesc}</p>
               </div>
             </div>
-            <div className="flex rounded-[12px] border border-white/[0.08] p-1 bg-black/10 dark:bg-black/30 backdrop-blur-md w-fit">
-              {themeOptions.map((opt) => (
-                <button
-                  type="button"
-                  key={opt.v}
-                  onClick={() => setTheme(opt.v)}
-                  className={cn(
-                    'flex items-center gap-2 px-3.5 py-1.5 rounded-[9px] text-xs font-medium transition-all cursor-pointer',
-                    theme === opt.v
-                      ? 'bg-background text-foreground shadow-xs font-semibold'
-                      : 'text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <opt.icon size={13} /> {opt.label}
-                </button>
-              ))}
+            <div className="flex rounded-[12px] border border-white/[0.08] p-1 bg-black/10 dark:bg-black/30 backdrop-blur-md w-fit relative">
+              {themeOptions.map((opt) => {
+                const isActive = theme === opt.v;
+                return (
+                  <button
+                    type="button"
+                    key={opt.v}
+                    onClick={() => setTheme(opt.v)}
+                    className={cn(
+                      'relative flex items-center gap-2 px-3.5 py-1.5 rounded-[9px] text-xs font-medium transition-colors cursor-pointer z-10',
+                      isActive ? 'text-foreground font-semibold' : 'text-muted-foreground hover:text-foreground'
+                    )}
+                  >
+                    {isActive && (
+                      <motion.div
+                        layoutId="active-theme-indicator"
+                        className="absolute inset-0 rounded-[9px] bg-background shadow-xs border border-border/50 -z-10"
+                        transition={{ type: 'spring', stiffness: 450, damping: 35 }}
+                      />
+                    )}
+                    <opt.icon size={13} /> {opt.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </CardContent>

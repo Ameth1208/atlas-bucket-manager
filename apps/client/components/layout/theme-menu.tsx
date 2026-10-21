@@ -4,6 +4,7 @@ import { Sun, Moon, Monitor, Palette, Check, ChevronRight } from 'lucide-react';
 import { Menu } from '@base-ui/react/menu';
 import { useTheme } from 'next-themes';
 import { useI18n } from '@/lib/i18n';
+import { motion } from 'framer-motion';
 
 type ThemeValue = 'light' | 'dark' | 'system';
 
@@ -48,7 +49,13 @@ export function ThemeMenu() {
                   <opt.icon size={14} className="text-muted-foreground shrink-0" />
                   <span className="flex-1 text-left font-medium">{labelFor(opt.v, t)}</span>
                   <Menu.RadioItemIndicator className="flex items-center justify-center">
-                    <Check size={13} strokeWidth={2.5} className="text-foreground" />
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    >
+                      <Check size={13} strokeWidth={2.5} className="text-foreground" />
+                    </motion.div>
                   </Menu.RadioItemIndicator>
                 </Menu.RadioItem>
               ))}
