@@ -95,8 +95,8 @@ function ShareBody({
     if (!objectKey.trim()) return;
     setLoadingPresign(true);
     try {
-      const { url } = await api.objects.presignedUrl(bucket.name, objectKey.trim(), bucket.providerId);
-      setPresignedUrl(url);
+      const shareUrl = `${window.location.origin}/api/public/share/${bucket.providerId}/${encodeURIComponent(bucket.name)}/${encodeURIComponent(objectKey.trim())}`;
+      setPresignedUrl(shareUrl);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {

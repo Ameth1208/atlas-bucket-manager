@@ -73,7 +73,7 @@ export class AuthService {
     return { success: true };
   }
 
-  private async buildResult(user: UserInfo): Promise<AuthResult> {
+  async buildResult(user: UserInfo): Promise<AuthResult> {
     const token = await this.jwt.signAsync(
       { userId: user.id, email: user.email, role: user.role },
       { expiresIn: '7d' },

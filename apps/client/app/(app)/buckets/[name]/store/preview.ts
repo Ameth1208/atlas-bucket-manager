@@ -1,10 +1,12 @@
 import { create } from 'zustand';
 
-interface PreviewFile {
+export interface PreviewFile {
   url: string;
   name: string;
   type: string;
   size: number;
+  shareUrl?: string;
+  key?: string;
 }
 
 interface PreviewStore {

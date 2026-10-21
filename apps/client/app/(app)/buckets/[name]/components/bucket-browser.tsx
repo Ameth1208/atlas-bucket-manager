@@ -140,6 +140,7 @@ export function BucketBrowser({ bucket, crumbs }: BucketBrowserProps) {
           fileName={previewFile.name}
           fileType={previewFile.type}
           fileSize={previewFile.size}
+          shareUrl={previewFile.shareUrl}
           onClose={() => setPreviewFile(null)}
         />
       )}

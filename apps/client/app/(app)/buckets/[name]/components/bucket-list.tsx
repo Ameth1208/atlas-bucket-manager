@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Folder, File, Eye, Download, Trash2, Clock } from 'lucide-react';
+import { Folder, File, Eye, Download, Trash2, Clock, Share2 } from 'lucide-react';
 import { cn, fmtBytes, fmtDate } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { useI18n } from '@/lib/i18n';
@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 export function ObjectList() {
   const { t, tx } = useI18n();
   const { objects, search, filter, selected, navigate, select } = useBrowserStore();
-  const { handlePreview, handleDownload, handleDeleteOne } = useActionsStore();
+  const { handlePreview, handleDownload, handleDownloadFolder, handleShare, handleDeleteOne } = useActionsStore();
   const filtered = filteredObjects(objects, search, filter);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
@@ -86,18 +86,48 @@ export function ObjectList() {
               {obj.isFolder ? t.bucketListFolder : (ext || '—')}
             </span>
             <div className="flex items-center gap-0.5 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
-              <ListAction onClick={(e) => { e.stopPropagation(); handlePreview(obj.key); }} ariaLabel={t.bucketListPreview}>
-                <Eye size={13} strokeWidth={1.8} />
-              </ListAction>
-              <ListAction onClick={(e) => { e.stopPropagation(); handleDownload(obj.key); }} ariaLabel={t.bucketListDownload}>
-                <Download size={13} strokeWidth={1.8} />
-              </ListAction>
+              {!obj.isFolder && (
+                <ListAction
+                  onClick={(e) => { e.stopPropagation(); handlePreview(obj.key); }}
+                  ariaLabel={t.bucketListPreview}
+                  title={t.bucketListPreview}
+                >
+                  <Eye size={13} strokeWidth={1.8} />
+                </ListAction>
+              )}
+              {obj.isFolder ? (
+                <ListAction
+                  onClick={(e) => { e.stopPropagation(); handleDownloadFolder(obj.key); }}
+                  ariaLabel="Descargar carpeta como ZIP"
+                  title="Descargar ZIP"
+                >
+                  <Download size={13} strokeWidth={1.8} />
+                </ListAction>
+              ) : (
+                <ListAction
+                  onClick={(e) => { e.stopPropagation(); handleDownload(obj.key); }}
+                  ariaLabel={t.bucketListDownload}
+                  title={t.bucketListDownload}
+                >
+                  <Download size={13} strokeWidth={1.8} />
+                </ListAction>
+              )}
+              {!obj.isFolder && (
+                <ListAction
+                  onClick={(e) => { e.stopPropagation(); handleShare(obj.key); }}
+                  ariaLabel="Compartir enlace público"
+                  title="Compartir enlace"
+                >
+                  <Share2 size={13} strokeWidth={1.8} />
+                </ListAction>
+              )}
               <ListAction
                 onClick={(e) => {
                   e.stopPropagation();
                   setDeleteTarget(obj.key);
                 }}
                 ariaLabel={t.bucketListDelete}
+                title={t.bucketListDelete}
                 variant="danger"
               >
                 <Trash2 size={13} strokeWidth={1.8} />
@@ -130,17 +160,20 @@ function ListAction({
   children,
   onClick,
   ariaLabel,
+  title,
   variant = 'default',
 }: {
   children: React.ReactNode;
   onClick: (e: React.MouseEvent) => void;
   ariaLabel: string;
+  title?: string;
   variant?: 'default' | 'danger';
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      title={title || ariaLabel}
       className={cn(
         'w-8 h-8 rounded-md flex items-center justify-center transition-colors',
         variant === 'danger'

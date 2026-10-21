@@ -5,34 +5,58 @@ import { useURLStore } from './url';
 import { useBrowserStore } from './browser';
 import { usePreviewStore } from './preview';
 
-const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
+const IMAGE_EXTS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'avif'];
 
 export const useActionsStore = create(() => ({
-  handleDownload: async (key: string) => {
+  handleDownload: (key: string) => {
     const { bucketName, providerId } = useURLStore.getState();
+    const url = `/api/buckets/${providerId}/${encodeURIComponent(bucketName)}/objects/${encodeURIComponent(key)}/stream?download=1`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = key.split('/').pop() || key;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  },
+
+  handleDownloadFolder: (folderKey: string) => {
+    const { bucketName, providerId } = useURLStore.getState();
+    const folderName = folderKey.replace(/\/+$/, '').split('/').filter(Boolean).pop() || bucketName;
+    toast.info(`Generando archivo ZIP de "${folderName}"...`);
+    const url = `/api/buckets/${providerId}/${encodeURIComponent(bucketName)}/zip?prefix=${encodeURIComponent(folderKey)}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${folderName}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  },
+
+  handleShare: async (key: string) => {
+    const { bucketName, providerId } = useURLStore.getState();
+    const shareUrl = `${window.location.origin}/api/public/share/${providerId}/${encodeURIComponent(bucketName)}/${encodeURIComponent(key)}`;
     try {
-      const { url } = await api.objects.presignedUrl(bucketName, key, providerId);
-      window.open(url, '_blank');
-    } catch (e: any) {
-      toast.error(e.message);
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success('Enlace público copiado al portapapeles');
+    } catch {
+      toast.error('No se pudo copiar el enlace');
     }
   },
 
-  handlePreview: async (key: string) => {
+  handlePreview: (key: string) => {
     const { bucketName, providerId } = useURLStore.getState();
     const objects = useBrowserStore.getState().objects;
-    try {
-      const { url } = await api.objects.presignedUrl(bucketName, key, providerId);
-      const obj = objects.find(o => o.key === key);
-      usePreviewStore.getState().set({
-        url,
-        name: key.split('/').pop() || key,
-        type: obj?.isFolder ? 'folder' : 'file',
-        size: obj?.size || 0,
-      });
-    } catch (e: any) {
-      toast.error(e.message);
-    }
+    const streamUrl = `/api/buckets/${providerId}/${encodeURIComponent(bucketName)}/objects/${encodeURIComponent(key)}/stream`;
+    const shareUrl = `${window.location.origin}/api/public/share/${providerId}/${encodeURIComponent(bucketName)}/${encodeURIComponent(key)}`;
+    const obj = objects.find(o => o.key === key);
+    usePreviewStore.getState().set({
+      url: streamUrl,
+      shareUrl,
+      key,
+      name: key.split('/').pop() || key,
+      type: obj?.isFolder ? 'folder' : 'file',
+      size: obj?.size || 0,
+    });
   },
 
   handleFiles: (files: FileList | null) => {
@@ -67,36 +91,22 @@ export const useActionsStore = create(() => ({
     const { bucketName, providerId } = useURLStore.getState();
     try {
       await api.objects.delete(bucketName, providerId, [key]);
-      // Update the local store immediately for snappy UI
       useBrowserStore.getState().setObjects(
         useBrowserStore.getState().objects.filter(o => o.key !== key)
       );
-      // Then re-fetch to be sure
       useBrowserStore.getState().fetchObjects();
     } catch (e: any) {
       toast.error(e.message);
     }
   },
 
-  loadThumbnail: async (key: string) => {
+  loadThumbnail: (key: string) => {
     const { bucketName, providerId } = useURLStore.getState();
     const browser = useBrowserStore.getState();
     if (browser.thumbnails[key] || !providerId) return;
-    // If we've already flagged the provider as failing, don't keep retrying
-    // for every object in the bucket. One banner is enough.
-    if (browser.thumbnailError) return;
     const ext = key.split('/').pop()?.split('.').pop()?.toLowerCase() || '';
     if (!IMAGE_EXTS.includes(ext)) return;
-    try {
-      const { url } = await api.objects.presignedUrl(bucketName, key, providerId);
-      useBrowserStore.getState().addThumbnail(key, url);
-    } catch (e: any) {
-      const msg = e?.message || 'No se pudo generar la URL de la miniatura';
-      useBrowserStore.getState().setThumbnailError(msg);
-      toast.error(msg, {
-        id: 'thumbnail-presign-error',
-        description: 'Las miniaturas no se pueden cargar. El bucket sigue siendo accesible.',
-      });
-    }
+    const streamUrl = `/api/buckets/${providerId}/${encodeURIComponent(bucketName)}/objects/${encodeURIComponent(key)}/stream`;
+    useBrowserStore.getState().addThumbnail(key, streamUrl);
   },
 }));

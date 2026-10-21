@@ -1,8 +1,8 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, ArrowRight, Lock } from 'lucide-react';
 import { Logo } from '@/components/ui/logo';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,12 +35,18 @@ function AcceptInviteInner() {
 
   const invite = validateQuery.data;
   const validating = validateQuery.isLoading;
-  const seededEmail = invite?.email && email === '' ? invite.email : email;
 
+  useEffect(() => {
+    if (invite?.email) {
+      setEmail(invite.email);
+    }
+  }, [invite?.email]);
+
+  const activeEmail = invite?.email || email;
   const mismatch = confirm.length > 0 && confirm !== password;
   const tooShort = password.length > 0 && password.length < 8;
   const canSubmit =
-    invite?.valid && name.trim().length > 0 && seededEmail.trim().length > 0 && password.length >= 8 && !mismatch;
+    invite?.valid && name.trim().length > 0 && activeEmail.trim().length > 0 && password.length >= 8 && !mismatch;
 
   const [accepting, setAccepting] = useState(false);
 
@@ -48,7 +54,7 @@ function AcceptInviteInner() {
     if (!canSubmit) return;
     setAccepting(true);
     try {
-      const user = await api.invites.accept(token, { name, email: seededEmail, password });
+      const user = await api.invites.accept(token, { name, email: activeEmail.trim(), password });
       setUser(user);
       toast.success(t.inviteAccepted);
       router.push('/dashboard');
@@ -116,13 +122,21 @@ function AcceptInviteInner() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>{t.inviteEmail}</Label>
+                  <div className="flex items-center justify-between">
+                    <Label>{t.inviteEmail}</Label>
+                    {invite?.email && (
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                        <Lock size={10} /> Asignado por invitación
+                      </span>
+                    )}
+                  </div>
                   <Input
                     type="email"
-                    value={seededEmail}
+                    value={activeEmail}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder={t.inviteEmailPh}
                     autoComplete="email"
+                    disabled={Boolean(invite?.email)}
                     required
                   />
                 </div>

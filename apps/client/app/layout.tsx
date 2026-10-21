@@ -4,8 +4,11 @@ import { Providers } from '@/components/providers';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
-  title: 'Atlas Bucket Manager v2.0.5',
-  description: 'Multi-cloud storage manager v2.0.5',
+  title: {
+    default: 'Atlas Bucket Manager',
+    template: '%s · Atlas Bucket Manager',
+  },
+  description: 'Multi-cloud storage manager',
   icons: {
     icon: [
       { url: '/icon.svg', type: 'image/svg+xml' },

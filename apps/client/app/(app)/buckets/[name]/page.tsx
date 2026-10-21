@@ -12,6 +12,7 @@ function BucketPageContent({ name, buckets }: { name: string; buckets: Bucket[] 
   const searchParams = useSearchParams();
   const router = useRouter();
   const { t } = useI18n();
+  const path = useBrowserStore((s) => s.path);
 
   const providerFromUrl = searchParams.get('provider') || '';
 
@@ -21,6 +22,13 @@ function BucketPageContent({ name, buckets }: { name: string; buckets: Bucket[] 
     : matches[0];
 
   const resolvedProviderId = bucket?.providerId ?? providerFromUrl;
+
+  useEffect(() => {
+    if (name) {
+      const sub = path.length > 0 ? `/${path.join('/')}` : '';
+      document.title = `${name}${sub} · Atlas Bucket Manager`;
+    }
+  }, [name, path]);
 
   useEffect(() => {
     if (!providerFromUrl && bucket?.providerId) {

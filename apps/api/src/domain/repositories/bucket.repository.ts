@@ -104,6 +104,12 @@ export interface IBucketRepository {
     bucket: string,
     key: string,
   ): Promise<NodeJS.ReadableStream>;
+  streamFolderZip(
+    providerId: string,
+    bucket: string,
+    prefix: string,
+    res: any,
+  ): Promise<void>;
   getProviderCredentials(
     providerId: string,
   ): ProviderCredentials | null;

@@ -1,5 +1,5 @@
 'use client';
-import { Folder, File, Eye, Download, Film, Music, Image, Trash2, FileText, Archive, FileCode, Clock } from 'lucide-react';
+import { Folder, File, Eye, Download, Film, Music, Image, Trash2, FileText, Archive, FileCode, Clock, Share2 } from 'lucide-react';
 import { cn, fmtBytes } from '@/lib/utils';
 import type { StorageObject } from '@/lib/api';
 import { useEffect, useState, useMemo } from 'react';
@@ -79,7 +79,7 @@ export function ObjectCard({
   const kind = obj.isFolder ? null : getFileKind(ext);
   const style = kind ? KIND_STYLE[kind] : null;
   const IconComp = obj.isFolder ? Folder : (style?.icon ?? File);
-  const { handleDeleteOne } = useActionsStore();
+  const { handleDeleteOne, handleDownloadFolder, handleShare } = useActionsStore();
   const qc = useQueryClient();
   const { t, tx, meta } = useI18n();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -171,9 +171,14 @@ export function ObjectCard({
 
         <div className="absolute top-2 right-2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           {obj.isFolder ? (
-            <ActionButton onClick={() => onNavigate(fileName)} ariaLabel={tx('bucketObjectOpenFolder', { name: fileName })}>
-              <Folder size={13} />
-            </ActionButton>
+            <>
+              <ActionButton onClick={() => onNavigate(fileName)} ariaLabel={tx('bucketObjectOpenFolder', { name: fileName })}>
+                <Folder size={13} />
+              </ActionButton>
+              <ActionButton onClick={(e) => { e.stopPropagation(); handleDownloadFolder(obj.key); }} ariaLabel="Descargar carpeta como ZIP">
+                <Download size={13} />
+              </ActionButton>
+            </>
           ) : (
             <>
               <ActionButton onClick={(e) => { e.stopPropagation(); onPreview(obj.key); }} ariaLabel={t.bucketListPreview}>
@@ -184,6 +189,9 @@ export function ObjectCard({
                   <Download size={13} />
                 </ActionButton>
               )}
+              <ActionButton onClick={(e) => { e.stopPropagation(); handleShare(obj.key); }} ariaLabel="Compartir enlace público">
+                <Share2 size={13} />
+              </ActionButton>
             </>
           )}
           <ActionButton onClick={onDelete} ariaLabel={t.bucketListDelete} variant="danger">

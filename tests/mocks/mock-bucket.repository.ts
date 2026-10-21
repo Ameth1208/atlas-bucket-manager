@@ -27,6 +27,7 @@ export class MockBucketRepository implements IBucketRepository {
   // URL and streaming
   getPresignedUrl = jest.fn(() => Promise.resolve("https://example.com/url"));
   getObjectStream = jest.fn(() => Promise.resolve({}));
+  streamFolderZip = jest.fn(() => Promise.resolve());
 
   // Helper to reset all mocks
   resetAllMocks() {

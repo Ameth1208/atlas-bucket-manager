@@ -1,3 +1,4 @@
+import { ZipArchive } from 'archiver';
 import { Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as http from 'http';
@@ -689,6 +690,50 @@ export class S3BucketRepository implements IBucketRepository {
   ): Promise<NodeJS.ReadableStream> {
     const client = this.s3.getClient(providerId);
     return client.getObject(bucket, key);
+  }
+
+  async streamFolderZip(
+    providerId: string,
+    bucket: string,
+    prefix: string,
+    res: any,
+  ): Promise<void> {
+    const client = this.s3.getClient(providerId);
+    const normalizedPrefix = prefix && !prefix.endsWith('/') ? prefix + '/' : prefix;
+    const folderBase = prefix.replace(/\/+$/, '').split('/').filter(Boolean).pop() || bucket;
+
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader(
+      'Content-Disposition',
+      'attachment; filename="' + encodeURIComponent(folderBase) + '.zip"',
+    );
+
+    const zip = new ZipArchive({ zlib: { level: 6 } });
+    zip.pipe(res);
+
+    try {
+      const stream = client.listObjectsV2(bucket, normalizedPrefix, true);
+      for await (const obj of stream) {
+        if (!obj.name || obj.name.endsWith('/')) continue;
+        const relativeName =
+          normalizedPrefix && obj.name.startsWith(normalizedPrefix)
+            ? obj.name.slice(normalizedPrefix.length)
+            : obj.name;
+        if (!relativeName) continue;
+
+        try {
+          const fileStream = await client.getObject(bucket, obj.name);
+          zip.append(fileStream, { name: relativeName });
+        } catch {
+          continue;
+        }
+      }
+      await zip.finalize();
+    } catch (err) {
+      if (!res.headersSent) {
+        res.status(500).send('Error generating zip');
+      }
+    }
   }
 
   // ── Helpers ────────────────────────────────────────────────────
