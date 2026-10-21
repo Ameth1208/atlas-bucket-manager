@@ -1,5 +1,7 @@
 # 🪣 Atlas Bucket Manager
 
+![Atlas Bucket Manager Preview](public/atlas-portada.png)
+
 > A high-performance, unified Multi-Cloud UI & API for managing S3-compatible storage (MinIO, AWS S3, Cloudflare R2, DigitalOcean Spaces, Wasabi). Built with **Next.js 16 + shadcn/ui** for the frontend and **Go 1.26 + Gin + MinIO-Go** for the backend API.
 
 Atlas is a lightweight, secure, and modern web interface designed to bridge the gap between local development and cloud production. Manage visibility, explore files, download folders as `.zip` in real-time, and perform global searches across all your storage providers in one unified place.
