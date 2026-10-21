@@ -1,4 +1,4 @@
-import { ZipArchive } from 'archiver';
+import archiver from 'archiver';
 import { Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as http from 'http';
@@ -727,7 +727,7 @@ export class S3BucketRepository implements IBucketRepository {
       'attachment; filename="' + encodeURIComponent(filename) + '.zip"',
     );
 
-    const zip = new ZipArchive({ zlib: { level: 6 } });
+    const zip = archiver('zip', { zlib: { level: 6 } });
     zip.pipe(res);
 
     try {

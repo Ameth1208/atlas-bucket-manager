@@ -2,15 +2,17 @@ import {
   BadRequestException,
   Inject,
   Injectable,
-  NotFoundException,
   PayloadTooLargeException,
 } from '@nestjs/common';
+import 'multer';
+import { Response } from 'express';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import {
   IBucketRepository,
   BUCKET_REPOSITORY,
+  DownloadZipOptions,
 } from '../../domain/repositories/bucket.repository';
 import { StorageObject, SearchResult } from '../../domain/entities/object.entity';
 import { CreateFolderBodyDto, DeleteObjectsDto } from '../buckets/dto/bucket.dto';
@@ -54,7 +56,12 @@ export class ObjectsService {
     return this.repo.getObjectStream(providerId, bucket, key);
   }
 
-  downloadZip(providerId: string, bucket: string, options: { prefix?: string; keys?: string[] }, res: any) {
+  downloadZip(
+    providerId: string,
+    bucket: string,
+    options: DownloadZipOptions,
+    res: Response,
+  ): Promise<void> {
     return this.repo.streamZip(providerId, bucket, options, res);
   }
 
