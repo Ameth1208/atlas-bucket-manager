@@ -202,4 +202,19 @@ func TestFullAPIWorkflow(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Fatalf("validate invite failed: %d, %s", w.Code, w.Body.String())
 	}
+
+	// 11. Test Bucket name regex validation
+	invalidBucketReq := map[string]string{
+		"name":       "INVALID_UPPERCASE_BUCKET!",
+		"providerId": "p-1",
+	}
+	b, _ = json.Marshal(invalidBucketReq)
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("POST", "/api/buckets", bytes.NewBuffer(b))
+	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(authCookie)
+	r.ServeHTTP(w, req)
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 for invalid bucket name, got %d", w.Code)
+	}
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"regexp"
 	"sync"
 	"time"
 
@@ -14,6 +15,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 )
+
+var s3BucketRegex = regexp.MustCompile(`^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$`)
 
 type Service struct {
 	db *database.DB
@@ -113,6 +116,10 @@ func (s *Service) List(ctx context.Context, userID string) (*domain.BucketsListR
 }
 
 func (s *Service) Create(ctx context.Context, providerID, name string, limit *int64) error {
+	if len(name) < 3 || len(name) > 63 || !s3BucketRegex.MatchString(name) {
+		return errors.New("bucket name must be between 3 and 63 characters and follow S3 naming conventions")
+	}
+
 	client, err := s.s3.GetClient(providerID)
 	if err != nil {
 		return err

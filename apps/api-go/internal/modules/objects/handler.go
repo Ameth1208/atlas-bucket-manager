@@ -210,6 +210,7 @@ func (h *Handler) Upload(c *gin.Context) {
 		}
 	}
 
+	var uploaded []string
 	for _, fileHeader := range files {
 		file, err := fileHeader.Open()
 		if err != nil {
@@ -225,9 +226,10 @@ func (h *Handler) Upload(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+		uploaded = append(uploaded, objectName)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	c.JSON(http.StatusOK, gin.H{"success": true, "uploaded": uploaded})
 }
 
 func (h *Handler) DownloadZip(c *gin.Context) {
