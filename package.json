@@ -20,6 +20,7 @@
   "scripts": {
     "dev": "pnpm -r --parallel --stream run dev",
     "dev:api": "pnpm --filter @atlas/api run dev",
+    "dev:api:go": "cd apps/api-go && go run ./cmd/server",
     "dev:client": "pnpm --filter @atlas/client run dev",
     "build": "pnpm -r run build",
     "build:api": "pnpm --filter @atlas/api run build",
@@ -27,6 +28,7 @@
     "start": "pnpm --filter @atlas/api run start",
     "test": "pnpm -r run test",
     "test:api": "pnpm --filter @atlas/api run test",
+    "test:api:go": "cd apps/api-go && go test -v ./...",
     "test:client": "pnpm --filter @atlas/client run test",
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",

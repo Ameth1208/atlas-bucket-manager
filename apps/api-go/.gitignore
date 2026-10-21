@@ -1,0 +1,16 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+atlas-api
+
+# Test artifacts
+*.test
+*.out
+
+# Data directories
+data/
+uploads/
+temp/
