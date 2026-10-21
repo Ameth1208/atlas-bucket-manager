@@ -11,7 +11,7 @@ console.log(`   • Web UI listening on: http://0.0.0.0:${webPort}`);
 console.log(`   • API Server on:       http://127.0.0.1:${apiPort}`);
 console.log('───────────────────────────────────────────────────');
 
-// 1. Start NestJS API
+// 1. Start Go API
 const apiEnv = {
   ...process.env,
   PORT: String(apiPort),
@@ -21,7 +21,11 @@ const apiEnv = {
   CORS_ORIGIN: process.env.CORS_ORIGIN || `http://localhost:${webPort}`,
 };
 
-const api = spawn('node', ['apps/api/dist/main.js'], {
+const apiBin = fs.existsSync('/app/atlas-api')
+  ? '/app/atlas-api'
+  : (fs.existsSync('./apps/api/atlas-api') ? './apps/api/atlas-api' : (fs.existsSync('./atlas-api') ? './atlas-api' : (process.platform === 'win32' ? './apps/api/atlas-api.exe' : 'atlas-api')));
+
+const api = spawn(apiBin, [], {
   cwd: process.cwd(),
   env: apiEnv,
   stdio: 'inherit',

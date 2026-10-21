@@ -1,68 +1,41 @@
 # ============================================
-# Stage 1: Dependencies
+# Stage 1: Build (Go 1.26 Static Binary)
 # ============================================
-FROM node:22-bookworm-slim AS deps
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ curl ca-certificates && rm -rf /var/lib/apt/lists/*
-
-# Copy workspace root
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
-
-# Copy all app package.json files
-COPY apps/api/package.json apps/api/package.json
-COPY apps/client/package.json apps/client/package.json
-
-# Enable corepack for pnpm
-RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
-
-# Install all workspace dependencies (honors better-sqlite3 build script)
-RUN pnpm install --frozen-lockfile
-
-# ============================================
-# Stage 2: Builder
-# ============================================
-FROM node:22-bookworm-slim AS builder
-WORKDIR /app
-
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=deps /app/apps/client/node_modules ./apps/client/node_modules
-
-# Copy source
-COPY package.json pnpm-workspace.yaml ./
-COPY apps/api ./apps/api
-COPY apps/client ./apps/client
-
-# Build the API (NestJS)
-RUN corepack enable && pnpm --filter @atlas/api run build
-
-# ============================================
-# Stage 3: Runtime
-# ============================================
-FROM node:22-bookworm-slim AS api
-
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && rm -rf /var/lib/apt/lists/*
+FROM golang:1.26-alpine AS builder
 
 WORKDIR /app
 
-# Copy production node_modules
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+RUN apk add --no-cache ca-certificates git
 
-# Copy compiled API
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
+COPY go.mod go.sum ./
+RUN go mod download
 
-# Create runtime dirs
-RUN mkdir -p /app/apps/api/data /app/apps/api/uploads /app/apps/api/temp
+COPY . .
 
-WORKDIR /app/apps/api
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+    -ldflags="-s -w -extldflags '-static'" \
+    -o /atlas-api ./cmd/server
 
+# ============================================
+# Stage 2: Runtime (Minimal Scratch / Alpine)
+# ============================================
+FROM alpine:3.21 AS runner
+
+RUN apk add --no-cache ca-certificates tzdata && \
+    mkdir -p /app/data /app/uploads /app/temp
+
+WORKDIR /app
+
+COPY --from=builder /atlas-api /app/atlas-api
+
+ENV PORT=3001
 ENV NODE_ENV=production
+ENV DB_PATH=/app/data
+ENV JWT_SECRET=atlas-production-fallback-secret-please-set-jwt-secret
+ENV CORS_ORIGIN=http://localhost:3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --retries=3 --start-period=15s \
-  CMD curl -f http://localhost:${PORT:-3001}/health || exit 1
+EXPOSE 3001
 
-CMD ["node", "dist/main.js"]
+VOLUME ["/app/data"]
+
+ENTRYPOINT ["/app/atlas-api"]

@@ -18,21 +18,18 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel --stream run dev",
-    "dev:api": "pnpm --filter @atlas/api run dev",
-    "dev:api:go": "cd apps/api-go && go run ./cmd/server",
+    "dev:api": "cd apps/api && go run ./cmd/server",
     "dev:client": "pnpm --filter @atlas/client run dev",
-    "build": "pnpm -r run build",
-    "build:api": "pnpm --filter @atlas/api run build",
+    "build": "pnpm run build:api && pnpm run build:client",
+    "build:api": "cd apps/api && go build -o atlas-api ./cmd/server",
     "build:client": "pnpm --filter @atlas/client run build",
-    "start": "pnpm --filter @atlas/api run start",
-    "test": "pnpm -r run test",
-    "test:api": "pnpm --filter @atlas/api run test",
-    "test:api:go": "cd apps/api-go && go test -v ./...",
+    "start": "node docker-entrypoint.js",
+    "test": "pnpm run test:api",
+    "test:api": "cd apps/api && go test -v ./...",
     "test:client": "pnpm --filter @atlas/client run test",
-    "lint": "pnpm -r run lint",
-    "typecheck": "pnpm -r run typecheck",
-    "clean": "pnpm -r exec rm -rf dist .next node_modules/.cache",
+    "lint": "pnpm --filter @atlas/client run lint",
+    "typecheck": "pnpm --filter @atlas/client run typecheck",
+    "clean": "rm -rf .next node_modules/.cache",
     "doctor": "npx react-doctor@latest"
   },
   "keywords": [
@@ -44,10 +41,5 @@
     "multi-cloud",
     "aws",
     "monorepo"
-  ],
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "better-sqlite3"
-    ]
-  }
+  ]
 }
