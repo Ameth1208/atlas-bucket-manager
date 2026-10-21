@@ -1,9 +1,9 @@
-# Docker Compose - Production All-in-One (v2.0.2)
+# Docker Compose - Production All-in-One (v2.0.6)
 # Usage: docker compose -f docker-compose.prod.yml up -d
 
 services:
   minio-manager:
-    image: ghcr.io/ameth1208/atlas-bucket-manager:${IMAGE_TAG:-2.0.5}
+    image: ghcr.io/ameth1208/atlas-bucket-manager:${IMAGE_TAG:-2.0.6}
     container_name: minio-manager
     ports:
       - "${PORT:-3000}:3000"

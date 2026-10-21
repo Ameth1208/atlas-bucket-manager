@@ -7,7 +7,7 @@ WORKDIR /app
 # Copy workspace files
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
 COPY apps/client/package.json ./apps/client/package.json
-COPY apps/api/package.json ./apps/api/package.json
+
 
 RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 RUN pnpm install --frozen-lockfile --ignore-scripts

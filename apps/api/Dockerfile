@@ -7,10 +7,10 @@ WORKDIR /app
 
 RUN apk add --no-cache ca-certificates git
 
-COPY go.mod go.sum ./
+COPY apps/api/go.mod apps/api/go.sum ./
 RUN go mod download
 
-COPY . .
+COPY apps/api ./
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags="-s -w -extldflags '-static'" \
