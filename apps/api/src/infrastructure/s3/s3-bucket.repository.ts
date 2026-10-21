@@ -5,7 +5,7 @@ import * as http from 'http';
 import * as https from 'https';
 import { S3Service } from './s3.service';
 import { DatabaseService } from '../database/database.service';
-import { IBucketRepository, BucketListResult } from '../../domain/repositories/bucket.repository';
+import { IBucketRepository, BucketListResult, DownloadZipOptions } from '../../domain/repositories/bucket.repository';
 import {
   Bucket,
   BucketStats,
@@ -698,34 +698,100 @@ export class S3BucketRepository implements IBucketRepository {
     prefix: string,
     res: any,
   ): Promise<void> {
+    return this.streamZip(providerId, bucket, { prefix }, res);
+  }
+
+  async streamZip(
+    providerId: string,
+    bucket: string,
+    options: DownloadZipOptions,
+    res: any,
+  ): Promise<void> {
     const client = this.s3.getClient(providerId);
+    const { prefix = '', keys } = options;
     const normalizedPrefix = prefix && !prefix.endsWith('/') ? prefix + '/' : prefix;
-    const folderBase = prefix.replace(/\/+$/, '').split('/').filter(Boolean).pop() || bucket;
+
+    let filename = bucket;
+    if (keys && keys.length === 1) {
+      filename = keys[0].replace(/\/+$/, '').split('/').filter(Boolean).pop() || bucket;
+    } else if (keys && keys.length > 1) {
+      const parentName = prefix.replace(/\/+$/, '').split('/').filter(Boolean).pop() || bucket;
+      filename = parentName + '-seleccion-' + keys.length + '-items';
+    } else if (prefix) {
+      filename = prefix.replace(/\/+$/, '').split('/').filter(Boolean).pop() || bucket;
+    }
 
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader(
       'Content-Disposition',
-      'attachment; filename="' + encodeURIComponent(folderBase) + '.zip"',
+      'attachment; filename="' + encodeURIComponent(filename) + '.zip"',
     );
 
     const zip = new ZipArchive({ zlib: { level: 6 } });
     zip.pipe(res);
 
     try {
-      const stream = client.listObjectsV2(bucket, normalizedPrefix, true);
-      for await (const obj of stream) {
-        if (!obj.name || obj.name.endsWith('/')) continue;
-        const relativeName =
-          normalizedPrefix && obj.name.startsWith(normalizedPrefix)
-            ? obj.name.slice(normalizedPrefix.length)
-            : obj.name;
-        if (!relativeName) continue;
+      if (keys && keys.length > 0) {
+        for (const k of keys) {
+          if (!k) continue;
+          if (k.endsWith('/')) {
+            const folderStream = client.listObjectsV2(bucket, k, true);
+            for await (const obj of folderStream) {
+              if (!obj.name || obj.name.endsWith('/')) continue;
+              const rel = normalizedPrefix && obj.name.startsWith(normalizedPrefix)
+                ? obj.name.slice(normalizedPrefix.length)
+                : obj.name;
+              try {
+                const fileStream = await client.getObject(bucket, obj.name);
+                zip.append(fileStream, { name: rel });
+              } catch {
+                continue;
+              }
+            }
+          } else {
+            try {
+              const fileStream = await client.getObject(bucket, k);
+              const rel = normalizedPrefix && k.startsWith(normalizedPrefix)
+                ? k.slice(normalizedPrefix.length)
+                : (k.split('/').pop() || k);
+              zip.append(fileStream, { name: rel });
+            } catch {
+              try {
+                const folderStream = client.listObjectsV2(bucket, k + '/', true);
+                for await (const obj of folderStream) {
+                  if (!obj.name || obj.name.endsWith('/')) continue;
+                  const rel = normalizedPrefix && obj.name.startsWith(normalizedPrefix)
+                    ? obj.name.slice(normalizedPrefix.length)
+                    : obj.name;
+                  try {
+                    const fileStream = await client.getObject(bucket, obj.name);
+                    zip.append(fileStream, { name: rel });
+                  } catch {
+                    continue;
+                  }
+                }
+              } catch {
+                continue;
+              }
+            }
+          }
+        }
+      } else {
+        const stream = client.listObjectsV2(bucket, normalizedPrefix, true);
+        for await (const obj of stream) {
+          if (!obj.name || obj.name.endsWith('/')) continue;
+          const relativeName =
+            normalizedPrefix && obj.name.startsWith(normalizedPrefix)
+              ? obj.name.slice(normalizedPrefix.length)
+              : obj.name;
+          if (!relativeName) continue;
 
-        try {
-          const fileStream = await client.getObject(bucket, obj.name);
-          zip.append(fileStream, { name: relativeName });
-        } catch {
-          continue;
+          try {
+            const fileStream = await client.getObject(bucket, obj.name);
+            zip.append(fileStream, { name: relativeName });
+          } catch {
+            continue;
+          }
         }
       }
       await zip.finalize();

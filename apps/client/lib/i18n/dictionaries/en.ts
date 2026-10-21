@@ -754,6 +754,8 @@ export const en: Dictionary = {
   bucketLayoutList: 'List view',
   bucketDeleteSelected: 'Delete',
   bucketDeleteSelectedCount: 'Delete ({count})',
+  bucketDownloadSelectedZip: 'Download ZIP ({count})',
+  bucketDownloadFolderZip: 'Download ZIP',
   bucketEmptyNoResults: 'No results',
   bucketEmptyNoResultsHint: 'Try a different search',
   bucketEmptyFolder: 'This folder is empty',

@@ -754,6 +754,8 @@ export const pt: Dictionary = {
   bucketLayoutList: 'Visualização em lista',
   bucketDeleteSelected: 'Excluir',
   bucketDeleteSelectedCount: 'Excluir ({count})',
+  bucketDownloadSelectedZip: 'Baixar ZIP ({count})',
+  bucketDownloadFolderZip: 'Baixar ZIP',
   bucketEmptyNoResults: 'Sem resultados',
   bucketEmptyNoResultsHint: 'Tente outra busca',
   bucketEmptyFolder: 'Esta pasta está vazia',

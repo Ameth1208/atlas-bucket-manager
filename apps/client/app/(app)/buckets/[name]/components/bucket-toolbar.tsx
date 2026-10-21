@@ -16,6 +16,7 @@ import {
   FileCode,
   FileText,
   Archive,
+  Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,7 +53,7 @@ const FILTERS: {
 export function BucketToolbar() {
   const { t, tx } = useI18n();
   const { layout, setLayout, filter, setFilter, objects, selected, search, setSearch } = useBrowserStore();
-  const { handleDelete } = useActionsStore();
+  const { handleDelete, handleDownloadSelected, handleDownloadCurrentFolder } = useActionsStore();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -177,10 +178,33 @@ export function BucketToolbar() {
           </button>
         </div>
 
-        {selected.size > 0 && (
-          <Button variant="destructive-soft" size="sm" onClick={() => setConfirmOpen(true)}>
-            <Trash2 size={12} />
-            {tx('bucketDeleteSelectedCount', { count: selected.size })}
+        {selected.size > 0 ? (
+          <>
+            <Button
+              variant="pearl"
+              size="sm"
+              onClick={handleDownloadSelected}
+              className="gap-1.5 font-medium"
+              title="Descargar elementos seleccionados como archivo ZIP"
+            >
+              <Download size={12} />
+              <span>{tx('bucketDownloadSelectedZip', { count: selected.size })}</span>
+            </Button>
+            <Button variant="destructive-soft" size="sm" onClick={() => setConfirmOpen(true)}>
+              <Trash2 size={12} />
+              {tx('bucketDeleteSelectedCount', { count: selected.size })}
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDownloadCurrentFolder}
+            className="text-muted-foreground hover:text-foreground text-[12px] h-8 px-2.5 rounded-full border border-border/60 hover:bg-muted"
+            title="Descargar carpeta actual como ZIP"
+          >
+            <Download size={12} className="mr-1" />
+            <span>{t.bucketDownloadFolderZip}</span>
           </Button>
         )}
       </div>

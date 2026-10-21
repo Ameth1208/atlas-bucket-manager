@@ -746,6 +746,8 @@ export interface Dictionary {
   bucketLayoutList: string;
   bucketDeleteSelected: string;
   bucketDeleteSelectedCount: string;
+  bucketDownloadSelectedZip: string;
+  bucketDownloadFolderZip: string;
   bucketEmptyNoResults: string;
   bucketEmptyNoResultsHint: string;
   bucketEmptyFolder: string;

@@ -54,8 +54,8 @@ export class ObjectsService {
     return this.repo.getObjectStream(providerId, bucket, key);
   }
 
-  downloadZip(providerId: string, bucket: string, prefix: string, res: any) {
-    return this.repo.streamFolderZip(providerId, bucket, prefix, res);
+  downloadZip(providerId: string, bucket: string, options: { prefix?: string; keys?: string[] }, res: any) {
+    return this.repo.streamZip(providerId, bucket, options, res);
   }
 
   async delete(

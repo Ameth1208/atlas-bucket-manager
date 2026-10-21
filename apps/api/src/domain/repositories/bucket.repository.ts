@@ -23,6 +23,11 @@ export interface BucketListResult {
   providerErrors: ProviderListError[];
 }
 
+export interface DownloadZipOptions {
+  prefix?: string;
+  keys?: string[];
+}
+
 export interface IBucketRepository {
   // Providers
   listProviders(): ProviderInfo[];
@@ -108,6 +113,12 @@ export interface IBucketRepository {
     providerId: string,
     bucket: string,
     prefix: string,
+    res: any,
+  ): Promise<void>;
+  streamZip(
+    providerId: string,
+    bucket: string,
+    options: DownloadZipOptions,
     res: any,
   ): Promise<void>;
   getProviderCredentials(

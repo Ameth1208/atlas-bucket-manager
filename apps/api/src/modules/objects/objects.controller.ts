@@ -138,9 +138,42 @@ export class ObjectsController {
     @Param('providerId') providerId: string,
     @Param('bucket') bucket: string,
     @Query('prefix') prefix: string = '',
+    @Query('keys') keysParam: string = '',
     @Res() res: Response,
   ) {
-    await this.objects.downloadZip(providerId, bucket, prefix, res);
+    let keys: string[] | undefined;
+    if (keysParam) {
+      try {
+        keys = keysParam.startsWith('[') ? JSON.parse(keysParam) : keysParam.split(',').filter(Boolean);
+      } catch {
+        keys = keysParam.split(',').filter(Boolean);
+      }
+    }
+    await this.objects.downloadZip(providerId, bucket, { prefix, keys }, res);
+  }
+
+  @Post('buckets/:providerId/:bucket/zip')
+  @HttpCode(HttpStatus.OK)
+  async downloadZipPost(
+    @Param('providerId') providerId: string,
+    @Param('bucket') bucket: string,
+    @Body() body: any,
+    @Res() res: Response,
+  ) {
+    let keys: string[] | undefined;
+    if (body?.keys) {
+      if (Array.isArray(body.keys)) {
+        keys = body.keys;
+      } else if (typeof body.keys === 'string') {
+        try {
+          keys = body.keys.startsWith('[') ? JSON.parse(body.keys) : body.keys.split(',').filter(Boolean);
+        } catch {
+          keys = body.keys.split(',').filter(Boolean);
+        }
+      }
+    }
+    const prefix = typeof body?.prefix === 'string' ? body.prefix : '';
+    await this.objects.downloadZip(providerId, bucket, { prefix, keys }, res);
   }
 
   @Public()

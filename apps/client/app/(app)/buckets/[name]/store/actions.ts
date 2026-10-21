@@ -32,6 +32,55 @@ export const useActionsStore = create(() => ({
     document.body.removeChild(a);
   },
 
+  handleDownloadSelected: () => {
+    const { bucketName, providerId } = useURLStore.getState();
+    const { selected, path } = useBrowserStore.getState();
+    if (!selected.size) return;
+    const prefix = path.join('/') + (path.length > 0 ? '/' : '');
+    const keys = [...selected];
+
+    toast.info(`Generando archivo ZIP de ${keys.length} elemento(s)...`);
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/api/buckets/${providerId}/${encodeURIComponent(bucketName)}/zip`;
+    form.style.display = 'none';
+
+    const keysInput = document.createElement('input');
+    keysInput.type = 'hidden';
+    keysInput.name = 'keys';
+    keysInput.value = JSON.stringify(keys);
+    form.appendChild(keysInput);
+
+    if (prefix) {
+      const prefixInput = document.createElement('input');
+      prefixInput.type = 'hidden';
+      prefixInput.name = 'prefix';
+      prefixInput.value = prefix;
+      form.appendChild(prefixInput);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+  },
+
+  handleDownloadCurrentFolder: () => {
+    const { bucketName, providerId } = useURLStore.getState();
+    const { path } = useBrowserStore.getState();
+    const prefix = path.join('/') + (path.length > 0 ? '/' : '');
+    const folderName = path.length > 0 ? path[path.length - 1] : bucketName;
+
+    toast.info(`Generando archivo ZIP de "${folderName}"...`);
+    const url = `/api/buckets/${providerId}/${encodeURIComponent(bucketName)}/zip?prefix=${encodeURIComponent(prefix)}`;
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${folderName}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  },
+
   handleShare: async (key: string) => {
     const { bucketName, providerId } = useURLStore.getState();
     const shareUrl = `${window.location.origin}/api/public/share/${providerId}/${encodeURIComponent(bucketName)}/${encodeURIComponent(key)}`;
