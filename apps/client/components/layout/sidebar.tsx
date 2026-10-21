@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, Star, Activity, Settings, Plus, ChevronRight, Database, Pencil, Trash2, Copy, Check, MoreHorizontal } from 'lucide-react';
+import { Home, LayoutDashboard, FolderArchive, Star, Activity, Settings, Plus, ChevronRight, Database, Pencil, Trash2, Copy, Check, MoreHorizontal } from 'lucide-react';
 import { api } from '@/lib/api';
 import type { Provider } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
@@ -35,10 +35,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n';
 
-type NavKey = 'sidebarNavDashboard' | 'sidebarNavFavorites' | 'sidebarNavActivity' | 'sidebarNavSettings';
+type NavKey = 'sidebarNavDashboard' | 'sidebarNavBuckets' | 'sidebarNavFavorites' | 'sidebarNavActivity' | 'sidebarNavSettings';
 
 const NAV_KEYS: { id: string; href: string; icon: typeof Home; labelKey: NavKey }[] = [
-  { id: 'dashboard', href: '/dashboard', icon: Home, labelKey: 'sidebarNavDashboard' },
+  { id: 'dashboard', href: '/dashboard', icon: LayoutDashboard, labelKey: 'sidebarNavDashboard' },
+  { id: 'buckets', href: '/buckets', icon: FolderArchive, labelKey: 'sidebarNavBuckets' },
   { id: 'favorites', href: '/favorites', icon: Star, labelKey: 'sidebarNavFavorites' },
   { id: 'activity', href: '/activity', icon: Activity, labelKey: 'sidebarNavActivity' },
 ];
@@ -124,7 +125,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {NAV_KEYS.map(item => {
-                const active = pathname === item.href || pathname.startsWith(item.href + '/');
+                const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href + '/'));
                 return (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton

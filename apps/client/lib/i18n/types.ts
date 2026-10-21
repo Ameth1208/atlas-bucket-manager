@@ -820,6 +820,8 @@ export interface Dictionary {
   sidebarInfoDelete: string;
   sidebarInfoCopy: string;
   sidebarNavDashboard: string;
+  sidebarNavBuckets: string;
+  dashboardViewAllBuckets: string;
   sidebarNavFavorites: string;
   sidebarNavActivity: string;
   sidebarNavSettings: string;

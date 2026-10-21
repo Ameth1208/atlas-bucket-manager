@@ -28,6 +28,7 @@ export function DashboardStats({
         label={t.dashboardStatBuckets}
         value={bucketsCount}
         icon={Cloud}
+        href="/buckets"
         sub={tx('dashboardStatBucketsSub', { count: providersCount })}
       />
       <StatCard
@@ -46,6 +47,7 @@ export function DashboardStats({
         label={t.dashboardStatActivity}
         value={activity.length}
         icon={Activity}
+        href="/activity"
         sub={t.dashboardStatActivitySub}
       />
     </div>

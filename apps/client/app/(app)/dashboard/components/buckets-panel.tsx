@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { BucketsList } from '@/components/dashboard/buckets-list';
-import { Search } from 'lucide-react';
+import { Search, ArrowRight } from 'lucide-react';
 import { useI18n } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
 
@@ -22,11 +23,20 @@ export function BucketsPanel({ search, setSearch, bucketsCount, className }: Buc
       )}
     >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 sm:px-6 py-4 border-b border-border/60">
-        <div>
-          <h2 className="text-[16px] font-semibold text-foreground tracking-[-0.2px]">{t.dashboardBucketsTitle}</h2>
-          <p className="text-[12px] text-muted-foreground mt-0.5">
-            {tx('dashboardBucketsSubtitle', { count: bucketsCount })}
-          </p>
+        <div className="flex items-center justify-between sm:justify-start gap-3">
+          <div>
+            <h2 className="text-[16px] font-semibold text-foreground tracking-[-0.2px]">{t.dashboardBucketsTitle}</h2>
+            <p className="text-[12px] text-muted-foreground mt-0.5">
+              {tx('dashboardBucketsSubtitle', { count: bucketsCount })}
+            </p>
+          </div>
+          <Link
+            href="/buckets"
+            className="inline-flex items-center gap-1 text-[12px] font-medium text-primary hover:underline transition-all ml-1 px-2.5 py-1 rounded-full bg-primary/10 hover:bg-primary/15 shrink-0"
+          >
+            <span>{t.dashboardViewAllBuckets}</span>
+            <ArrowRight size={12} />
+          </Link>
         </div>
         <div className="relative flex items-center gap-2 w-full sm:w-64">
           <Search size={14} className="absolute left-3 text-muted-foreground/60" />
